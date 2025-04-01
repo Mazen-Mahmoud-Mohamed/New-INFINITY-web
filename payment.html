@@ -1,95 +1,538 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - INFINITY Total-Com Solutions</title>
     <link rel="stylesheet" href="mazen.css">
-    <link rel="stylesheet" href="payment.css">
-    <title>M&M Cell Scripts - Payment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .payment-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .payment-methods {
+            margin-bottom: 2rem;
+        }
+
+        .payment-method-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .method-option {
+            padding: 1.5rem;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .method-option:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary-color);
+        }
+
+        .method-option.selected {
+            border-color: var(--primary-color);
+            background: rgba(0, 153, 204, 0.05);
+        }
+
+        .method-option i {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .method-option h4 {
+            margin: 0;
+            color: var(--text-color);
+        }
+
+        .payment-content > div {
+            display: none;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .payment-content > div.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .payment-info-section {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.5s ease, opacity 0.3s ease, margin 0.3s ease;
+            margin: 0;
+        }
+
+        .payment-info-section.visible {
+            max-height: 2000px;
+            opacity: 1;
+            margin: 2rem 0;
+        }
+
+        .bank-info {
+            margin: 2rem 0;
+            padding: 2rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #e1e8ed;
+        }
+
+        .bank-info h3, .instapay-info h3 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .bank-details, .instapay-details {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e1e8ed;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .detail-value {
+            font-family: monospace;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+        }
+
+        .copy-btn {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .copy-btn.copied {
+            background: #22c55e;
+        }
+
+        .order-summary {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e1e8ed;
+        }
+
+        .order-summary h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .vat-checkbox {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .vat-checkbox input[type="checkbox"] {
+            width: 1.2rem;
+            height: 1.2rem;
+            cursor: pointer;
+        }
+
+        .vat-checkbox label {
+            cursor: pointer;
+            color: var(--text-color);
+        }
+
+        .order-totals {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e1e8ed;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .total-row.final {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            border-top: 2px solid #e1e8ed;
+            padding-top: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .payment-instructions {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            border-radius: 8px;
+            color: #856404;
+        }
+
+        .payment-instructions h4 {
+            color: #856404;
+            margin-bottom: 1rem;
+        }
+
+        .payment-instructions ol {
+            margin-left: 1.5rem;
+        }
+
+        .payment-instructions li {
+            margin-bottom: 0.5rem;
+        }
+
+        .cash-info {
+            text-align: center;
+            padding: 2rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #e1e8ed;
+        }
+
+        .cash-info i {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .cash-info p {
+            color: var(--text-color);
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .payment-container {
+                margin: 1rem;
+                padding: 1rem;
+            }
+
+            .detail-row {
+                flex-direction: column;
+                text-align: center;
+                gap: 0.5rem;
+            }
+
+            .method-option {
+                padding: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <nav>
-            <a class="logo" href="index.html">M&M Apple Services</a>
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <a href="index.html" class="logo">
+                <img src="assets/images/infinity-logo.png" alt="INFINITY Total-Com Solutions Logo" class="logo-image">
+                <div class="logo-container">
+                    <span class="logo-text">INFINITY</span>
+                    <span class="logo-subtext">Total-Com Solutions</span>
+                </div>
+            </a>
             <ul>
-                <li><a href="index.html#pricing">Pricing</a></li>
-                <li><a href="index.html#features">Features</a></li>
-                <li><a href="index.html#contact">Contact</a></li>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html">Products</a></li>
+                <li><a href="#contact">Contact</a></li>
             </ul>
-        </nav>
+        </div>
+    </nav>
 
-        <div class="payment-content">
-            <h2>Complete Your Purchase</h2>
-            <div class="order-summary">
-                <h3>Order Summary</h3>
-                <div class="selected-plan">
-                    <span id="plan-name">Selected Plan</span>
-                    <span id="plan-price">$0.00</span>
+    <!-- Payment Section -->
+    <section class="payment-hero">
+        <div class="container">
+            <h1>Complete Your Payment</h1>
+        </div>
+    </section>
+
+    <div class="payment-container">
+        <div class="payment-methods">
+            <h3>Select Payment Method</h3>
+            <div class="payment-method-selector">
+                <div class="method-option" data-method="bank">
+                    <i class="fas fa-university"></i>
+                    <h4>Bank Transfer</h4>
                 </div>
-            </div>
-
-            <div class="payment-methods">
-                <h3>Select Payment Method</h3>
-                <div class="payment-grid">
-                    <button class="payment-option vodafone">
-                        <i class="fas fa-mobile-alt"></i>
-                        <span>Vodafone Cash</span>
-                    </button>
-                    <button class="payment-option etisalat">
-                        <i class="fas fa-mobile"></i>
-                        <span>Etisalat Cash</span>
-                    </button>
-                    <button class="payment-option instapay">
-                        <i class="fas fa-wallet"></i>
-                        <span>InstaPay</span>
-                    </button>
-                    <button class="payment-option binance">
-                        <i class="fab fa-bitcoin"></i>
-                        <span>Binance</span>
-                    </button>
+                <div class="method-option" data-method="instapay">
+                    <i class="fas fa-mobile-alt"></i>
+                    <h4>InstaPay</h4>
                 </div>
-            </div>
-
-            <div class="payment-details" id="payment-details">
-                <!-- This will be populated by JavaScript when a payment method is selected -->
+                <div class="method-option" data-method="cash">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <h4>Cash on Delivery</h4>
+                </div>
             </div>
         </div>
 
-        <footer id="contact">
-            <h3>Connect With Us</h3>
-            <div class="social-links">
-                <a href="https://www.facebook.com/profile.php?id=100072105520347&locale=ar_AR" target="_blank" class="social-btn">
-                    <i class="fab fa-facebook"></i>
-                    <span>Facebook</span>
-                </a>
-                <a href="https://m.me/100072105520347" target="_blank" class="social-btn messenger">
-                    <i class="fab fa-facebook-messenger"></i>
-                    <span>Messenger</span>
-                </a>
-                <a href="https://wa.me/201002667790" target="_blank" class="social-btn whatsapp">
-                    <i class="fab fa-whatsapp"></i>
-                    <span>WhatsApp 1</span>
-                </a>
-                <a href="https://wa.me/201113579824" target="_blank" class="social-btn whatsapp">
-                    <i class="fab fa-whatsapp"></i>
-                    <span>WhatsApp 2</span>
-                </a>
-                <a href="https://discord.com/users/mazenmahmoud6550" target="_blank" class="social-btn discord">
-                    <i class="fab fa-discord"></i>
-                    <span>Discord 1</span>
-                </a>
-                <a href="https://discord.com/users/ma7amedd" target="_blank" class="social-btn discord">
-                    <i class="fab fa-discord"></i>
-                    <span>Discord 2</span>
-                </a>
+        <div class="payment-info-section">
+            <div class="payment-content">
+                <!-- Bank Transfer Content -->
+                <div id="bank-content">
+                    <div class="bank-info">
+                        <h3>Bank Transfer Information</h3>
+                        <div class="bank-details">
+                            <div class="detail-row">
+                                <span class="detail-label">Company Name:</span>
+                                <span class="detail-value">INFINITY</span>
+                                <button class="copy-btn" data-copy="INFINITY">Copy</button>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Full Name:</span>
+                                <span class="detail-value">INFINITY for specialized security systems</span>
+                                <button class="copy-btn" data-copy="INFINITY for specialized security systems">Copy</button>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Swift Code:</span>
+                                <span class="detail-value">CIBEEGCX160</span>
+                                <button class="copy-btn" data-copy="CIBEEGCX160">Copy</button>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Account No.:</span>
+                                <span class="detail-value">100031074171</span>
+                                <button class="copy-btn" data-copy="100031074171">Copy</button>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">IBAN:</span>
+                                <span class="detail-value">EG950010016000000100031074171</span>
+                                <button class="copy-btn" data-copy="EG950010016000000100031074171">Copy</button>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Bank Branch Code:</span>
+                                <span class="detail-value">160</span>
+                                <button class="copy-btn" data-copy="160">Copy</button>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Bank Name:</span>
+                                <span class="detail-value">CIB</span>
+                                <button class="copy-btn" data-copy="CIB">Copy</button>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Bank Branch:</span>
+                                <span class="detail-value">Zahraa Maadi</span>
+                                <button class="copy-btn" data-copy="Zahraa Maadi">Copy</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- InstaPay Content -->
+                <div id="instapay-content">
+                    <div class="bank-info">
+                        <h3>InstaPay Information</h3>
+                        <div class="bank-details">
+                            <div class="detail-row">
+                                <span class="detail-label">InstaPay Number:</span>
+                                <span class="detail-value">+20102111480</span>
+                                <button class="copy-btn" data-copy="+20102111480">Copy</button>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Account Name:</span>
+                                <span class="detail-value">INFINITY</span>
+                                <button class="copy-btn" data-copy="INFINITY">Copy</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cash on Delivery Content -->
+                <div id="cash-content">
+                    <div class="cash-info">
+                        <i class="fas fa-truck"></i>
+                        <h3>Cash on Delivery</h3>
+                        <p>Pay in cash when your order is delivered to your doorstep.</p>
+                        <p>Our delivery team will contact you to arrange the delivery time.</p>
+                    </div>
+                </div>
             </div>
-            <div class="contact-info">
-                <p>Discord: mazenmahmoud6550 / ma7amedd</p>
-                <p>WhatsApp: +20 100 266 7790 / +20 111 357 9824</p>
-                <p>Available 24/7 for Support</p>
+
+            <div class="order-summary">
+                <h3>Order Summary</h3>
+                <div id="order-details">
+                    <!-- Order details will be populated by JavaScript -->
+                </div>
+                
+                <div class="vat-checkbox">
+                    <input type="checkbox" id="vat-checkbox">
+                    <label for="vat-checkbox">Add 14% VAT</label>
+                </div>
+
+                <div class="order-totals">
+                    <div class="total-row">
+                        <span>Subtotal:</span>
+                        <span id="subtotal">EGP 0.00</span>
+                    </div>
+                    <div class="total-row">
+                        <span>VAT (14%):</span>
+                        <span id="vat-amount">EGP 0.00</span>
+                    </div>
+                    <div class="total-row final">
+                        <span>Total:</span>
+                        <span id="final-total">EGP 0.00</span>
+                    </div>
+                </div>
             </div>
-        </footer>
+
+            <div class="payment-instructions">
+                <h4><i class="fas fa-info-circle"></i> Payment Instructions</h4>
+                <ol>
+                    <li>Select your preferred payment method above.</li>
+                    <li>For bank transfer or InstaPay, copy the payment details.</li>
+                    <li>Complete the payment using your preferred method.</li>
+                    <li>Keep your payment receipt for reference.</li>
+                    <li>Our team will contact you to confirm your order.</li>
+                </ol>
+            </div>
+        </div>
     </div>
-    <script src="payment.js"></script>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="container">
+            <h2>Contact Us</h2>
+            <div class="contact-info">
+                <p>
+                    <i class="fas fa-phone"></i>
+                    Phone: +20102111480
+                </p>
+                <p>
+                    <i class="fas fa-envelope"></i>
+                    Email: Mohamed.Zidan@infinity-egy.net
+                </p>
+                <p>
+                    <i class="fas fa-map-marker-alt"></i>
+                    Address: 7A,50th,st,Zahraa Elmaadi,Cairo
+                </p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Infinity Total-Com Solutions. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Payment method selection
+            const methodOptions = document.querySelectorAll('.method-option');
+            const paymentContents = document.querySelectorAll('.payment-content > div');
+            const paymentInfoSection = document.querySelector('.payment-info-section');
+
+            methodOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove selected class from all options
+                    methodOptions.forEach(opt => opt.classList.remove('selected'));
+                    // Add selected class to clicked option
+                    this.classList.add('selected');
+                    
+                    // Hide all content sections
+                    paymentContents.forEach(content => content.classList.remove('active'));
+                    // Show selected content
+                    const method = this.dataset.method;
+                    document.getElementById(`${method}-content`).classList.add('active');
+
+                    // Show payment info section
+                    paymentInfoSection.classList.add('visible');
+
+                    // Scroll to payment info section
+                    paymentInfoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+            });
+
+            // Copy button functionality
+            document.querySelectorAll('.copy-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const textToCopy = this.dataset.copy;
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        this.textContent = 'Copied!';
+                        this.classList.add('copied');
+                        setTimeout(() => {
+                            this.textContent = 'Copy';
+                            this.classList.remove('copied');
+                        }, 2000);
+                    });
+                });
+            });
+
+            // Get cart data from localStorage
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const orderDetails = document.getElementById('order-details');
+            const subtotalElement = document.getElementById('subtotal');
+            const vatAmountElement = document.getElementById('vat-amount');
+            const finalTotalElement = document.getElementById('final-total');
+            const vatCheckbox = document.getElementById('vat-checkbox');
+
+            // Calculate and display order details
+            function updateOrderSummary() {
+                let subtotal = 0;
+                let html = '';
+
+                cart.forEach(item => {
+                    const itemTotal = (item.price + item.installation) * item.quantity;
+                    subtotal += itemTotal;
+                    html += `
+                        <div class="detail-row">
+                            <span class="detail-label">${item.name} × ${item.quantity}</span>
+                            <span class="detail-value">EGP ${itemTotal.toFixed(2)}</span>
+                        </div>
+                    `;
+                });
+
+                orderDetails.innerHTML = html;
+                
+                // Calculate VAT and total
+                const vat = vatCheckbox.checked ? subtotal * 0.14 : 0;
+                const total = subtotal + vat;
+
+                // Update display
+                subtotalElement.textContent = `EGP ${subtotal.toFixed(2)}`;
+                vatAmountElement.textContent = `EGP ${vat.toFixed(2)}`;
+                finalTotalElement.textContent = `EGP ${total.toFixed(2)}`;
+            }
+
+            // Initial update
+            updateOrderSummary();
+
+            // Update when VAT checkbox changes
+            vatCheckbox.addEventListener('change', updateOrderSummary);
+        });
+    </script>
 </body>
 </html> 

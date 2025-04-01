@@ -1,110 +1,418 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INFINITY Total-Com Solutions</title>
     <link rel="stylesheet" href="mazen.css">
-    <title>M&M Apple Services - Professional Account Creation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <nav>
-            <a class="logo" href="#">M&M Apple Services</a>
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <a href="index.html" class="logo">
+                <img src="assets/images/infinity-logo.png" alt="INFINITY Total-Com Solutions Logo" class="logo-image">
+                <div class="logo-container">
+                    <span class="logo-text">INFINITY</span>
+                    <span class="logo-subtext">Total-Com Solutions</span>
+                </div>
+            </a>
             <ul>
-                <li><a href="#pricing">Pricing</a></li>
-                <li><a href="#features">Features</a></li>
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="products.html">Products</a></li>
+                <li><a href="#clients">Clients</a></li>
+                <li><a href="team.html">Our Team</a></li>
                 <li><a href="#contact">Contact</a></li>
             </ul>
-        </nav>
-        <div class="content">
-            <div class="text">
-                <h2>Premium Apple Services<br>Account Solutions</h2>
-                <p>Professional Apple ID and iCloud account creation services. Secure, reliable, and instant setup for all your Apple needs.</p>
-                
-                <div class="features-list">
-                    <div class="feature-item">
-                        <i class="fas fa-shield-alt"></i>
-                        <span>Verified Accounts</span>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-cloud"></i>
-                        <span>iCloud Setup</span>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Instant Delivery</span>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-lock"></i>
-                        <span>Full Access</span>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-sync"></i>
-                        <span>Free Updates</span>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-headset"></i>
-                        <span>24/7 Support</span>
-                    </div>
-                </div>
+            <button class="menu-toggle" aria-label="Toggle navigation menu">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
 
-                <div class="pricing-buttons">
-                    <a href="payment.html?plan=Daily Access&price=$9.99" class="price-btn daily">
-                        <span class="plan-name">1 Account</span>
-                        <span class="price">$9.99</span>
-                        <span class="period">verified account</span>
-                    </a>
-                    <a href="payment.html?plan=Weekly Access&price=$49.99" class="price-btn weekly">
-                        <span class="plan-name">1 Account</span>
-                        <span class="price">$49.99</span>
-                        <span class="period">verified accounts</span>
-                    </a>
-                    <a href="payment.html?plan=Monthly Access&price=$149.99" class="price-btn monthly">
-                        <span class="plan-name">1 Account</span>
-                        <span class="price">$149.99</span>
-                        <span class="period">verified accounts</span>
-                    </a>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-main">
+                <div class="hero-logo">
+                    <img src="assets/images/infinity-logo.png" alt="INFINITY Logo" class="hero-logo-image">
                 </div>
-            </div>
-            <div class="image">
-                <img title="M&M Logo" src="image.jpg" alt="M&M Cell Scripts Logo">
+                <div class="hero-text-content">
+                    <h1>Welcome to <span class="hero-company-name">INFINITY</span></h1>
+                    <p class="hero-subtitle">Total-Com Solutions</p>
+                    <p class="hero-text">Leading provider of GPS tracking and fleet management solutions in Egypt</p>
+                    <div class="cta-buttons">
+                        <a href="#services" class="cta-primary">Our Services</a>
+                        <a href="#contact" class="cta-secondary">Contact Us</a>
+                    </div>
+                </div>
             </div>
         </div>
+    </section>
 
-        <footer id="contact">
-            <h3>Connect With Us</h3>
-            <div class="social-links">
-                <a href="https://www.facebook.com/profile.php?id=100072105520347&locale=ar_AR" target="_blank" class="social-btn">
-                    <i class="fab fa-facebook"></i>
-                    <span>Facebook</span>
-                </a>
-                <a href="https://m.me/100072105520347" target="_blank" class="social-btn messenger">
-                    <i class="fab fa-facebook-messenger"></i>
-                    <span>Messenger</span>
-                </a>
-                <a href="https://wa.me/201002667790" target="_blank" class="social-btn whatsapp">
-                    <i class="fab fa-whatsapp"></i>
-                    <span>WhatsApp 1</span>
-                </a>
-                <a href="https://wa.me/201113579824" target="_blank" class="social-btn whatsapp">
-                    <i class="fab fa-whatsapp"></i>
-                    <span>WhatsApp 2</span>
-                </a>
-                <a href="https://discord.com/users/mazenmahmoud6550" target="_blank" class="social-btn discord">
-                    <i class="fab fa-discord"></i>
-                    <span>Discord 1</span>
-                </a>
-                <a href="https://discord.com/users/ma7amedd" target="_blank" class="social-btn discord">
-                    <i class="fab fa-discord"></i>
-                    <span>Discord 2</span>
-                </a>
+    <!-- About Section -->
+    <section id="about" class="features">
+        <div class="container">
+            <h2>About Company</h2>
+            <p>Infinity is a professional company specialized in providing the service of installation for GPS tracking system provided by ETIT (Egyptian company for Tracking and Information Technology).</p>
+            <p>Infinity was established on 2016 immediately after the authorization of ETIT to be Egyptian legal entity to provide GPS tracking system in Egypt by National Telecommunication Regulatory Authority (NTRA).</p>
+        </div>
+    </section>
+
+    <!-- Mission Section -->
+    <section id="mission" class="features">
+        <div class="container">
+            <h2>Our Mission</h2>
+            <div class="features-grid mission-grid">
+                <div class="feature-card">
+                    <i class="fas fa-truck-moving"></i>
+                    <h3>Fleet Management System</h3>
+                    <p>Provide comprehensive fleet management solutions</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <h3>GPS Installation</h3>
+                    <p>Installation and maintenance of GPS tracking devices inside vehicles</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-video"></i>
+                    <h3>CCTV Systems</h3>
+                    <p>Installation and Maintenance of CCTV systems inside vehicles</p>
+                </div>
             </div>
+            <div class="feature-card center-card">
+                <i class="fas fa-temperature-high"></i>
+                <h3>Temperature Control</h3>
+                <p>Full control of Goods through Temperature Sensors</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Values Section -->
+    <section id="values" class="values-section">
+        <div class="container">
+            <h2>Our Values</h2>
+            <div class="values-grid">
+                <div class="value-card">
+                    <i class="fas fa-lightbulb"></i>
+                    <h3>Creativity</h3>
+                </div>
+                <div class="value-card">
+                    <i class="fas fa-users"></i>
+                    <h3>Team Work</h3>
+                </div>
+                <div class="value-card">
+                    <i class="fas fa-handshake"></i>
+                    <h3>Collaboration</h3>
+                </div>
+                <div class="value-card">
+                    <i class="fas fa-heart"></i>
+                    <h3>Compassion</h3>
+                </div>
+                <div class="value-card">
+                    <i class="fas fa-fire"></i>
+                    <h3>Passion</h3>
+                </div>
+                <div class="value-card">
+                    <i class="fas fa-smile"></i>
+                    <h3>Happiness</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Goals Section -->
+    <section id="goals" class="features">
+        <div class="container">
+            <h2>Our Goals</h2>
+            <p>Improve the level of safety in all companies of EGYPT By providing all services of Fleet Management System</p>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <h3>GPS Tracking System</h3>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-video"></i>
+                    <h3>CCTV Solutions</h3>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-car"></i>
+                    <h3>Vehicle tracking</h3>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Fleet Optimisation</h3>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Driver safety anywhere</h3>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-dollar-sign"></i>
+                    <h3>Cost reduction</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="features">
+        <div class="container">
+            <h2>Our Services</h2>
+            <h3>Legal GPS Tracking Solutions Powered BY ETIT</h3>
+            <div class="feature-card">
+                <p>As a fleet manager, it is crucial to your business to not only track your vehicles, but to have access to immediate, secure information about your fleet at all times. You need to monitor the locations and statuses of their vehicles and drivers, without incurring the complexity of a full fleet management system.</p>
+                <p>Fleet management solutions by ETIT present an effective offering which suits fleets of varying sizes and types - from trucks to light commercial vehicles, to motorcycles. Even the entry-level fleet management ETIT portal enables customers to always have direct control over their mobile assets and workforce.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contracts Section -->
+    <section id="contracts" class="features">
+        <div class="container">
+            <h2>Contracts</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-file-contract"></i>
+                    <h3>Supply and Installation Contracts</h3>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-tools"></i>
+                    <h3>Maintenance and Monitoring Contracts</h3>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-video"></i>
+                    <h3>CCTV Systems</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Clients Section -->
+    <section id="clients" class="clients">
+        <div class="container">
+            <h2>Our Trusted Clients</h2>
+            <!-- Featured Client -->
+            <div class="client-logo featured">
+                <img src="client-logos/vodafone.png" alt="Vodafone - Our Primary Telecommunications Partner">
+                <div class="featured-badge">
+                    <i class="fas fa-star"></i>
+                    Primary Partner
+                </div>
+            </div>
+            
+            <!-- First Row -->
+            <div class="clients-grid">
+                <div class="client-logo">
+                    <img src="client-logos/kraft-heinz.png" alt="Kraft Heinz">
+                </div>
+                <div class="client-logo">
+                    <img src="client-logos/elsewedy.png" alt="Elsewedy Electric">
+                </div>
+                <div class="client-logo">
+                    <img src="client-logos/raya.png" alt="Raya">
+                </div>
+                <div class="client-logo">
+                    <img src="client-logos/europcar.png" alt="Europcar">
+                </div>
+            </div>
+
+            <!-- Second Row -->
+            <div class="clients-grid">
+                <div class="client-logo">
+                    <img src="client-logos/coca-cola.png" alt="Coca Cola">
+                </div>
+                <div class="client-logo">
+                    <img src="client-logos/ccba.png" alt="CCBA">
+                </div>
+                <div class="client-logo">
+                    <img src="client-logos/guc.png" alt="GUC">
+                </div>
+                <div class="client-logo">
+                    <img src="client-logos/public-transport.png" alt="Public Transport Authority">
+                </div>
+            </div>
+
+            <!-- Third Row -->
+            <div class="clients-grid">
+                <div class="client-logo">
+                    <img src="client-logos/rme.png" alt="RME">
+                </div>
+                <div class="client-logo">
+                    <img src="client-logos/lafarge.png" alt="Lafarge">
+                </div>
+                <div class="client-logo">
+                    <img src="client-logos/ucp.png" alt="United Company of Pharmacists">
+                </div>
+                <div class="client-logo">
+                    <img src="client-logos/dhl.png" alt="DHL">
+                </div>
+            </div>
+
+            <!-- Fourth Row -->
+            <div class="clients-grid">
+                <div class="client-logo">
+                    <img src="client-logos/eni.png" alt="ENI">
+                </div>
+                <div class="client-logo">
+                    <img src="client-logos/beyti.png" alt="Beyti">
+                </div>
+                <div class="client-logo">
+                    <img src="client-logos/pfizer.png" alt="Pfizer">
+                </div>
+                <div class="client-logo">
+                    <img src="client-logos/cat.png" alt="CAT">
+                </div>
+            </div>
+
+            <!-- Last Row (Centered) -->
+            <div class="clients-grid centered-logos">
+                <div class="client-logo">
+                    <img src="client-logos/juhayna.png" alt="Juhayna">
+                </div>
+                <div class="client-logo">
+                    <img src="client-logos/egyptian-airports.png" alt="Egyptian Airports Co.">
+                </div>
+                <div class="client-logo">
+                    <img src="client-logos/al-ahram.png" alt="Al Ahram Beverages Company">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <footer id="contact">
+        <div class="container">
+            <h2>Contact Us</h2>
             <div class="contact-info">
-                <p>Discord: mazenmahmoud6550 / ma7amedd</p>
-                <p>WhatsApp: +20 100 266 7790 / +20 111 357 9824</p>
-                <p>Available 24/7 for Support</p>
+                <p>
+                    <i class="fas fa-phone"></i>
+                    Phone: +20102111480
+                </p>
+                <p>
+                    <i class="fas fa-envelope"></i>
+                    Email: Mohamed.Zidan@infinity-egy.net
+                </p>
+                <p>
+                    <i class="fas fa-map-marker-alt"></i>
+                    Address: 7A,50th,st,Zahraa Elmaadi,Cairo
+                </p>
             </div>
-        </footer>
-    </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Infinity Total-Com Solutions. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const hero = document.querySelector('.hero');
+        const logo = document.querySelector('.hero-logo-image');
+        let timeout;
+        let rafId;
+
+        // Calculate rotation based on mouse position
+        function handleMouseMove(e) {
+            if (!hero || !logo) return;
+            
+            // Cancel any pending animation frame
+            if (rafId) {
+                cancelAnimationFrame(rafId);
+            }
+            
+            // Remove returning class if it exists
+            logo.classList.remove('returning');
+            
+            // Use requestAnimationFrame for smooth updates
+            rafId = requestAnimationFrame(() => {
+                const rect = hero.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+                
+                // Calculate the center of the hero section
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                // Calculate the distance from center with easing
+                const dx = mouseX - centerX;
+                const dy = mouseY - centerY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                // Add more responsive rotation with distance-based damping
+                const damping = Math.min(1, distance / centerX);
+                const rotateY = (dx / centerX) * 25 * damping;
+                const rotateX = (-dy / centerY) * 15 * damping;
+                
+                // Add subtle movement towards mouse
+                const translateX = dx * 0.05;
+                const translateY = dy * 0.05;
+                
+                // Add tracking class to disable default animation
+                hero.classList.add('tracking');
+                
+                // Apply the transform with smoother interpolation
+                logo.style.transform = `
+                    perspective(1000px)
+                    rotateY(${rotateY}deg)
+                    rotateX(${rotateX}deg)
+                    translate(${translateX}px, ${translateY}px)
+                    scale(${1 + damping * 0.05})
+                `;
+            });
+            
+            // Clear existing timeout
+            clearTimeout(timeout);
+            
+            // Set new timeout to remove tracking after mouse stops
+            timeout = setTimeout(() => {
+                // Add returning class for smooth transition back
+                logo.classList.add('returning');
+                
+                // Remove tracking class after delay
+                setTimeout(() => {
+                    hero.classList.remove('tracking');
+                    logo.style.transform = '';
+                    
+                    // Remove returning class after transition
+                    setTimeout(() => {
+                        logo.classList.remove('returning');
+                    }, 500);
+                }, 1000);
+            }, 50); // Small delay to prevent jitter
+        }
+
+        // Handle mouse enter/leave
+        function handleMouseLeave() {
+            if (!hero || !logo) return;
+            if (rafId) {
+                cancelAnimationFrame(rafId);
+            }
+            
+            // Add returning class for smooth transition
+            logo.classList.add('returning');
+            
+            // Remove tracking after delay
+            setTimeout(() => {
+                hero.classList.remove('tracking');
+                logo.style.transform = '';
+                
+                // Remove returning class after transition
+                setTimeout(() => {
+                    logo.classList.remove('returning');
+                }, 500);
+            }, 1000);
+        }
+
+        // Add event listeners
+        hero.addEventListener('mousemove', handleMouseMove);
+        hero.addEventListener('mouseleave', handleMouseLeave);
+    });
+    </script>
 </body>
 </html> 
+

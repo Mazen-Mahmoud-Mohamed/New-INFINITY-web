@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Products - INFINITY Total-Com Solutions</title>
+    <link rel="stylesheet" href="mazen.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 800px;
+            margin: auto;
+            padding: 2rem;
+            border-radius: 15px;
+            position: relative;
+            transform: translateY(-50px);
+            transition: transform 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+            text-align: center;
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close-modal:hover {
+            color: var(--primary-color);
+        }
+
+        .specs-section {
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .specs-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .specs-section h3 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .specs-section h3 i {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .specs-list {
+            display: grid;
+            gap: 1.5rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .spec-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: rgba(0, 153, 204, 0.05);
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .spec-item:hover {
+            transform: translateY(-2px);
+            background: rgba(0, 153, 204, 0.1);
+        }
+
+        .spec-arabic {
+            color: var(--text-color);
+            font-family: 'Cairo', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 500;
+            text-align: center;
+            direction: rtl;
+            line-height: 1.6;
+            margin-bottom: 0.3rem;
+        }
+
+        .spec-english {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .info-btn {
+            background: transparent;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            margin: 0.5rem 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .info-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 8px rgba(0, 153, 204, 0.2);
+        }
+
+        .info-btn i {
+            margin-right: 0.5rem;
+        }
+
+        [dir="rtl"] .specs-list li {
+            padding-left: 0;
+            padding-right: 1.5rem;
+        }
+
+        [dir="rtl"] .specs-list li::before {
+            left: auto;
+            right: 0;
+        }
+
+        .modal-title {
+            text-align: center;
+            color: var(--primary-color);
+            font-size: 1.75rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(0, 153, 204, 0.1);
+        }
+
+        .section-icon {
+            display: block;
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .modal-content {
+                padding: 1.5rem;
+            }
+
+            .specs-section h3 {
+                font-size: 1.1rem;
+            }
+
+            .spec-item {
+                padding: 0.75rem;
+            }
+
+            .spec-arabic {
+                font-size: 1rem;
+            }
+
+            .spec-english {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body class="products-page">
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <a href="index.html" class="logo">
+                <img src="assets/images/infinity-logo.png" alt="INFINITY Total-Com Solutions Logo" class="logo-image">
+                <div class="logo-container">
+                    <span class="logo-text">INFINITY</span>
+                    <span class="logo-subtext">Total-Com Solutions</span>
+                </div>
+            </a>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="index.html#about">About</a></li>
+                <li><a href="index.html#services">Services</a></li>
+                <li><a href="products.html" class="active">Products</a></li>
+                <li><a href="index.html#clients">Clients</a></li>
+                <li><a href="team.html">Our Team</a></li>
+                <li><a href="index.html#contact">Contact</a></li>
+            </ul>
+            <div class="cart-icon">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count">0</span>
+            </div>
+            <button class="menu-toggle" aria-label="Toggle navigation menu">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Products Hero Section -->
+    <section class="products-hero">
+        <div class="hero-content">
+            <h1>Our Products</h1>
+            <p>Discover our range of GPS tracking and fleet management solutions</p>
+        </div>
+    </section>
+
+    <!-- Search Bar Section -->
+    <section class="search-section">
+        <div class="container">
+            <div class="search-container">
+                <input type="text" id="product-search" placeholder="Search products...">
+                <button class="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Product Categories -->
+    <section class="product-categories">
+        <div class="container">
+            <div class="category-filters">
+                <button class="category-btn active" data-category="all">All Products</button>
+                <button class="category-btn" data-category="gps">GPS Devices</button>
+                <button class="category-btn" data-category="cctv">CCTV Systems</button>
+                <button class="category-btn" data-category="sensors">Sensors</button>
+                <button class="category-btn" data-category="accessories">Accessories</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Grid -->
+    <section class="products-grid">
+        <div class="container">
+            <div class="products-wrapper">
+                <!-- GPS Tracker FMB120 -->
+                <div class="product-card" data-category="gps">
+                    <div class="product-badge">Best Seller</div>
+                    <img src="assets/products/fmb120.png" alt="GPS Tracker FMB120">
+                    <div class="product-info">
+                        <h3>GPS Tracker FMB120</h3>
+                        <h3 class="arabic-title">جهاز تتبع FMB120</h3>
+                        <button class="info-btn" onclick="showProductModal()">
+                            <i class="fas fa-info-circle"></i>
+                            Specifications
+                        </button>
+                        <p class="product-description">Advanced GPS tracking device for real-time vehicle monitoring and route tracking.</p>
+                        <p class="product-description-ar">جهاز تتبع تستطيع من خلاله متابعه سيارتك لحظيا ومعرفه خط سيرها</p>
+                        <div class="product-features">
+                            <span><i class="fas fa-map-marker-alt"></i> Real-time tracking</span>
+                            <span><i class="fas fa-route"></i> Route history</span>
+                            <span><i class="fas fa-shield-alt"></i> NTRA Approved</span>
+                        </div>
+                        <div class="product-price">
+                            <span class="price">EGP 3,475.00</span>
+                            <div class="installation-price">
+                                <span>Installation: EGP 325.00</span>
+                            </div>
+                            <button class="add-to-cart-btn" data-id="fmb120" data-name="GPS Tracker FMB120" data-price="3475" data-installation="325">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cut Off Engine -->
+                <div class="product-card" data-category="accessories">
+                    <img src="assets/products/cut-off-engine.png" alt="Cut Off Engine">
+                    <div class="product-info">
+                        <h3>Cut Off Engine</h3>
+                        <h3 class="arabic-title">حساس فصل المحرك</h3>
+                        <p class="product-description">Remote engine control system for vehicle security.</p>
+                        <p class="product-description-ar">تستطيع من خلاله ايقاف وتشغيل محرك السياره في حاله السرقات</p>
+                        <div class="product-features">
+                            <span><i class="fas fa-power-off"></i> Remote control</span>
+                            <span><i class="fas fa-lock"></i> Anti-theft</span>
+                            <span><i class="fas fa-tools"></i> Easy installation</span>
+                        </div>
+                        <div class="product-price">
+                            <span class="price">EGP 170.00</span>
+                            <div class="installation-price">
+                                <span>Installation: EGP 80.00</span>
+                            </div>
+                            <button class="add-to-cart-btn" data-id="cut-off" data-name="Cut Off Engine" data-price="170" data-installation="80">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Door Sensor -->
+                <div class="product-card" data-category="sensors">
+                    <img src="assets/products/door-sensor.png" alt="Door Sensor">
+                    <div class="product-info">
+                        <h3>Door Sensor</h3>
+                        <h3 class="arabic-title">حساس باب</h3>
+                        <p class="product-description">Door monitoring sensor for vehicle security and tracking.</p>
+                        <p class="product-description-ar">حساس الباب أحد المستشعرات التي يتم تركيبها مع جهاز التتبع وظيفته معرفه فتح وغلق باب السياره أو الباب الخلفي ويتم استقبال الاشعارات عند ذلك</p>
+                        <div class="product-features">
+                            <span><i class="fas fa-door-open"></i> Door monitoring</span>
+                            <span><i class="fas fa-bell"></i> Instant alerts</span>
+                            <span><i class="fas fa-shield-alt"></i> Security</span>
+                        </div>
+                        <div class="product-price">
+                            <span class="price">EGP 240.00</span>
+                            <div class="installation-price">
+                                <span>Installation: EGP 350.00</span>
+                            </div>
+                            <button class="add-to-cart-btn" data-id="door-sensor" data-name="Door Sensor" data-price="240" data-installation="350">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Driver ID Button -->
+                <div class="product-card" data-category="accessories">
+                    <img src="assets/products/driver-button.png" alt="Driver ID Button">
+                    <div class="product-info">
+                        <h3>Driver ID Button</h3>
+                        <h3 class="arabic-title">حساس Button | تعريف السائق</h3>
+                        <p class="product-description">Driver identification system for fleet management.</p>
+                        <p class="product-description-ar">حساس تعريف السائق يتم من خلاله معرفه تحركات السائق ويتم ربطه بالسياره</p>
+                        <div class="product-features">
+                            <span><i class="fas fa-id-card"></i> Driver ID</span>
+                            <span><i class="fas fa-user-check"></i> Authentication</span>
+                            <span><i class="fas fa-history"></i> Activity logging</span>
+                        </div>
+                        <div class="product-price">
+                            <span class="price">EGP 1,220.00</span>
+                            <button class="add-to-cart-btn" data-id="driver-button" data-name="Driver ID Button" data-price="1220" data-installation="0">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Shopping Cart Sidebar -->
+    <div class="cart-sidebar">
+        <div class="cart-header">
+            <h3>Shopping Cart</h3>
+            <button class="close-cart"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="cart-items">
+            <!-- Cart items will be dynamically added here -->
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Subtotal:</span>
+                <span class="subtotal-amount">EGP 0.00</span>
+            </div>
+            <div class="cart-total">
+                <span>Installation:</span>
+                <span class="installation-amount">EGP 0.00</span>
+            </div>
+            <div class="cart-total">
+                <span>Total:</span>
+                <span class="total-amount">EGP 0.00</span>
+            </div>
+            <button class="checkout-btn">Proceed to Checkout</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="container">
+            <h2>Contact Us</h2>
+            <div class="contact-info">
+                <p>
+                    <i class="fas fa-phone"></i>
+                    Phone: +20102111480
+                </p>
+                <p>
+                    <i class="fas fa-envelope"></i>
+                    Email: Mohamed.Zidan@infinity-egy.net
+                </p>
+                <p>
+                    <i class="fas fa-map-marker-alt"></i>
+                    Address: 7A,50th,st,Zahraa Elmaadi,Cairo
+                </p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Infinity Total-Com Solutions. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Add the modal HTML at the end of the body, before the closing body tag -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" aria-label="Close modal">×</button>
+            <h2 class="modal-title">FMB120 مواصفات جهاز   Device Specifications</h2>
+            
+            <div class="specs-section">
+                <i class="fas fa-cog section-icon"></i>
+                <h3> الخصائص العامة   General Features</h3>
+                <div class="specs-list">
+                    <div class="spec-item">
+                        <div class="spec-arabic">بلد الصنع: ليتوانيا شركة Teltonika</div>
+                        <div class="spec-english">Manufacturer: Teltonika, Lithuania</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-arabic">نظام التتبع: GPS/GSM</div>
+                        <div class="spec-english">Tracking System: GPS/GSM</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-arabic">الاتصال: GSM يدعم شبكة (2G/3G/4G)</div>
+                        <div class="spec-english">Connectivity: GSM network support (2G/3G/4G)</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-arabic">البطارية: بطارية احتياطية تعمل حتى 12 ساعة في حالة فصل بطارية السيارة</div>
+                        <div class="spec-english">Battery: Backup battery works up to 12 hours if vehicle battery is disconnected</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-arabic">التركيب: سهل التركيب ولا يتطلب تعديلات في السيارة</div>
+                        <div class="spec-english">Installation: Easy installation with no vehicle modifications required</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-arabic">التتبع: يمكن تتبع السيارة في الوقت الفعلي عبر التطبيق او الكمبيوتر</div>
+                        <div class="spec-english">Tracking: Real-time vehicle tracking via mobile app or computer</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="specs-section">
+                <i class="fas fa-star section-icon"></i>
+                <h3> المميزات الفنية   Technical Features</h3>
+                <div class="specs-list">
+                    <div class="spec-item">
+                        <div class="spec-arabic">تحديد الموقع الحالي: يمكن تحديد موقع السيارة في الوقت الحالي بدقة عالية</div>
+                        <div class="spec-english">Current Location: High-precision real-time vehicle location tracking</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-arabic">إصدار التقارير: توفير تقارير عن السرعة، الوقوف، التوقفات وغيرها</div>
+                        <div class="spec-english">Reporting: Provides reports on speed, stops, parking, and more</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-arabic">إدارة الأساطيل: يدعم إدارة أساطيل المركبات بفعالية</div>
+                        <div class="spec-english">Fleet Management: Efficient vehicle fleet management support</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-arabic">تنبيهات الأمان: ترسل تنبيهات في حالة العبث او فصل البطارية</div>
+                        <div class="spec-english">Security Alerts: Sends notifications for tampering or battery disconnection</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="specs-section">
+                <i class="fas fa-tools section-icon"></i>
+                <h3> الخدمات التي يوفرها الجهاز   Device Services</h3>
+                <div class="specs-list">
+                    <div class="spec-item">
+                        <div class="spec-arabic">استعادة خط السير: يمكن استعادة خط سير السيارة لأي فترة زمنية سابقة</div>
+                        <div class="spec-english">Route History: Can retrieve vehicle route history for any past period</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-arabic">تقرير المسافة المقطوعة: تظهير عدد الكيلومترات التي يقطعها السيارة</div>
+                        <div class="spec-english">Distance Report: Shows total kilometers traveled by the vehicle</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-arabic">تقرير استهلاك الوقود: يوفر تقارير عن استهلاك الوقود</div>
+                        <div class="spec-english">Fuel Consumption Report: Provides reports on fuel consumption</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-arabic">تقرير السرعة الزائدة: تظهير السرعة الزائدة وأماكنها ووقتها</div>
+                        <div class="spec-english">Speed Report: Shows overspeeding incidents with location and time</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-arabic">تحديد المناطق الجغرافية: إمكانية تحديد منطقة جغرافية معينة وإرسال تنبيه</div>
+                        <div class="spec-english">Geofencing: Ability to set geographic zones and receive alerts</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-arabic">إيقاف المحرك عن بعد: إمكانية إيقاف محرك السيارة عن بعد عبر الموبايل</div>
+                        <div class="spec-english">Remote Engine Cut-off: Ability to remotely stop the vehicle engine via mobile</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="specs-section">
+                <i class="fas fa-info-circle section-icon"></i>
+                <h3>ملحوظات إضافية   Additional Notes</h3>
+                <div class="specs-list">
+                    <div class="spec-item">
+                        <div class="spec-arabic">الميكروفون: مايك حساس للاستماع داخل السيارة (لا يوجد في الوقت الحالي)</div>
+                        <div class="spec-english">Microphone: Sensitive microphone for in-vehicle listening (not currently available)</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-arabic">تنبيهات الأمان: إرسال تنبيهات في حالة العبث او فصل البطارية</div>
+                        <div class="spec-english">Security Alerts: Sends notifications for tampering or battery disconnection</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const categoryBtns = document.querySelectorAll('.category-btn');
+            const productCards = document.querySelectorAll('.product-card');
+            const cartIcon = document.querySelector('.cart-icon');
+            const cartSidebar = document.querySelector('.cart-sidebar');
+            const closeCart = document.querySelector('.close-cart');
+            const addToCartBtns = document.querySelectorAll('.add-to-cart-btn');
+            const cartItems = document.querySelector('.cart-items');
+            const subtotalAmount = document.querySelector('.subtotal-amount');
+            const installationAmount = document.querySelector('.installation-amount');
+            const totalAmount = document.querySelector('.total-amount');
+            const searchInput = document.getElementById('product-search');
+            let cart = [];
+
+            // Search functionality
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const activeCategory = document.querySelector('.category-btn.active').dataset.category;
+
+                productCards.forEach(card => {
+                    const productName = card.querySelector('h3').textContent.toLowerCase();
+                    const productNameAr = card.querySelector('.arabic-title').textContent.toLowerCase();
+                    const productDesc = card.querySelector('.product-description').textContent.toLowerCase();
+                    const productDescAr = card.querySelector('.product-description-ar').textContent.toLowerCase();
+                    const productCategory = card.dataset.category;
+                    
+                    const matchesSearch = productName.includes(searchTerm) || 
+                                       productNameAr.includes(searchTerm) || 
+                                       productDesc.includes(searchTerm) ||
+                                       productDescAr.includes(searchTerm);
+                    
+                    const matchesCategory = activeCategory === 'all' || productCategory === activeCategory;
+
+                    if (matchesSearch && matchesCategory) {
+                        card.style.display = 'block';
+                        // Highlight matching text
+                        if (searchTerm) {
+                            highlightText(card, searchTerm);
+                        } else {
+                            removeHighlight(card);
+                        }
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+
+            // Highlight matching text
+            function highlightText(card, searchTerm) {
+                const elements = card.querySelectorAll('h3, .product-description, .arabic-title, .product-description-ar');
+                elements.forEach(element => {
+                    const originalText = element.textContent;
+                    const regex = new RegExp(`(${searchTerm})`, 'gi');
+                    element.innerHTML = originalText.replace(regex, '<mark>$1</mark>');
+                });
+            }
+
+            // Remove highlighting
+            function removeHighlight(card) {
+                const elements = card.querySelectorAll('h3, .product-description, .arabic-title, .product-description-ar');
+                elements.forEach(element => {
+                    const markedText = element.innerHTML;
+                    element.innerHTML = markedText.replace(/<\/?mark>/g, '');
+                });
+            }
+
+            // Category filtering with search integration
+            categoryBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    categoryBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    // Trigger search to update results with new category
+                    searchInput.dispatchEvent(new Event('input'));
+                });
+            });
+
+            // Cart functionality
+            cartIcon.addEventListener('click', () => {
+                cartSidebar.classList.add('active');
+            });
+
+            closeCart.addEventListener('click', () => {
+                cartSidebar.classList.remove('active');
+            });
+
+            function updateCart() {
+                cartItems.innerHTML = '';
+                let subtotal = 0;
+                let installation = 0;
+                
+                cart.forEach(item => {
+                    subtotal += item.price * item.quantity;
+                    installation += item.installation * item.quantity;
+                    
+                    cartItems.innerHTML += `
+                        <div class="cart-item">
+                            <div class="item-info">
+                                <h4>${item.name}</h4>
+                                <p>EGP ${item.price.toFixed(2)} × ${item.quantity}</p>
+                                ${item.installation > 0 ? `<p class="installation-fee">Installation: EGP ${item.installation.toFixed(2)}</p>` : ''}
+                            </div>
+                            <div class="item-actions">
+                                <button class="quantity-btn minus" data-id="${item.id}">-</button>
+                                <span>${item.quantity}</span>
+                                <button class="quantity-btn plus" data-id="${item.id}">+</button>
+                                <button class="remove-btn" data-id="${item.id}">×</button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                document.querySelector('.cart-count').textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+                subtotalAmount.textContent = `EGP ${subtotal.toFixed(2)}`;
+                installationAmount.textContent = `EGP ${installation.toFixed(2)}`;
+                totalAmount.textContent = `EGP ${(subtotal + installation).toFixed(2)}`;
+            }
+
+            addToCartBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.dataset.id;
+                    const name = btn.dataset.name;
+                    const price = parseFloat(btn.dataset.price);
+                    const installation = parseFloat(btn.dataset.installation) || 0;
+
+                    const existingItem = cart.find(item => item.id === id);
+                    if (existingItem) {
+                        existingItem.quantity++;
+                    } else {
+                        cart.push({
+                            id,
+                            name,
+                            price,
+                            installation,
+                            quantity: 1
+                        });
+                    }
+
+                    updateCart();
+                    btn.classList.add('added');
+                    btn.textContent = 'Added to Cart';
+                    
+                    setTimeout(() => {
+                        btn.classList.remove('added');
+                        btn.textContent = 'Add to Cart';
+                    }, 2000);
+                });
+            });
+
+            // Event delegation for cart item buttons
+            cartItems.addEventListener('click', (e) => {
+                if (e.target.classList.contains('quantity-btn')) {
+                    const id = e.target.dataset.id;
+                    const item = cart.find(item => item.id === id);
+                    
+                    if (e.target.classList.contains('plus')) {
+                        item.quantity++;
+                    } else if (e.target.classList.contains('minus')) {
+                        item.quantity--;
+                        if (item.quantity === 0) {
+                            cart = cart.filter(i => i.id !== id);
+                        }
+                    }
+                    updateCart();
+                }
+                
+                if (e.target.classList.contains('remove-btn')) {
+                    const id = e.target.dataset.id;
+                    cart = cart.filter(item => item.id !== id);
+                    updateCart();
+                }
+            });
+
+            // Checkout button
+            document.querySelector('.checkout-btn').addEventListener('click', () => {
+                if (cart.length === 0) {
+                    alert('Your cart is empty!');
+                    return;
+                }
+                // Save cart data to localStorage
+                localStorage.setItem('cart', JSON.stringify(cart));
+                // Redirect to payment page
+                window.location.href = 'payment.html';
+            });
+
+            // Modal functionality
+            window.showProductModal = function() {
+                const modal = document.getElementById('productModal');
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            };
+
+            // Close modal when clicking the close button
+            const closeModalBtn = document.querySelector('.close-modal');
+            if (closeModalBtn) {
+                closeModalBtn.addEventListener('click', function() {
+                    const modal = document.getElementById('productModal');
+                    modal.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+            }
+
+            // Close modal when clicking outside
+            const modal = document.getElementById('productModal');
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        modal.classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html> 
