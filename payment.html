@@ -199,6 +199,32 @@
             margin-top: 0.5rem;
         }
 
+        .submit-order-btn {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            margin: 2rem 0;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-order-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .submit-order-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .payment-instructions {
             margin-top: 2rem;
             padding: 1.5rem;
@@ -411,6 +437,10 @@
                 </div>
             </div>
 
+            <button id="submit-order" class="submit-order-btn" disabled>
+                Submit Order
+            </button>
+
             <div class="payment-instructions">
                 <h4><i class="fas fa-info-circle"></i> Payment Instructions</h4>
                 <ol>
@@ -454,6 +484,7 @@
             const methodOptions = document.querySelectorAll('.method-option');
             const paymentContents = document.querySelectorAll('.payment-content > div');
             const paymentInfoSection = document.querySelector('.payment-info-section');
+            const submitOrderBtn = document.getElementById('submit-order');
 
             methodOptions.forEach(option => {
                 option.addEventListener('click', function() {
@@ -473,6 +504,9 @@
 
                     // Scroll to payment info section
                     paymentInfoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                    // Enable submit button when a payment method is selected
+                    submitOrderBtn.disabled = false;
                 });
             });
 
@@ -532,6 +566,27 @@
 
             // Update when VAT checkbox changes
             vatCheckbox.addEventListener('change', updateOrderSummary);
+
+            // Handle order submission
+            submitOrderBtn.addEventListener('click', function() {
+                const selectedMethod = document.querySelector('.method-option.selected');
+                if (!selectedMethod) {
+                    alert('Please select a payment method first.');
+                    return;
+                }
+
+                const method = selectedMethod.dataset.method;
+                const total = finalTotalElement.textContent;
+                
+                // Here you would typically send this data to your server
+                alert(`Order submitted successfully!\nPayment Method: ${method}\nTotal Amount: ${total}\n\nOur team will contact you shortly to confirm your order.`);
+                
+                // Clear cart after successful submission
+                localStorage.removeItem('cart');
+                
+                // Redirect to home page
+                window.location.href = 'index.html';
+            });
         });
     </script>
 </body>

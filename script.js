@@ -268,4 +268,188 @@ document.addEventListener('DOMContentLoaded', function() {
         el.classList.add('fade-in');
         observer.observe(el);
     });
+});
+
+// Database API Functions
+const API_URL = 'http://localhost:3000/api';
+
+// Product Functions
+async function fetchProducts() {
+    try {
+        const response = await fetch(`${API_URL}/products`);
+        const products = await response.json();
+        return products;
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        throw error;
+    }
+}
+
+async function getProductById(id) {
+    try {
+        const response = await fetch(`${API_URL}/products/${id}`);
+        const product = await response.json();
+        return product;
+    } catch (error) {
+        console.error('Error fetching product:', error);
+        throw error;
+    }
+}
+
+// Order Functions
+async function createOrder(orderData) {
+    try {
+        const response = await fetch(`${API_URL}/orders`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(orderData)
+        });
+        const order = await response.json();
+        return order;
+    } catch (error) {
+        console.error('Error creating order:', error);
+        throw error;
+    }
+}
+
+async function getOrderById(id) {
+    try {
+        const response = await fetch(`${API_URL}/orders/${id}`);
+        const order = await response.json();
+        return order;
+    } catch (error) {
+        console.error('Error fetching order:', error);
+        throw error;
+    }
+}
+
+// Payment Functions
+async function createPayment(paymentData) {
+    try {
+        const response = await fetch(`${API_URL}/payments`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(paymentData)
+        });
+        const payment = await response.json();
+        return payment;
+    } catch (error) {
+        console.error('Error creating payment:', error);
+        throw error;
+    }
+}
+
+async function updatePaymentStatus(paymentId, status) {
+    try {
+        const response = await fetch(`${API_URL}/payments/${paymentId}/status`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status })
+        });
+        const payment = await response.json();
+        return payment;
+    } catch (error) {
+        console.error('Error updating payment status:', error);
+        throw error;
+    }
+}
+
+// Example usage functions
+async function loadProductsToPage() {
+    try {
+        const products = await fetchProducts();
+        const productsContainer = document.querySelector('.products-container');
+        if (productsContainer) {
+            productsContainer.innerHTML = products.map(product => `
+                <div class="product-card">
+                    <img src="${product.image}" alt="${product.name}">
+                    <h3>${product.name}</h3>
+                    <p>${product.description}</p>
+                    <p class="price">$${product.price}</p>
+                    <button onclick="addToCart('${product._id}')">Add to Cart</button>
+                </div>
+            `).join('');
+        }
+    } catch (error) {
+        console.error('Error loading products:', error);
+    }
+}
+
+async function handleOrderSubmission(orderData) {
+    try {
+        // Create the order
+        const order = await createOrder(orderData);
+        
+        // Create the payment
+        const paymentData = {
+            order: order._id,
+            amount: order.totalAmount,
+            method: orderData.paymentMethod,
+            paymentDetails: {
+                // Add payment details based on the selected method
+                bankName: orderData.paymentMethod === 'bank_transfer' ? 'Your Bank' : undefined,
+                accountNumber: orderData.paymentMethod === 'bank_transfer' ? '123456789' : undefined,
+                // Add other payment details as needed
+            }
+        };
+        
+        const payment = await createPayment(paymentData);
+        
+        // Update UI or redirect to success page
+        return { order, payment };
+    } catch (error) {
+        console.error('Error processing order:', error);
+        throw error;
+    }
+}
+
+// Initialize the page
+document.addEventListener('DOMContentLoaded', () => {
+    // Load products if we're on the products page
+    if (document.querySelector('.products-container')) {
+        loadProductsToPage();
+    }
+    
+    // Add event listeners for order form if we're on the payment page
+    const orderForm = document.querySelector('#orderForm');
+    if (orderForm) {
+        orderForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(orderForm);
+            const orderData = {
+                customer: {
+                    name: formData.get('customerName'),
+                    email: formData.get('customerEmail'),
+                    phone: formData.get('customerPhone')
+                },
+                items: JSON.parse(formData.get('items')), // Assuming items are stored in a hidden input
+                totalAmount: parseFloat(formData.get('totalAmount')),
+                paymentMethod: formData.get('paymentMethod'),
+                shippingAddress: {
+                    street: formData.get('street'),
+                    city: formData.get('city'),
+                    state: formData.get('state'),
+                    zipCode: formData.get('zipCode'),
+                    country: formData.get('country')
+                }
+            };
+            
+            try {
+                const result = await handleOrderSubmission(orderData);
+                // Handle successful order
+                alert('Order placed successfully!');
+                // Redirect to success page or show success message
+            } catch (error) {
+                // Handle error
+                alert('Error placing order. Please try again.');
+            }
+        });
+    }
 }); 

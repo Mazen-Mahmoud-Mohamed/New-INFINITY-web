@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In / Sign Up - Infinity</title>
+    <link rel="stylesheet" href="mazen.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background: var(--light-gray);
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            width: 100%;
+            max-width: 400px;
+            padding: 2rem;
+            transition: var(--transition);
+        }
+
+        .auth-card:hover {
+            box-shadow: var(--hover-shadow);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .auth-header h1 {
+            color: var(--primary-color);
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-header p {
+            color: var(--text-light);
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: clamp(0.8rem, 2vw, 1rem);
+            cursor: pointer;
+            color: var(--text-light);
+            transition: var(--transition);
+            font-weight: 500;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+
+        .auth-tab.active {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            margin-bottom: -2px;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            font-weight: 500;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: clamp(0.7rem, 2vw, 0.8rem);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0, 153, 204, 0.1);
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: clamp(0.8rem, 2vw, 1rem);
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+
+        .auth-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .social-auth {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .social-auth p {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+
+        .social-buttons {
+            display: flex;
+            gap: clamp(0.5rem, 2vw, 1rem);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .social-btn {
+            padding: clamp(0.7rem, 2vw, 0.8rem);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background: white;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: var(--transition);
+            min-width: clamp(2.5rem, 8vw, 3rem);
+            height: clamp(2.5rem, 8vw, 3rem);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .social-btn:hover {
+            background: var(--light-gray);
+            color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .social-btn i {
+            font-size: clamp(1rem, 3vw, 1.2rem);
+        }
+
+        .forgot-password {
+            text-align: right;
+            margin-top: -1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .forgot-password a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+        }
+
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .auth-container {
+                padding: 1rem;
+            }
+
+            .auth-card {
+                padding: 1.5rem;
+            }
+
+            .social-buttons {
+                gap: 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .auth-container {
+                padding: 0.5rem;
+            }
+
+            .auth-card {
+                padding: 1rem;
+            }
+
+            .auth-tabs {
+                margin-bottom: 1.5rem;
+            }
+
+            .form-group {
+                margin-bottom: 1rem;
+            }
+        }
+
+        /* Tablet Optimization */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .auth-card {
+                max-width: 450px;
+            }
+        }
+
+        /* Landscape Mode */
+        @media (max-height: 600px) and (orientation: landscape) {
+            .auth-container {
+                padding: 1rem;
+            }
+
+            .auth-card {
+                padding: 1.5rem;
+            }
+
+            .form-group {
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>Welcome Back</h1>
+                <p>Sign in to your account or create a new one</p>
+            </div>
+            
+            <div class="auth-tabs">
+                <div class="auth-tab active" onclick="switchTab('signin')">Sign In</div>
+                <div class="auth-tab" onclick="switchTab('signup')">Sign Up</div>
+            </div>
+
+            <form class="auth-form active" id="signin-form">
+                <div class="form-group">
+                    <label for="signin-email">Email</label>
+                    <input type="email" id="signin-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="signin-password">Password</label>
+                    <input type="password" id="signin-password" required>
+                </div>
+                <div class="forgot-password">
+                    <a href="#">Forgot Password?</a>
+                </div>
+                <button type="submit" class="auth-btn">Sign In</button>
+            </form>
+
+            <form class="auth-form" id="signup-form">
+                <div class="form-group">
+                    <label for="signup-name">Full Name</label>
+                    <input type="text" id="signup-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-email">Email</label>
+                    <input type="email" id="signup-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-password">Password</label>
+                    <input type="password" id="signup-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-confirm-password">Confirm Password</label>
+                    <input type="password" id="signup-confirm-password" required>
+                </div>
+                <button type="submit" class="auth-btn">Create Account</button>
+            </form>
+
+            <div class="social-auth">
+                <p>Or continue with</p>
+                <div class="social-buttons">
+                    <button class="social-btn" aria-label="Sign in with Google">
+                        <i class="fab fa-google"></i>
+                    </button>
+                    <button class="social-btn" aria-label="Sign in with Facebook">
+                        <i class="fab fa-facebook-f"></i>
+                    </button>
+                    <button class="social-btn" aria-label="Sign in with Apple">
+                        <i class="fab fa-apple"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is already logged in
+        async function checkAuth() {
+            try {
+                const res = await fetch("/api/user");
+                if (res.ok) {
+                    const data = await res.json();
+                    window.location.href = "/index.html"; // Redirect to home page if logged in
+                }
+            } catch (error) {
+                console.error("Auth check failed:", error);
+            }
+        }
+
+        function showError(formId, message) {
+            const form = document.getElementById(formId);
+            let errorDiv = form.querySelector('.error-message');
+            if (!errorDiv) {
+                errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                form.insertBefore(errorDiv, form.querySelector('button'));
+            }
+            errorDiv.textContent = message;
+            errorDiv.style.color = '#dc3545';
+            errorDiv.style.marginTop = '0.5rem';
+            errorDiv.style.fontSize = '0.9rem';
+        }
+
+        function switchTab(tab) {
+            // Update tabs
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.auth-tab[onclick="switchTab('${tab}')"]`).classList.add('active');
+
+            // Update forms
+            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+            document.getElementById(`${tab}-form`).classList.add('active');
+
+            // Update header text
+            const header = document.querySelector('.auth-header h1');
+            const subheader = document.querySelector('.auth-header p');
+            if (tab === 'signin') {
+                header.textContent = 'Welcome Back';
+                subheader.textContent = 'Sign in to your account or create a new one';
+            } else {
+                header.textContent = 'Create Account';
+                subheader.textContent = 'Join us and start your journey';
+            }
+        }
+
+        // Form submission handlers
+        document.getElementById('signin-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('signin-email').value;
+            const password = document.getElementById('signin-password').value;
+
+            try {
+                const res = await fetch("/api/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    showError('signin-form', data.error);
+                    return;
+                }
+
+                // Successful login
+                window.location.href = "/index.html";
+            } catch (error) {
+                showError('signin-form', "An error occurred during login");
+            }
+        });
+
+        document.getElementById('signup-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const confirmPassword = document.getElementById('signup-confirm-password').value;
+
+            if (password !== confirmPassword) {
+                showError('signup-form', "Passwords do not match");
+                return;
+            }
+
+            try {
+                const res = await fetch("/api/register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, password, name }),
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    showError('signup-form', data.error);
+                    return;
+                }
+
+                // Successful registration - switch to login tab
+                switchTab('signin');
+                document.getElementById('signin-email').value = email;
+                showError('signin-form', "Registration successful! Please sign in.", true);
+            } catch (error) {
+                showError('signup-form', "An error occurred during registration");
+            }
+        });
+
+        // Handle responsive behavior
+        function handleResponsive() {
+            const isMobile = window.innerWidth <= 768;
+            const isLandscape = window.innerHeight < window.innerWidth;
+            
+            // Adjust padding and margins for mobile landscape
+            if (isMobile && isLandscape) {
+                document.querySelector('.auth-container').style.padding = '0.5rem';
+                document.querySelector('.auth-card').style.padding = '1rem';
+            }
+        }
+
+        // Initial call
+        handleResponsive();
+        checkAuth();
+
+        // Add resize listener
+        window.addEventListener('resize', handleResponsive);
+    </script>
+</body>
+</html> 

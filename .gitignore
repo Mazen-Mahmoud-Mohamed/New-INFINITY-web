@@ -1,5 +1,21 @@
-.DS_Store
+# Dependencies
 node_modules/
+package-lock.json
+
+# Environment variables
 .env
+
+# Database
+database/
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
 *.log
-Thumbs.db 
+npm-debug.log* 
