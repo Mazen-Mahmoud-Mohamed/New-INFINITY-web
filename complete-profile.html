@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Profile - INFINITY</title>
+    <link rel="stylesheet" href="mazen.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .cp-wrap {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: var(--light-gray);
+        }
+        .cp-card {
+            width: 100%;
+            max-width: 760px;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: var(--box-shadow);
+            padding: 1.2rem;
+        }
+        .cp-title { margin: 0; color: var(--primary-color); }
+        .cp-sub { color: var(--text-light); margin: .35rem 0 1rem; }
+        .cp-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: .9rem;
+        }
+        .cp-group { display: grid; gap: .35rem; }
+        .cp-group.full { grid-column: 1 / -1; }
+        .cp-group label { font-weight: 600; color: var(--text-color); }
+        .cp-group input, .cp-group select {
+            width: 100%;
+            padding: .68rem .72rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: .95rem;
+        }
+        .cp-group input:focus, .cp-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0, 153, 204, .12);
+        }
+        .password-field { position: relative; }
+        .password-field input { padding-right: 2.5rem; }
+        .toggle-password {
+            position: absolute;
+            right: .7rem;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: transparent;
+            color: #64748b;
+            cursor: pointer;
+        }
+        .cp-actions { margin-top: 1rem; display: flex; gap: .6rem; flex-wrap: wrap; }
+        .cp-btn {
+            border: none;
+            border-radius: 10px;
+            padding: .7rem 1rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .cp-btn.primary { background: var(--primary-color); color: #fff; }
+        .cp-btn.ghost { background: #e2e8f0; color: #0f172a; }
+        .cp-msg {
+            margin-top: .7rem;
+            border-radius: 10px;
+            padding: .62rem .75rem;
+            display: none;
+        }
+        .cp-msg.error { display: block; background: #fee2e2; border: 1px solid #fecaca; color: #991b1b; }
+        .cp-msg.success { display: block; background: #dcfce7; border: 1px solid #86efac; color: #166534; }
+        @media (max-width: 760px) {
+            .cp-grid { grid-template-columns: 1fr; }
+            .cp-card { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="cp-wrap">
+        <div class="cp-card">
+            <h2 class="cp-title">Complete Your Profile</h2>
+            <p class="cp-sub">For security, please set a password and phone number before continuing.</p>
+            <form id="complete-profile-form">
+                <div class="cp-grid">
+                    <div class="cp-group">
+                        <label for="cp-phone">Phone Number *</label>
+                        <input id="cp-phone" type="tel" placeholder="01XXXXXXXXX" required>
+                    </div>
+                    <div class="cp-group">
+                        <label for="cp-age">Age</label>
+                        <input id="cp-age" type="number" min="16" max="100">
+                    </div>
+                    <div class="cp-group">
+                        <label for="cp-gender">Gender</label>
+                        <select id="cp-gender">
+                            <option value="">Select Gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="prefer_not_to_say">Prefer not to say</option>
+                        </select>
+                    </div>
+                    <div class="cp-group">
+                        <label for="cp-state">State</label>
+                        <input id="cp-state" type="text" placeholder="Cairo">
+                    </div>
+                    <div class="cp-group">
+                        <label for="cp-company-name">Company Name</label>
+                        <input id="cp-company-name" type="text" placeholder="Optional">
+                    </div>
+                    <div class="cp-group">
+                        <label for="cp-company-location">Company Location</label>
+                        <input id="cp-company-location" type="text" placeholder="Optional">
+                    </div>
+                    <div class="cp-group">
+                        <label for="cp-password">Set Password *</label>
+                        <div class="password-field">
+                            <input id="cp-password" type="password" minlength="6" required>
+                            <button type="button" class="toggle-password" data-target="cp-password" aria-label="Show password"><i class="fas fa-eye"></i></button>
+                        </div>
+                    </div>
+                    <div class="cp-group">
+                        <label for="cp-confirm-password">Confirm Password *</label>
+                        <div class="password-field">
+                            <input id="cp-confirm-password" type="password" minlength="6" required>
+                            <button type="button" class="toggle-password" data-target="cp-confirm-password" aria-label="Show password"><i class="fas fa-eye"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="cp-actions">
+                    <button type="submit" class="cp-btn primary" id="cp-save-btn">Save and Continue</button>
+                    <button type="button" class="cp-btn ghost" id="cp-logout-btn">Sign Out</button>
+                </div>
+                <div id="cp-message" class="cp-msg"></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function showMessage(message, type = "error") {
+            const el = document.getElementById("cp-message");
+            el.textContent = message;
+            el.className = `cp-msg ${type}`;
+        }
+
+        async function ensureSessionAndNeed() {
+            const res = await fetch("/api/user", { credentials: "include" });
+            if (!res.ok) {
+                window.location.href = "/auth.html";
+                return false;
+            }
+            const data = await res.json();
+            const missing = Array.isArray(data?.missingProfileFields) ? data.missingProfileFields : [];
+            if (!missing.includes("password") && !missing.includes("phone")) {
+                const role = data?.user?.role || "customer";
+                window.location.href = ["employee", "manager", "primary", "technical"].includes(role) ? "/dashboard.html" : "/index.html";
+                return false;
+            }
+            return true;
+        }
+
+        document.getElementById("complete-profile-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const password = document.getElementById("cp-password").value;
+            const confirmPassword = document.getElementById("cp-confirm-password").value;
+            if (password !== confirmPassword) {
+                showMessage("Passwords do not match.", "error");
+                return;
+            }
+
+            const payload = {
+                phone: document.getElementById("cp-phone").value.trim(),
+                age: Number(document.getElementById("cp-age").value) || null,
+                gender: document.getElementById("cp-gender").value || null,
+                state: document.getElementById("cp-state").value.trim(),
+                companyName: document.getElementById("cp-company-name").value.trim(),
+                companyLocation: document.getElementById("cp-company-location").value.trim(),
+                password
+            };
+
+            const btn = document.getElementById("cp-save-btn");
+            const prevText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = "Saving...";
+            try {
+                const res = await fetch("/api/profile/complete", {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    showMessage(data?.error || "Failed to save profile.", "error");
+                    return;
+                }
+                showMessage("Profile completed successfully. Redirecting...", "success");
+                const me = await fetch("/api/user", { credentials: "include" });
+                if (me.ok) {
+                    const m = await me.json();
+                    const role = m?.user?.role || "customer";
+                    setTimeout(() => {
+                        window.location.href = ["employee", "manager", "primary", "technical"].includes(role) ? "/dashboard.html" : "/index.html";
+                    }, 700);
+                } else {
+                    window.location.href = "/index.html";
+                }
+            } catch (_error) {
+                showMessage("Unexpected error. Please try again.", "error");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = prevText;
+            }
+        });
+
+        document.getElementById("cp-logout-btn").addEventListener("click", async () => {
+            await fetch("/api/logout", { method: "POST", credentials: "include" });
+            window.location.href = "/auth.html";
+        });
+
+        document.querySelectorAll(".toggle-password").forEach((btn) => {
+            btn.addEventListener("click", () => {
+                const target = document.getElementById(btn.getAttribute("data-target"));
+                if (!target) return;
+                const hidden = target.type === "password";
+                target.type = hidden ? "text" : "password";
+                btn.innerHTML = hidden ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
+            });
+        });
+
+        ensureSessionAndNeed();
+    </script>
+</body>
+</html>

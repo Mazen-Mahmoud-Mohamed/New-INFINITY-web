@@ -304,6 +304,14 @@ async function syncRoleFromEmailLists(user) {
     return user;
 }
 
+function getMissingProfileFields(user) {
+    if (!user) return [];
+    const missing = [];
+    if (!user.passwordHash) missing.push("password");
+    if (!user.phone) missing.push("phone");
+    return missing;
+}
+
 async function ensurePrimaryAdmin() {
     if (!PRIMARY_ADMIN_EMAIL || !PRIMARY_ADMIN_PASSWORD) return;
     const existing = await User.findOne({ email: PRIMARY_ADMIN_EMAIL });
@@ -1117,6 +1125,10 @@ app.get("/auth/google/callback", (req, res, next) => {
     passport.authenticate("google", { session: false }, async (err, user) => {
         if (err || !user) return res.redirect("/auth.html?error=google_auth_failed");
         req.session.user = { id: String(user._id), email: user.email, name: user.name, role: user.role || "customer" };
+        const missing = getMissingProfileFields(user);
+        if (missing.length) {
+            return res.redirect("/complete-profile.html");
+        }
         return res.redirect((["employee", "manager", "primary", "technical"].includes(user.role)) ? "/dashboard.html" : "/index.html");
     })(req, res, next);
 });
@@ -1132,6 +1144,10 @@ app.get("/auth/facebook/callback", (req, res, next) => {
     passport.authenticate("facebook", { session: false }, async (err, user) => {
         if (err || !user) return res.redirect("/auth.html?error=facebook_auth_failed");
         req.session.user = { id: String(user._id), email: user.email, name: user.name, role: user.role || "customer" };
+        const missing = getMissingProfileFields(user);
+        if (missing.length) {
+            return res.redirect("/complete-profile.html");
+        }
         return res.redirect((["employee", "manager", "primary", "technical"].includes(user.role)) ? "/dashboard.html" : "/index.html");
     })(req, res, next);
 });
@@ -1214,7 +1230,50 @@ app.get("/api/user", async (req, res) => {
         const user = await User.findById(req.session.user.id).select("role").lean();
         req.session.user.role = user?.role || "customer";
     }
-    res.json({ user: req.session.user });
+    const dbUser = await User.findById(req.session.user.id)
+        .select("phone passwordHash")
+        .lean();
+    res.json({
+        user: req.session.user,
+        missingProfileFields: getMissingProfileFields(dbUser)
+    });
+});
+
+app.post("/api/profile/complete", requireAuth, async (req, res) => {
+    try {
+        const {
+            password,
+            phone,
+            age,
+            gender,
+            state,
+            companyName,
+            companyLocation
+        } = req.body || {};
+
+        const user = await User.findById(req.session.user.id);
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        if (!password || String(password).length < 6) {
+            return res.status(400).json({ error: "Password must be at least 6 characters" });
+        }
+        if (!phone || !String(phone).trim()) {
+            return res.status(400).json({ error: "Phone number is required" });
+        }
+
+        user.passwordHash = await bcrypt.hash(String(password), 10);
+        user.phone = String(phone).trim();
+        if (typeof age === "number" && Number.isFinite(age)) user.age = age;
+        if (typeof gender === "string" && ["male", "female", "prefer_not_to_say"].includes(gender)) user.gender = gender;
+        if (typeof state === "string") user.state = state.trim() || null;
+        if (typeof companyName === "string") user.companyName = companyName.trim() || null;
+        if (typeof companyLocation === "string") user.companyLocation = companyLocation.trim() || null;
+
+        await user.save();
+        res.json({ message: "Profile completed successfully" });
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error" });
+    }
 });
 
 app.post("/api/logout", (req, res) => {
