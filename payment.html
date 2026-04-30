@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment - INFINITY Total-Com Solutions</title>
     <link rel="stylesheet" href="mazen.css">
-<<<<<<< HEAD
+
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
-=======
-    <link rel="stylesheet" href="payment.css">
-    <title>M&M Cell Scripts - Payment</title>
->>>>>>> 33713d5228b5b5d6c23b50bb16e718db26145f76
+
+
+
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .payment-container {
@@ -408,7 +408,7 @@
     </style>
 </head>
 <body>
-<<<<<<< HEAD
+
     <!-- Navigation -->
     <nav>
         <div class="container">
@@ -454,52 +454,7 @@
                     <i class="fas fa-money-bill-wave"></i>
                     <h4>Cash on Delivery</h4>
                 </div>
-=======
-    <div class="container">
-        <nav>
-            <a class="logo" href="index.html">M&M Apple Services</a>
-            <ul>
-                <li><a href="index.html#pricing">Pricing</a></li>
-                <li><a href="index.html#features">Features</a></li>
-                <li><a href="index.html#contact">Contact</a></li>
-            </ul>
-        </nav>
 
-        <div class="payment-content">
-            <h2>Complete Your Purchase</h2>
-            <div class="order-summary">
-                <h3>Order Summary</h3>
-                <div class="selected-plan">
-                    <span id="plan-name">Selected Plan</span>
-                    <span id="plan-price">$0.00</span>
-                </div>
-            </div>
-
-            <div class="payment-methods">
-                <h3>Select Payment Method</h3>
-                <div class="payment-grid">
-                    <button class="payment-option vodafone">
-                        <i class="fas fa-mobile-alt"></i>
-                        <span>Vodafone Cash</span>
-                    </button>
-                    <button class="payment-option etisalat">
-                        <i class="fas fa-mobile"></i>
-                        <span>Etisalat Cash</span>
-                    </button>
-                    <button class="payment-option instapay">
-                        <i class="fas fa-wallet"></i>
-                        <span>InstaPay</span>
-                    </button>
-                    <button class="payment-option binance">
-                        <i class="fab fa-bitcoin"></i>
-                        <span>Binance</span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="payment-details" id="payment-details">
-                <!-- This will be populated by JavaScript when a payment method is selected -->
->>>>>>> 33713d5228b5b5d6c23b50bb16e718db26145f76
             </div>
         </div>
 
@@ -632,7 +587,7 @@
                 <div id="order-details">
                     <!-- Order details will be populated by JavaScript -->
                 </div>
-                
+
                 <div class="vat-checkbox">
                     <input type="checkbox" id="vat-checkbox">
                     <label for="vat-checkbox">Add 14% VAT</label>
@@ -678,7 +633,7 @@
             </div>
         </div>
     </div>
-<<<<<<< HEAD
+
 
     <!-- Footer -->
     <footer id="contact">
@@ -787,7 +742,7 @@
                     methodOptions.forEach(opt => opt.classList.remove('selected'));
                     // Add selected class to clicked option
                     this.classList.add('selected');
-                    
+
                     // Hide all content sections
                     paymentContents.forEach(content => content.classList.remove('active'));
                     // Show selected content
@@ -855,7 +810,7 @@
                 });
 
                 orderDetails.innerHTML = html;
-                
+
                 // Calculate VAT and total
                 const vat = vatCheckbox.checked ? subtotal * 0.14 : 0;
                 const total = subtotal + vat;
@@ -885,7 +840,7 @@
 
                 const method = selectedMethod.dataset.method;
                 const total = finalTotalElement.textContent;
-                
+
                 if (method === 'visa') {
                     // Handle Visa payment
                     await handleVisaPayment();
@@ -931,7 +886,7 @@
             async function handleVisaPayment() {
                 const visaForm = document.getElementById('visa-payment-form');
                 const formData = new FormData(visaForm);
-                
+
                 // Validate form
                 if (!visaForm.checkValidity()) {
                     visaForm.reportValidity();
@@ -973,7 +928,7 @@
                             `Amount: ${finalTotalElement.textContent}`,
                             'Thank you for your purchase.'
                         ]);
-                        
+
                         // Clear cart after successful payment
                         try { await fetch('/api/cart', { method: 'DELETE', credentials: 'include' }); } catch (e) {}
                         localStorage.removeItem('cart');
@@ -988,8 +943,8 @@
             }
         });
     </script>
-=======
-    <script src="payment.js"></script>
->>>>>>> 33713d5228b5b5d6c23b50bb16e718db26145f76
+
+
+
 </body>
 </html> 

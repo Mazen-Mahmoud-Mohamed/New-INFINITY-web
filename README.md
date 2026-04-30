@@ -22,7 +22,7 @@ This project includes:
 - Real payment integration ready with Stripe API key
 - Order tracking and storage
 
-<<<<<<< HEAD
+
 ### 3. User Experience
 - Modern, responsive payment form design
 - Real-time form validation
@@ -31,7 +31,17 @@ This project includes:
 - Secure payment messaging
 
 
-<<<<<<< HEAD
+
+
+
+
+## API Key Integration
+The provided API key has been integrated into the system:
+```
+ZXlKaGJHY2lPaUpJVXpVeE1pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SmpiR0Z6Y3lJNklrMWxjbU5vWVc1MElpd2ljSEp2Wm1sc1pWOXdheUk2TVRBM01qazNOQ3dpYm1GdFpTSTZJbWx1YVhScFlXd2lmUS5ld3Rpc0hDYmd4bFdMVG02QXVtamJ2eWQ3SmY4X01pTFg3ZnpTZzVrR2xydUdCcmFOTV9qb0ZROXlLVzNrRUp1bmhzSlNnS3QtLUlaVjd6Z2czX2VfUQ==
+```
+
+
 ## Files Modified
 
 ### 1. `payment.html`
@@ -121,3 +131,22 @@ To deploy with real Stripe integration:
 5. Set up proper SSL certificates for production
 
 ## File Structure
+
+```
+wep/
+├── payment.html          # Main payment page with Visa integration
+├── test-payment.html     # Standalone test page
+├── server.js            # Backend with payment processing
+├── package.json         # Dependencies
+├── database/            # Order storage
+│   └── orders.txt       # Order records
+└── README.md           # This file
+```
+
+## Support
+
+For technical support or questions about the Visa payment integration, please contact the development team.
+
+---
+
+**Note**: This is a development version with mock payment processing. For production use, ensure proper security measures and real payment gateway integration.
