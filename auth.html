@@ -469,6 +469,10 @@
                 const res = await fetch("/api/user", { credentials: "include" });
                 if (res.ok) {
                     const data = await res.json();
+                    if (Array.isArray(data?.missingProfileFields) && data.missingProfileFields.length) {
+                        window.location.href = "/complete-profile.html";
+                        return;
+                    }
                     const role = data?.user?.role || 'customer';
                     window.location.href = (['employee', 'manager', 'primary', 'technical'].includes(role))
                         ? "/dashboard.html"
