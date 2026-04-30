@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - INFINITY</title>
+    <link rel="stylesheet" href="mazen.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background: #f4f7fb; }
+        .my-wrap { max-width: 1120px; margin: 6.2rem auto 1.2rem; padding: 0 1rem; }
+        .my-head, .my-card {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 8px 22px rgba(2, 6, 23, .08);
+            padding: 1rem;
+        }
+        .my-head { margin-bottom: 1rem; }
+        .my-title { margin: 0; color: #0891b2; }
+        .my-sub { margin: .25rem 0 0; color: #64748b; }
+        .tools { margin-top: .75rem; display: flex; gap: .55rem; flex-wrap: wrap; }
+        .tools input, .tools select {
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            padding: .5rem .65rem;
+            background: #fff;
+            min-width: 180px;
+        }
+        .orders-grid { display: grid; gap: .8rem; }
+        .order-box {
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            background: #fff;
+            padding: .8rem;
+        }
+        .order-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: .7rem;
+            margin-bottom: .65rem;
+        }
+        .order-id { margin: 0; color: #0f172a; font-weight: 700; }
+        .order-meta { margin: .2rem 0 0; color: #64748b; font-size: .86rem; }
+        .status-chip {
+            padding: .22rem .62rem;
+            border-radius: 999px;
+            font-size: .82rem;
+            font-weight: 700;
+            display: inline-block;
+        }
+        .status-completed { background: #dcfce7; color: #166534; }
+        .status-processing { background: #dbeafe; color: #1d4ed8; }
+        .status-pending { background: #fef9c3; color: #854d0e; }
+        .status-cancelled { background: #fee2e2; color: #991b1b; }
+        .status-failed { background: #e2e8f0; color: #334155; }
+        .items { display: grid; gap: .45rem; margin-bottom: .65rem; }
+        .item {
+            display: flex;
+            gap: .55rem;
+            align-items: center;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            background: #f8fafc;
+            padding: .42rem;
+        }
+        .item img {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #fff;
+            border: 1px solid #dbe3ee;
+            flex-shrink: 0;
+        }
+        .item-meta { font-size: .84rem; color: #334155; line-height: 1.25; min-width: 0; overflow-wrap: anywhere; }
+        .order-bottom { display: flex; justify-content: space-between; align-items: center; gap: .7rem; flex-wrap: wrap; }
+        .amount { color: #0f172a; font-weight: 700; }
+        .pdf-btn {
+            border: none;
+            border-radius: 9px;
+            background: #0f766e;
+            color: #fff;
+            font-weight: 700;
+            font-size: .82rem;
+            padding: .46rem .72rem;
+            cursor: pointer;
+        }
+        .empty {
+            border: 1px dashed #cbd5e1;
+            border-radius: 12px;
+            color: #64748b;
+            background: #f8fafc;
+            padding: 1rem;
+            text-align: center;
+        }
+        @media (max-width: 900px) {
+            .my-wrap { margin-top: 5.8rem; }
+        }
+        @media (max-width: 680px) {
+            .my-wrap { padding: 0 .6rem; margin-top: 5.5rem; }
+            .tools { display: grid; grid-template-columns: 1fr; }
+            .tools input, .tools select { min-width: 0; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="index.html" class="logo">
+                <img src="assets/images/infinity-logo.png" alt="INFINITY Total-Com Solutions Logo" class="logo-image">
+                <div class="logo-container">
+                    <span class="logo-text">INFINITY</span>
+                    <span class="logo-subtext">Total-Com Solutions</span>
+                </div>
+            </a>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="index.html#about">About</a></li>
+                <li><a href="index.html#services">Services</a></li>
+                <li><a href="products.html">Products</a></li>
+                <li><a href="user-dashboard.html" class="active">My Orders</a></li>
+                <li class="staff-dashboard-link" style="display:none;"><a href="dashboard.html" class="auth-link dashboard-nav-link"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                <li><a href="auth.html" class="auth-link account-link"><i class="fas fa-user"></i> Sign In</a></li>
+            </ul>
+            <button class="menu-toggle" aria-label="Toggle navigation menu">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <div class="my-wrap">
+        <div class="my-head">
+            <h2 class="my-title">My Orders</h2>
+            <p class="my-sub">Track your order status and download PDF anytime.</p>
+            <div class="tools">
+                <input id="orders-search" placeholder="Search by ID, status, payment, phone, email...">
+                <select id="status-filter">
+                    <option value="">All statuses</option>
+                    <option value="pending">pending</option>
+                    <option value="processing">processing</option>
+                    <option value="completed">completed</option>
+                    <option value="cancelled">cancelled</option>
+                    <option value="failed">failed</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="my-card">
+            <div id="orders-list" class="orders-grid"></div>
+        </div>
+    </div>
+
+    <script src="script.js?v=20260429-3"></script>
+    <script>
+        let allOrders = [];
+
+        function statusClass(status) {
+            return `status-${String(status || "").toLowerCase()}`;
+        }
+
+        function matches(order, keyword, statusFilter) {
+            if (statusFilter && String(order.status || "").toLowerCase() !== statusFilter) return false;
+            if (!keyword) return true;
+            const hay = [
+                order._id,
+                order.transactionId,
+                order.customerName,
+                order.customerEmail,
+                order.customerPhone,
+                order.customerState,
+                order.paymentMethod,
+                order.status,
+                order.amount
+            ].filter(Boolean).join(" ").toLowerCase();
+            return hay.includes(keyword);
+        }
+
+        function renderOrders() {
+            const list = document.getElementById("orders-list");
+            const keyword = (document.getElementById("orders-search").value || "").trim().toLowerCase();
+            const statusFilter = (document.getElementById("status-filter").value || "").trim().toLowerCase();
+            const visible = allOrders.filter((o) => matches(o, keyword, statusFilter));
+
+            if (!visible.length) {
+                list.innerHTML = `<div class="empty">No orders found.</div>`;
+                return;
+            }
+
+            list.innerHTML = visible.map((o) => {
+                const items = Array.isArray(o.orderItems) ? o.orderItems : [];
+                return `
+                    <div class="order-box">
+                        <div class="order-top">
+                            <div>
+                                <p class="order-id">${o.transactionId || o._id}</p>
+                                <p class="order-meta">${o.createdAt ? new Date(o.createdAt).toLocaleString() : "-"} | ${o.paymentMethod || "-"}</p>
+                            </div>
+                            <span class="status-chip ${statusClass(o.status)}">${o.status || "-"}</span>
+                        </div>
+                        <div class="items">
+                            ${items.length ? items.map((item) => `
+                                <div class="item">
+                                    <img src="${item.image || "assets/images/infinity-logo.png"}" alt="${item.name || "item"}">
+                                    <div class="item-meta">
+                                        <div><strong>${item.name || "-"}</strong> x ${item.quantity || 1}</div>
+                                        <div>Price: EGP ${Number(item.price || 0).toFixed(2)} | Install: EGP ${Number(item.installation || 0).toFixed(2)}</div>
+                                    </div>
+                                </div>
+                            `).join("") : `<div class="empty">No items</div>`}
+                        </div>
+                        <div class="order-bottom">
+                            <div class="amount">Total: EGP ${Number(o.amount || 0).toFixed(2)}</div>
+                            <button class="pdf-btn" onclick="downloadPdf('${o._id}')">PDF</button>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+        }
+
+        function downloadPdf(orderId) {
+            window.open(`/api/orders/${orderId}/pdf`, "_blank");
+        }
+
+        async function ensureAuth() {
+            const res = await fetch("/api/user", { credentials: "include" });
+            if (!res.ok) {
+                window.location.href = "/auth.html";
+                return false;
+            }
+            return true;
+        }
+
+        async function loadOrders() {
+            const ok = await ensureAuth();
+            if (!ok) return;
+            const res = await fetch("/api/orders/me", { credentials: "include" });
+            const data = await res.json();
+            allOrders = Array.isArray(data.orders) ? data.orders : [];
+            renderOrders();
+        }
+
+        document.getElementById("orders-search").addEventListener("input", renderOrders);
+        document.getElementById("status-filter").addEventListener("change", renderOrders);
+        loadOrders();
+    </script>
+</body>
+</html>

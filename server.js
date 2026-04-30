@@ -641,8 +641,155 @@ app.delete("/api/cart", requireAuth, async (req, res) => {
 app.get("/api/orders/me", requireAuth, async (req, res) => {
     try {
         const userId = getSessionUserObjectId(req);
-        const orders = await Order.find({ userId }).sort({ createdAt: -1 }).limit(50);
-        res.json({ orders });
+        const orders = await Order.find({ userId }).sort({ createdAt: -1 }).limit(100).lean();
+
+        const productIds = new Set();
+        orders.forEach((o) => {
+            (o.orderItems || []).forEach((item) => {
+                if (item?.id) productIds.add(String(item.id));
+            });
+        });
+        const products = await Product.find({ productId: { $in: Array.from(productIds) } })
+            .select("productId image -_id")
+            .lean();
+        const imageByProductId = {};
+        products.forEach((p) => {
+            imageByProductId[p.productId] = p.image;
+        });
+
+        const enrichedOrders = orders.map((o) => ({
+            ...o,
+            orderItems: (o.orderItems || []).map((item) => ({
+                ...item,
+                image: item?.image || imageByProductId[String(item?.id || "")] || "assets/images/infinity-logo.png"
+            }))
+        }));
+
+        res.json({ orders: enrichedOrders });
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+app.get("/api/orders/:id", requireAuth, async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id).lean();
+        if (!order) return res.status(404).json({ error: "Order not found" });
+
+        const role = req.session?.user?.role || "customer";
+        const isStaff = ["technical", "employee", "manager", "primary"].includes(role);
+        const ownerId = String(order.userId || "");
+        const sessionUserId = String(getSessionUserObjectId(req) || "");
+        if (!isStaff && ownerId !== sessionUserId) {
+            return res.status(403).json({ error: "Not allowed" });
+        }
+
+        const orderItems = Array.isArray(order.orderItems) ? order.orderItems : [];
+        const missingImageIds = orderItems
+            .filter((item) => item && item.id && !item.image)
+            .map((item) => String(item.id));
+
+        let imageById = {};
+        if (missingImageIds.length) {
+            const products = await Product.find({ productId: { $in: missingImageIds } })
+                .select("productId image -_id")
+                .lean();
+            imageById = products.reduce((acc, p) => {
+                acc[p.productId] = p.image;
+                return acc;
+            }, {});
+        }
+
+        const enrichedOrder = {
+            ...order,
+            orderItems: orderItems.map((item) => ({
+                ...item,
+                image: item?.image || imageById[String(item?.id || "")] || "assets/images/infinity-logo.png"
+            }))
+        };
+
+        res.json({ order: enrichedOrder });
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+app.get("/api/orders/:id/pdf", requireAuth, async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id).lean();
+        if (!order) return res.status(404).json({ error: "Order not found" });
+
+        const role = req.session?.user?.role || "customer";
+        const isStaff = ["technical", "employee", "manager", "primary"].includes(role);
+        const ownerId = String(order.userId || "");
+        const sessionUserId = String(getSessionUserObjectId(req) || "");
+        if (!isStaff && ownerId !== sessionUserId) {
+            return res.status(403).json({ error: "Not allowed" });
+        }
+
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", `attachment; filename="order-${order.transactionId || order._id}.pdf"`);
+        const doc = new PDFDocument({ margin: 36, size: "A4" });
+        doc.pipe(res);
+
+        const arialPath = "C:\\Windows\\Fonts\\arial.ttf";
+        if (fs.existsSync(arialPath)) {
+            doc.registerFont("UI", arialPath);
+            doc.font("UI");
+        }
+
+        const items = Array.isArray(order.orderItems) ? order.orderItems : [];
+        const itemIds = items.map(i => String(i?.id || "")).filter(Boolean);
+        const products = await Product.find({ productId: { $in: itemIds } }).select("productId image -_id").lean();
+        const imageByProductId = {};
+        products.forEach((p) => { imageByProductId[p.productId] = p.image; });
+        const defaultLogo = "assets/images/infinity-logo.png";
+        const resolveImagePath = (rawPath) => {
+            if (!rawPath || typeof rawPath !== "string") return null;
+            const normalized = rawPath.replace(/^\/+/, "");
+            const abs = path.join(__dirname, normalized);
+            return fs.existsSync(abs) ? abs : null;
+        };
+
+        doc.fillColor("#0f172a").fontSize(20).text("INFINITY - Customer Order", { align: "left" });
+        doc.moveDown(0.5);
+        doc.fontSize(11);
+        doc.text(`Order ID: ${order._id}`);
+        doc.text(`Transaction ID: ${order.transactionId || "-"}`);
+        doc.text(`Created At: ${new Date(order.createdAt).toLocaleString()}`);
+        doc.text(`Status: ${order.status || "-"}`);
+        doc.moveDown(0.5);
+        doc.text(`Customer: ${order.customerName || "-"}`);
+        doc.text(`Email: ${order.customerEmail || "-"}`);
+        doc.text(`Phone: ${order.customerPhone || "-"}`);
+        doc.text(`Location: ${order.customerState || "-"}`);
+        doc.text(`Payment Method: ${order.paymentMethod || "-"}`);
+        doc.text(`Amount: EGP ${Number(order.amount || 0).toFixed(2)}`);
+        doc.moveDown(0.8);
+        doc.fontSize(13).text("Order Items");
+        doc.moveDown(0.3);
+
+        const pageWidth = doc.page.width - 72;
+        for (const item of items) {
+            if (doc.y > 720) doc.addPage();
+            const blockTop = doc.y;
+            const blockHeight = 70;
+            doc.roundedRect(36, blockTop - 2, pageWidth, blockHeight, 8).fillColor("#f8fafc").fill();
+            doc.fillColor("#0f172a");
+            const preferredImage = item?.image || imageByProductId[String(item?.id || "")] || defaultLogo;
+            const imagePath = resolveImagePath(preferredImage);
+            if (imagePath) {
+                try { doc.image(imagePath, 44, blockTop + 6, { fit: [52, 52] }); } catch (_e) {}
+            }
+            const startX = 106;
+            const startY = blockTop + 6;
+            doc.fontSize(11).text(`${item.name || "Item"} x ${item.quantity || 1}`, startX, startY, { width: pageWidth - 120 });
+            doc.fontSize(10).fillColor("#334155").text(`Price: EGP ${Number(item.price || 0).toFixed(2)}`, startX, startY + 18);
+            doc.text(`Installation: EGP ${Number(item.installation || 0).toFixed(2)}`, startX, startY + 33);
+            doc.y = blockTop + blockHeight + 6;
+        }
+
+        doc.end();
     } catch (error) {
         res.status(500).json({ error: "Internal server error" });
     }

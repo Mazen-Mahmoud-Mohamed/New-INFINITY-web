@@ -263,6 +263,37 @@
                 gap: 0.45rem;
             }
         }
+        .theme-toast {
+            position: fixed;
+            right: 1rem;
+            bottom: 1rem;
+            z-index: 2200;
+            background: linear-gradient(135deg, #0e7490, #0891b2);
+            color: #fff;
+            padding: .72rem .92rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 24px rgba(2, 6, 23, .28);
+            font-weight: 600;
+            opacity: 0;
+            transform: translateY(10px);
+            pointer-events: none;
+            transition: opacity .2s ease, transform .2s ease;
+        }
+        .theme-toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .theme-toast.error {
+            background: linear-gradient(135deg, #b91c1c, #ef4444);
+        }
+        @media (max-width: 680px) {
+            .theme-toast {
+                right: .6rem;
+                left: .6rem;
+                bottom: .8rem;
+                text-align: center;
+            }
+        }
     </style>
 </head>
 <body class="products-page">
@@ -284,6 +315,7 @@
                 <li><a href="index.html#clients">Clients</a></li>
                 <li><a href="team.html">Our Team</a></li>
                 <li><a href="index.html#contact">Contact</a></li>
+                <li class="user-orders-link" style="display:none;"><a href="user-dashboard.html" class="auth-link my-orders-nav-link"><i class="fas fa-receipt"></i> My Orders</a></li>
                 <li class="staff-dashboard-link" style="display:none;"><a href="dashboard.html" class="auth-link dashboard-nav-link"><i class="fas fa-chart-line"></i> Dashboard</a></li>
                 <li><a href="auth.html" class="auth-link account-link"><i class="fas fa-user"></i> Sign In</a></li>
             </ul>
@@ -588,6 +620,7 @@
             </div>
         </div>
     </div>
+    <div id="theme-toast" class="theme-toast" role="status" aria-live="polite"></div>
 
     <script src="script.js?v=20260429-3"></script>
     <script>
@@ -607,6 +640,16 @@
             let isLoggedIn = false;
             let productStockMap = {};
             const fallbackCartImage = 'assets/images/infinity-logo.png';
+            let toastTimer;
+
+            function showThemeToast(message, isError = false) {
+                const toast = document.getElementById('theme-toast');
+                if (!toast) return;
+                clearTimeout(toastTimer);
+                toast.textContent = message;
+                toast.className = `theme-toast${isError ? ' error' : ''} show`;
+                toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+            }
 
             function getProductImageById(productId) {
                 const btn = document.querySelector(`.add-to-cart-btn[data-id="${productId}"]`);
@@ -906,7 +949,7 @@
             // Checkout button
             document.querySelector('.checkout-btn').addEventListener('click', () => {
                 if (cart.length === 0) {
-                    alert('Your cart is empty!');
+                    showThemeToast('Your cart is empty.', true);
                     return;
                 }
                 // Ensure cart is saved before checkout

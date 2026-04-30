@@ -237,6 +237,9 @@ async function initAuthUI() {
     try {
         const res = await fetch('/api/user', { credentials: 'include' });
         if (!res.ok) {
+            document.querySelectorAll('.user-orders-link').forEach((el) => {
+                el.style.display = 'none';
+            });
             document.querySelectorAll('.staff-dashboard-link').forEach((el) => {
                 el.style.display = 'none';
             });
@@ -251,7 +254,11 @@ async function initAuthUI() {
         const role = data?.user?.role || 'customer';
         // Show dashboard shortcut for staff roles only.
         const canSeeDashboard = ['employee', 'manager', 'primary', 'technical'].includes(role);
+        const canSeeMyOrders = !canSeeDashboard;
 
+        document.querySelectorAll('.user-orders-link').forEach((el) => {
+            el.style.display = canSeeMyOrders ? '' : 'none';
+        });
         if (canSeeDashboard) {
             // Reveal static dashboard links in nav (more reliable than injecting only).
             document.querySelectorAll('.staff-dashboard-link').forEach((el) => {
@@ -277,6 +284,9 @@ async function initAuthUI() {
             }
         }, { once: true });
     } catch (e) {
+        document.querySelectorAll('.user-orders-link').forEach((el) => {
+            el.style.display = 'none';
+        });
         document.querySelectorAll('.staff-dashboard-link').forEach((el) => {
             el.style.display = 'none';
         });

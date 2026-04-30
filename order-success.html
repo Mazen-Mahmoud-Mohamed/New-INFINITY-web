@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Success - INFINITY</title>
+    <link rel="stylesheet" href="mazen.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background: #f4f7fb; }
+        .success-wrap { max-width: 1080px; margin: 6.4rem auto 1.2rem; padding: 0 1rem; }
+        .success-title { margin: 0 0 .35rem; color: #0891b2; }
+        .success-subtitle { margin: 0; color: #475569; font-size: .95rem; }
+        .s-btn {
+            border: none;
+            border-radius: 10px;
+            padding: .56rem .8rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: .42rem;
+        }
+        .s-btn.primary { background: #0891b2; color: #fff; }
+        .s-btn.ghost { background: #e2e8f0; color: #0f172a; }
+        .success-card {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 8px 22px rgba(2, 6, 23, .08);
+            padding: 1rem;
+        }
+        .success-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            padding: .3rem .65rem;
+            border-radius: 999px;
+            font-size: .82rem;
+            font-weight: 700;
+            background: #dcfce7;
+            color: #166534;
+            margin-bottom: .75rem;
+        }
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: .75rem;
+            margin-bottom: 1rem;
+        }
+        .meta-box {
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            background: #f8fafc;
+            padding: .65rem .75rem;
+        }
+        .meta-label { color: #64748b; font-size: .82rem; }
+        .meta-value { color: #0f172a; font-weight: 700; margin-top: .2rem; word-break: break-word; }
+        .items-list { display: grid; gap: .55rem; }
+        .item-row {
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            background: #fff;
+            padding: .5rem .6rem;
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+        }
+        .item-row img {
+            width: 58px;
+            height: 58px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 1px solid #dbe3ee;
+            background: #fff;
+            flex-shrink: 0;
+        }
+        .item-main { min-width: 0; flex: 1; }
+        .item-name { margin: 0 0 .2rem; font-weight: 700; color: #0f172a; }
+        .item-sub { margin: 0; font-size: .86rem; color: #475569; }
+        .totals {
+            margin-top: .9rem;
+            border-top: 1px solid #e2e8f0;
+            padding-top: .7rem;
+            display: grid;
+            gap: .35rem;
+        }
+        .total-line { display: flex; justify-content: space-between; gap: 1rem; color: #334155; }
+        .total-line.final { color: #0891b2; font-weight: 800; font-size: 1.04rem; }
+        .error-box {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            border-radius: 10px;
+            padding: .7rem .85rem;
+        }
+        @media (max-width: 900px) {
+            .meta-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 680px) {
+            .success-wrap { padding: 0 .6rem; margin: .8rem auto; }
+            .success-wrap { margin-top: 5.6rem; }
+            .success-actions { display: grid; grid-template-columns: 1fr 1fr; }
+            .s-btn { justify-content: center; }
+            .item-row { align-items: flex-start; }
+            .item-main { overflow-wrap: anywhere; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="index.html" class="logo">
+                <img src="assets/images/infinity-logo.png" alt="INFINITY Total-Com Solutions Logo" class="logo-image">
+                <div class="logo-container">
+                    <span class="logo-text">INFINITY</span>
+                    <span class="logo-subtext">Total-Com Solutions</span>
+                </div>
+            </a>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="index.html#about">About</a></li>
+                <li><a href="index.html#services">Services</a></li>
+                <li><a href="products.html">Products</a></li>
+                <li><a href="index.html#clients">Clients</a></li>
+                <li><a href="team.html">Our Team</a></li>
+                <li><a href="index.html#contact">Contact</a></li>
+                <li class="user-orders-link" style="display:none;"><a href="user-dashboard.html" class="auth-link my-orders-nav-link"><i class="fas fa-receipt"></i> My Orders</a></li>
+                <li class="staff-dashboard-link" style="display:none;"><a href="dashboard.html" class="auth-link dashboard-nav-link"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                <li><a href="auth.html" class="auth-link account-link"><i class="fas fa-user"></i> Sign In</a></li>
+            </ul>
+            <button class="menu-toggle" aria-label="Toggle navigation menu">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <div class="success-wrap">
+        <div class="success-card" id="order-success-content">
+            <h2 class="success-title">Order Submitted Successfully</h2>
+            <p class="success-subtitle" style="margin-bottom:.75rem;">Your order is saved. You can review all details below.</p>
+            <div class="success-chip"><i class="fas fa-circle-check"></i> Success</div>
+            <div id="order-success-body">Loading order details...</div>
+        </div>
+    </div>
+
+    <script src="script.js?v=20260429-3"></script>
+    <script>
+        function money(v) {
+            return `EGP ${Number(v || 0).toFixed(2)}`;
+        }
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
+
+        async function initSuccessPage() {
+            const body = document.getElementById("order-success-body");
+
+            try {
+                const userRes = await fetch("/api/user", { credentials: "include" });
+                if (!userRes.ok) {
+                    window.location.href = "/auth.html";
+                    return;
+                }
+                const orderId = new URLSearchParams(window.location.search).get("orderId");
+                if (!orderId) {
+                    body.innerHTML = `<div class="error-box">Missing order id.</div>`;
+                    return;
+                }
+
+                const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}`, { credentials: "include" });
+                const data = await res.json();
+                if (!res.ok || !data?.order) {
+                    body.innerHTML = `<div class="error-box">${escapeHtml(data?.error || "Could not load order details.")}</div>`;
+                    return;
+                }
+
+                const order = data.order;
+                const items = Array.isArray(order.orderItems) ? order.orderItems : [];
+                const createdAt = order.createdAt ? new Date(order.createdAt).toLocaleString() : "-";
+                const subtotal = items.reduce((sum, item) => sum + (Number(item.price || 0) + Number(item.installation || 0)) * Number(item.quantity || 1), 0);
+                const vat = order.vatApplied ? subtotal * 0.14 : 0;
+                const total = Number(order.amount || 0);
+
+                body.innerHTML = `
+                    <div class="meta-grid">
+                        <div class="meta-box"><div class="meta-label">Order ID</div><div class="meta-value">${escapeHtml(order._id || "-")}</div></div>
+                        <div class="meta-box"><div class="meta-label">Transaction ID</div><div class="meta-value">${escapeHtml(order.transactionId || "-")}</div></div>
+                        <div class="meta-box"><div class="meta-label">Customer</div><div class="meta-value">${escapeHtml(order.customerName || "-")} (${escapeHtml(order.customerEmail || "-")})</div></div>
+                        <div class="meta-box"><div class="meta-label">Phone / Location</div><div class="meta-value">${escapeHtml(order.customerPhone || "-")} / ${escapeHtml(order.customerState || "-")}</div></div>
+                        <div class="meta-box"><div class="meta-label">Payment</div><div class="meta-value">${escapeHtml(order.paymentMethod || "-")} | ${escapeHtml(order.status || "-")}</div></div>
+                        <div class="meta-box"><div class="meta-label">Created</div><div class="meta-value">${escapeHtml(createdAt)}</div></div>
+                    </div>
+                    <h3 style="margin:.2rem 0 .65rem;color:#0f172a;">Ordered Items</h3>
+                    <div class="items-list">
+                        ${items.length ? items.map((item) => `
+                            <div class="item-row">
+                                <img src="${escapeHtml(item.image || "assets/images/infinity-logo.png")}" alt="${escapeHtml(item.name || "item")}">
+                                <div class="item-main">
+                                    <p class="item-name">${escapeHtml(item.name || "-")} x ${Number(item.quantity || 1)}</p>
+                                    <p class="item-sub">Price: ${money(item.price)} | Install: ${money(item.installation)}</p>
+                                </div>
+                            </div>
+                        `).join("") : `<div class="meta-box">No items found.</div>`}
+                    </div>
+                    <div class="totals">
+                        <div class="total-line"><span>Subtotal</span><strong>${money(subtotal)}</strong></div>
+                        <div class="total-line"><span>VAT (14%)</span><strong>${money(vat)}</strong></div>
+                        <div class="total-line final"><span>Total</span><span>${money(total)}</span></div>
+                    </div>
+                `;
+            } catch (_error) {
+                body.innerHTML = `<div class="error-box">Unexpected error while loading your order details.</div>`;
+            }
+        }
+
+        initSuccessPage();
+    </script>
+</body>
+</html>

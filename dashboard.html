@@ -129,6 +129,61 @@
             margin-left: .3rem;
         }
         .pdf-btn:hover { background: #115e59 !important; }
+        .save-status {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 88px;
+            padding: .28rem .55rem;
+            border-radius: 999px;
+            font-size: .78rem;
+            font-weight: 700;
+            border: 1px solid transparent;
+            text-transform: capitalize;
+        }
+        .save-status.idle {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #475569;
+        }
+        .save-status.saving {
+            background: #e0f2fe;
+            border-color: #7dd3fc;
+            color: #075985;
+        }
+        .save-status.saved {
+            background: #dcfce7;
+            border-color: #86efac;
+            color: #166534;
+        }
+        .save-status.failed {
+            background: #fee2e2;
+            border-color: #fca5a5;
+            color: #991b1b;
+        }
+        .dash-toast {
+            position: fixed;
+            right: 1rem;
+            bottom: 1rem;
+            z-index: 2000;
+            min-width: 220px;
+            max-width: 360px;
+            padding: .75rem .9rem;
+            border-radius: 12px;
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(2, 6, 23, .25);
+            transform: translateY(12px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .2s ease, transform .2s ease;
+        }
+        .dash-toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .dash-toast.success { background: linear-gradient(135deg, #0f766e, #0891b2); }
+        .dash-toast.error { background: linear-gradient(135deg, #b91c1c, #ef4444); }
         @media (max-width: 1050px) { .user-create { grid-template-columns: 1fr 1fr; } }
         @media (max-width: 680px) {
             .dashboard-wrap { padding: 0 .55rem; margin: 1rem auto; }
@@ -145,6 +200,18 @@
             .dash-actions .dash-btn { flex: 1; text-align: center; justify-content: center; }
             .order-action { flex-direction: column; align-items: stretch; min-width: 130px; }
             .dash-search { min-width: 100%; width: 100%; }
+            .dash-toast {
+                right: .55rem;
+                left: .55rem;
+                bottom: .75rem;
+                max-width: none;
+                min-width: 0;
+                font-size: .9rem;
+            }
+        }
+        @media (min-width: 681px) and (max-width: 1024px) {
+            .dash-card { overflow-x: auto; }
+            .dash-table { min-width: 980px; }
         }
     </style>
 </head>
@@ -174,6 +241,7 @@
                     <h3>Inventory</h3>
                     <div class="section-tools">
                         <input id="inventory-search" class="dash-search" placeholder="Search product name or ID...">
+                        <button class="dash-btn primary" id="save-all-inventory-btn">Save All</button>
                     </div>
                 </div>
                 <table class="dash-table" id="products-table">
@@ -246,6 +314,7 @@
         </div>
         </div>
     </div>
+    <div id="dash-toast" class="dash-toast" role="status" aria-live="polite"></div>
 
     <script>
         let currentRole = "customer";
@@ -254,6 +323,7 @@
         let allOrders = [];
         let allCustomers = [];
         let allUsers = [];
+        let toastTimer;
 
         function canEditInventory() { return ['employee','manager','primary'].includes(currentRole); }
         function canEditOrders() { return ['employee','manager','primary'].includes(currentRole); }
@@ -307,10 +377,28 @@
                     <td><input type="number" min="0" value="${p.installation || 0}" id="installation-${p.productId}" ${!canEditInventory() ? 'disabled' : ''}></td>
                     <td><input type="number" min="0" value="${p.stock}" id="stock-${p.productId}" ${!canEditInventory() ? 'disabled' : ''}></td>
                     <td>${p.active ? 'Yes' : 'No'}</td>
-                    <td><button ${!canEditInventory() ? 'disabled' : ''} onclick="updateStock('${p.productId}')">Save</button></td>
+                    <td><span class="save-status idle" id="save-status-${p.productId}">idle</span></td>
                 `;
                 tbody.appendChild(tr);
             });
+        }
+
+        function setProductSaveStatus(productId, state) {
+            const el = document.getElementById(`save-status-${productId}`);
+            if (!el) return;
+            el.className = `save-status ${state}`;
+            el.textContent = state;
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('dash-toast');
+            if (!toast) return;
+            clearTimeout(toastTimer);
+            toast.textContent = message;
+            toast.className = `dash-toast ${type} show`;
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2600);
         }
 
         async function updateStock(productId) {
@@ -326,6 +414,67 @@
             });
             if (!res.ok) { alert('Failed to update stock'); return; }
             await loadProducts();
+        }
+
+        async function saveAllInventory() {
+            if (!canEditInventory()) return;
+            const btn = document.getElementById('save-all-inventory-btn');
+            btn.disabled = true;
+            const previousText = btn.textContent;
+            btn.textContent = 'Saving...';
+
+            try {
+                const updates = allProducts.map((p) => {
+                    const stockEl = document.getElementById(`stock-${p.productId}`);
+                    const priceEl = document.getElementById(`price-${p.productId}`);
+                    const installationEl = document.getElementById(`installation-${p.productId}`);
+                    if (!stockEl || !priceEl || !installationEl) return null;
+                    return {
+                        productId: p.productId,
+                        stock: Number(stockEl.value),
+                        price: Number(priceEl.value),
+                        installation: Number(installationEl.value)
+                    };
+                }).filter(Boolean);
+
+                updates.forEach((u) => setProductSaveStatus(u.productId, 'saving'));
+                const results = await Promise.all(updates.map(async (u) => {
+                    try {
+                        const res = await fetch(`/api/dashboard/products/${u.productId}/stock`, {
+                            method: 'PATCH',
+                            credentials: 'include',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                stock: u.stock,
+                                price: u.price,
+                                installation: u.installation
+                            })
+                        });
+                        setProductSaveStatus(u.productId, res.ok ? 'saved' : 'failed');
+                        return res.ok;
+                    } catch (_error) {
+                        setProductSaveStatus(u.productId, 'failed');
+                        return false;
+                    }
+                }));
+
+                const successCount = results.filter(Boolean).length;
+                const failedCount = results.length - successCount;
+                if (failedCount === 0) {
+                    showToast(`Saved ${successCount} products successfully.`, 'success');
+                } else {
+                    showToast(`Saved ${successCount}, failed ${failedCount}.`, 'error');
+                }
+
+                setTimeout(() => {
+                    updates.forEach((u) => setProductSaveStatus(u.productId, 'idle'));
+                }, 2600);
+            } catch (error) {
+                showToast('Failed to save inventory changes.', 'error');
+            } finally {
+                btn.disabled = !canEditInventory();
+                btn.textContent = previousText;
+            }
         }
 
         async function loadOrders() {
@@ -527,6 +676,7 @@
         document.getElementById('orders-search').addEventListener('input', renderOrders);
         document.getElementById('customers-search').addEventListener('input', renderCustomers);
         document.getElementById('users-search').addEventListener('input', renderUsers);
+        document.getElementById('save-all-inventory-btn').addEventListener('click', saveAllInventory);
         document.getElementById('create-user-btn').addEventListener('click', createUser);
         document.getElementById('dash-logout-btn').addEventListener('click', async () => {
             await fetch('/api/logout', { method: 'POST', credentials: 'include' });
@@ -551,6 +701,7 @@
                     ? 'Employee cannot create accounts.'
                     : 'Read-only role for user management.';
             }
+            document.getElementById('save-all-inventory-btn').disabled = !canEditInventory();
             if (currentRole === 'technical') {
                 document.getElementById('user-mgmt-note').textContent = 'Technical role: view-only access.';
             }
