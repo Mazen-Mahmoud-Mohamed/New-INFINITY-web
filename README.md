@@ -22,12 +22,18 @@ This project includes:
 - Real payment integration ready with Stripe API key
 - Order tracking and storage
 
+<<<<<<< HEAD
 ### 3. User Experience
 - Modern, responsive payment form design
 - Real-time form validation
 - Processing animation with spinner
 - Success/error feedback
 - Secure payment messaging
+=======
+- Single Account: $9.99
+- Single Account: $49.99
+- Single Account: $149.99
+>>>>>>> 33713d5228b5b5d6c23b50bb16e718db26145f76
 
 ## API Key Integration
 The provided API key has been integrated into the system:
@@ -35,6 +41,7 @@ The provided API key has been integrated into the system:
 ZXlKaGJHY2lPaUpJVXpVeE1pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SmpiR0Z6Y3lJNklrMWxjbU5vWVc1MElpd2ljSEp2Wm1sc1pWOXdheUk2TVRBM01qazNOQ3dpYm1GdFpTSTZJbWx1YVhScFlXd2lmUS5ld3Rpc0hDYmd4bFdMVG02QXVtamJ2eWQ3SmY4X01pTFg3ZnpTZzVrR2xydUdCcmFOTV9qb0ZROXlLVzNrRUp1bmhzSlNnS3QtLUlaVjd6Z2czX2VfUQ==
 ```
 
+<<<<<<< HEAD
 ## Files Modified
 
 ### 1. `payment.html`
@@ -143,3 +150,8 @@ For technical support or questions about the Visa payment integration, please co
 ---
 
 **Note**: This is a development version with mock payment processing. For production use, ensure proper security measures and real payment gateway integration.
+=======
+- Discord: mazenmahmoud6550 / ma7amedd
+- WhatsApp: +20 100 266 7790 / +20 111 357 9824
+- Available 24/7 for Support 
+>>>>>>> 33713d5228b5b5d6c23b50bb16e718db26145f76
