@@ -121,27 +121,3 @@ To deploy with real Stripe integration:
 5. Set up proper SSL certificates for production
 
 ## File Structure
-
-```
-wep/
-├── payment.html          # Main payment page with Visa integration
-├── test-payment.html     # Standalone test page
-├── server.js            # Backend with payment processing
-├── package.json         # Dependencies
-├── database/            # Order storage
-│   └── orders.txt       # Order records
-└── README.md           # This file
-```
-
-## Support
-
-For technical support or questions about the Visa payment integration, please contact the development team.
-
----
-
-**Note**: This is a development version with mock payment processing. For production use, ensure proper security measures and real payment gateway integration.
-=======
-- Discord: mazenmahmoud6550 / ma7amedd
-- WhatsApp: +20 100 266 7790 / +20 111 357 9824
-- Available 24/7 for Support 
->>>>>>> 33713d5228b5b5d6c23b50bb16e718db26145f76
