@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - INFINITY</title>
+    <link rel="stylesheet" href="mazen.css">
+    <style>
+        body { background: #f4f7fb; }
+        .dashboard-wrap { max-width: 1280px; margin: 1.5rem auto; padding: 0 1rem; }
+        .dash-topbar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; background: #fff; border-radius: 14px; box-shadow: 0 6px 18px rgba(0,0,0,.08); padding: 1rem 1.2rem; margin-bottom: 1rem; }
+        .dash-title { color: #0891b2; margin: 0; }
+        .dash-user { margin: .3rem 0 0; color: #475569; font-size: .95rem; }
+        .dash-actions { display: flex; gap: .6rem; }
+        .dash-btn { border: none; border-radius: 10px; padding: .55rem .85rem; cursor: pointer; font-weight: 600; }
+        .dash-btn.primary { background: #0891b2; color: #fff; }
+        .dash-btn.ghost { background: #e2e8f0; color: #0f172a; }
+        .dash-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+        .dash-card { background: #fff; border-radius: 14px; box-shadow: 0 6px 18px rgba(0,0,0,.08); padding: 1rem; }
+        .dash-card h3 { margin-top: 0; color: #0f172a; }
+        .dash-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+        .dash-table th, .dash-table td { border-bottom: 1px solid #e5e7eb; padding: 0.55rem; text-align: left; vertical-align: middle; }
+        .status-chip { padding: .22rem .62rem; border-radius: 999px; font-size: .82rem; font-weight: 700; display: inline-block; }
+        .status-completed { background: #dcfce7; color: #166534; }
+        .status-processing { background: #dbeafe; color: #1d4ed8; }
+        .status-pending { background: #fef9c3; color: #854d0e; }
+        .status-cancelled { background: #fee2e2; color: #991b1b; }
+        .status-failed { background: #e2e8f0; color: #334155; }
+        .muted { color: #64748b; font-size: .85rem; }
+        .user-create { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: .55rem; margin-bottom: .8rem; }
+        .user-create input, .user-create select { padding: .5rem; border: 1px solid #cbd5e1; border-radius: 8px; }
+        .section-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem; }
+        .section-head select {
+            padding: .45rem .65rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            background: #fff;
+            min-width: 120px;
+            font-weight: 600;
+        }
+        .section-tools {
+            display: flex;
+            align-items: center;
+            gap: .55rem;
+            flex-wrap: wrap;
+        }
+        .dash-search {
+            min-width: 230px;
+            padding: .45rem .65rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            background: #fff;
+            font-size: .9rem;
+        }
+        .dash-tabs { display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: 1rem; }
+        .dash-tab { border: none; border-radius: 10px; padding: .65rem .95rem; background: #e2e8f0; cursor: pointer; font-weight: 700; color: #0f172a; }
+        .dash-tab.active { background: #0891b2; color: #fff; }
+        .dash-section { display: none; }
+        .dash-section.active { display: block; }
+        .inventory-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+        .inventory-thumb { width: 56px; height: 56px; object-fit: cover; border-radius: 10px; border: 1px solid #e2e8f0; background: #f8fafc; }
+        .order-items-list { display: grid; gap: .45rem; }
+        .order-item { display: flex; align-items: center; gap: .5rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: .35rem .45rem; }
+        .order-item img { width: 36px; height: 36px; object-fit: cover; border-radius: 8px; border: 1px solid #dbe3ee; background: #fff; }
+        .order-item .item-meta { font-size: .8rem; color: #334155; line-height: 1.25; }
+        .order-summary-box { margin-top: .35rem; font-size: .8rem; color: #334155; display: grid; gap: .15rem; }
+        .order-action {
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+            min-width: 170px;
+        }
+        .order-action select { flex: 1; }
+        .order-action button { white-space: nowrap; }
+        .dash-table input[type="number"],
+        .dash-table input[type="text"],
+        .dash-table input[type="email"],
+        .dash-table input[type="password"],
+        .dash-table select,
+        .user-create input,
+        .user-create select {
+            width: 100%;
+            min-width: 90px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: .42rem .5rem;
+            background: #fff;
+            color: #0f172a;
+            font-size: .88rem;
+            transition: border-color .2s ease, box-shadow .2s ease;
+            box-sizing: border-box;
+        }
+        .dash-table input:focus,
+        .dash-table select:focus,
+        .user-create input:focus,
+        .user-create select:focus {
+            outline: none;
+            border-color: #0891b2;
+            box-shadow: 0 0 0 3px rgba(8,145,178,.15);
+        }
+        .dash-table button {
+            border: none;
+            border-radius: 8px;
+            background: #0891b2;
+            color: #fff;
+            font-weight: 700;
+            font-size: .82rem;
+            padding: .42rem .65rem;
+            cursor: pointer;
+            transition: background .2s ease, transform .15s ease, opacity .2s ease;
+        }
+        .dash-table button:hover { background: #0e7490; transform: translateY(-1px); }
+        .dash-table button:disabled {
+            background: #cbd5e1;
+            color: #64748b;
+            cursor: not-allowed;
+            transform: none;
+        }
+        #users-table button {
+            background: #dc2626;
+        }
+        #users-table button:hover { background: #b91c1c; }
+        #users-table button:disabled {
+            background: #e5e7eb;
+            color: #94a3b8;
+        }
+        .pdf-btn {
+            background: #0f766e !important;
+            margin-left: .3rem;
+        }
+        .pdf-btn:hover { background: #115e59 !important; }
+        @media (max-width: 1050px) { .user-create { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 680px) {
+            .user-create { grid-template-columns: 1fr; }
+            .dash-topbar { flex-direction: column; align-items: flex-start; }
+            .order-action { flex-direction: column; align-items: stretch; min-width: 130px; }
+            .dash-search { min-width: 100%; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-wrap">
+        <div class="dash-topbar">
+            <div>
+                <h2 class="dash-title">Staff Dashboard</h2>
+                <p id="dash-user" class="dash-user"></p>
+            </div>
+            <div class="dash-actions">
+                <a href="/index.html" class="dash-btn ghost" style="text-decoration:none;display:inline-flex;align-items:center;">Website</a>
+                <button class="dash-btn primary" id="dash-logout-btn">Sign Out</button>
+            </div>
+        </div>
+
+        <div class="dash-tabs">
+            <button class="dash-tab active" data-section="inventory-section">Inventory</button>
+            <button class="dash-tab" data-section="orders-section">Orders</button>
+            <button class="dash-tab" data-section="customers-section">Customers</button>
+            <button class="dash-tab" data-section="users-section">User Management</button>
+        </div>
+
+        <div id="inventory-section" class="dash-section active">
+            <div class="dash-card">
+                <div class="section-head">
+                    <h3>Inventory</h3>
+                    <div class="section-tools">
+                        <input id="inventory-search" class="dash-search" placeholder="Search product name or ID...">
+                    </div>
+                </div>
+                <table class="dash-table" id="products-table">
+                    <thead><tr><th>Product</th><th>Image</th><th>Price</th><th>Install</th><th>Stock</th><th>Active</th><th>Update</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="orders-section" class="dash-section">
+            <div class="dash-card">
+                <div class="section-head">
+                    <h3>Orders</h3>
+                    <div class="section-tools">
+                        <input id="orders-search" class="dash-search" placeholder="Search order by ID, customer, email, phone, method...">
+                        <label>Filter:
+                            <select id="status-filter">
+                                <option value="">All</option>
+                                <option value="pending">pending</option>
+                                <option value="processing">processing</option>
+                                <option value="completed">completed</option>
+                                <option value="cancelled">cancelled</option>
+                                <option value="failed">failed</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+                <table class="dash-table" id="orders-table">
+                    <thead><tr><th>Order</th><th>Customer</th><th>Contact</th><th>Location</th><th>Items / Amount</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="customers-section" class="dash-section">
+            <div class="dash-card">
+                <div class="section-head">
+                    <h3>Customers</h3>
+                    <div class="section-tools">
+                        <input id="customers-search" class="dash-search" placeholder="Search by name, email, phone, gender, age, address...">
+                    </div>
+                </div>
+                <table class="dash-table" id="customers-table">
+                    <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Profile</th><th>Location / Company</th><th>Created</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="users-section" class="dash-section">
+        <div class="dash-card" style="margin-top:1rem;">
+            <h3>User Management</h3>
+            <p class="muted" id="user-mgmt-note">Create/delete staff users by role permissions.</p>
+            <input id="users-search" class="dash-search" placeholder="Search user by name, email, or role..." style="margin-bottom:.75rem; max-width: 420px;">
+            <div class="user-create" id="user-create-form">
+                <input id="new-user-name" placeholder="Name">
+                <input id="new-user-email" placeholder="Email">
+                <input id="new-user-password" placeholder="Password" type="password">
+                <select id="new-user-role">
+                    <option value="technical">technical</option>
+                    <option value="employee">employee</option>
+                    <option value="manager">manager</option>
+                </select>
+                <button class="dash-btn primary" id="create-user-btn">Create</button>
+            </div>
+            <table class="dash-table" id="users-table">
+                <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Action</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        </div>
+    </div>
+
+    <script>
+        let currentRole = "customer";
+        let currentUserId = "";
+        let allProducts = [];
+        let allOrders = [];
+        let allCustomers = [];
+        let allUsers = [];
+
+        function canEditInventory() { return ['employee','manager','primary'].includes(currentRole); }
+        function canEditOrders() { return ['employee','manager','primary'].includes(currentRole); }
+        function canManageUsers() { return ['employee','manager','primary'].includes(currentRole); }
+        function canDeleteUserRole(targetRole) {
+            if (targetRole === 'primary') return false;
+            if (currentRole === 'primary') return true;
+            if (currentRole === 'manager') return targetRole !== 'primary';
+            if (currentRole === 'employee') return !['primary','manager'].includes(targetRole);
+            return false;
+        }
+
+        async function ensureStaff() {
+            const res = await fetch('/api/user', { credentials: 'include' });
+            if (!res.ok) { window.location.href = '/auth.html'; return false; }
+            const data = await res.json();
+            currentRole = data?.user?.role || 'customer';
+            currentUserId = data?.user?.id || '';
+            document.getElementById('dash-user').textContent = `Logged in as ${data?.user?.name || ''} (${currentRole})`;
+            if (!['technical','employee','manager','primary'].includes(currentRole)) {
+                alert('You are not allowed to access dashboard');
+                window.location.href = '/index.html';
+                return false;
+            }
+            return true;
+        }
+
+        async function loadProducts() {
+            const res = await fetch('/api/dashboard/products', { credentials: 'include' });
+            const data = await res.json();
+            allProducts = Array.isArray(data.products) ? data.products : [];
+            renderProducts();
+        }
+
+        function renderProducts() {
+            const keyword = (document.getElementById('inventory-search')?.value || '').trim().toLowerCase();
+            const tbody = document.querySelector('#products-table tbody');
+            tbody.innerHTML = '';
+            const visible = allProducts.filter((p) => {
+                if (!keyword) return true;
+                const hay = `${p.name || ''} ${p.productId || ''}`.toLowerCase();
+                return hay.includes(keyword);
+            });
+
+            visible.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${p.name}<br><small class="muted">${p.productId}</small></td>
+                    <td><img class="inventory-thumb" src="${p.image || 'assets/images/infinity-logo.png'}" alt="${p.name}"></td>
+                    <td><input type="number" min="0" value="${p.price || 0}" id="price-${p.productId}" ${!canEditInventory() ? 'disabled' : ''}></td>
+                    <td><input type="number" min="0" value="${p.installation || 0}" id="installation-${p.productId}" ${!canEditInventory() ? 'disabled' : ''}></td>
+                    <td><input type="number" min="0" value="${p.stock}" id="stock-${p.productId}" ${!canEditInventory() ? 'disabled' : ''}></td>
+                    <td>${p.active ? 'Yes' : 'No'}</td>
+                    <td><button ${!canEditInventory() ? 'disabled' : ''} onclick="updateStock('${p.productId}')">Save</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function updateStock(productId) {
+            if (!canEditInventory()) return;
+            const stock = Number(document.getElementById(`stock-${productId}`).value);
+            const price = Number(document.getElementById(`price-${productId}`).value);
+            const installation = Number(document.getElementById(`installation-${productId}`).value);
+            const res = await fetch(`/api/dashboard/products/${productId}/stock`, {
+                method: 'PATCH',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ stock, price, installation })
+            });
+            if (!res.ok) { alert('Failed to update stock'); return; }
+            await loadProducts();
+        }
+
+        async function loadOrders() {
+            const status = document.getElementById('status-filter').value;
+            const res = await fetch(`/api/dashboard/orders${status ? `?status=${encodeURIComponent(status)}` : ''}`, { credentials: 'include' });
+            const data = await res.json();
+            allOrders = Array.isArray(data.orders) ? data.orders : [];
+            renderOrders();
+        }
+
+        function renderOrders() {
+            const keyword = (document.getElementById('orders-search')?.value || '').trim().toLowerCase();
+            const tbody = document.querySelector('#orders-table tbody');
+            tbody.innerHTML = '';
+            const visible = allOrders.filter((o) => {
+                if (!keyword) return true;
+                const hay = [
+                    o._id,
+                    o.transactionId,
+                    o.customerName,
+                    o.customerEmail,
+                    o.customerPhone,
+                    o.customerState,
+                    o.customerCompanyName,
+                    o.customerCompanyLocation,
+                    o.paymentMethod,
+                    o.status,
+                    o.currency,
+                    o.amount
+                ].filter(Boolean).join(' ').toLowerCase();
+                return hay.includes(keyword);
+            });
+
+            visible.forEach(o => {
+                const disabled = canEditOrders() ? '' : 'disabled';
+                const items = Array.isArray(o.orderItems) ? o.orderItems : [];
+                const statusClass = `status-${String(o.status || '').toLowerCase()}`;
+                const itemsHtml = items.length
+                    ? items.map((item) => `
+                        <div class="order-item">
+                            <img src="${item.image || 'assets/images/infinity-logo.png'}" alt="${item.name || 'item'}">
+                            <div class="item-meta">
+                                <div><strong>${item.name || '-'}</strong> x ${item.quantity || 1}</div>
+                                <div>Price: EGP ${Number(item.price || 0).toFixed(2)} | Install: EGP ${Number(item.installation || 0).toFixed(2)}</div>
+                            </div>
+                        </div>
+                    `).join('')
+                    : '<span class="muted">No items</span>';
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${o.transactionId}<br><small class="muted">${new Date(o.createdAt).toLocaleString()}</small></td>
+                    <td>${o.customerName || '-'}<br><small class="muted">${o.customerEmail || '-'}</small></td>
+                    <td>${o.customerPhone || '-'}<br><small class="muted">${o.customerGender || '-'} | Age: ${o.customerAge || '-'}</small></td>
+                    <td>${o.customerState || '-'}<br><small class="muted">${o.customerCompanyName || '-'} / ${o.customerCompanyLocation || '-'}</small></td>
+                    <td>
+                        <div class="order-items-list">${itemsHtml}</div>
+                        <div class="order-summary-box">
+                            <div><strong>Amount:</strong> EGP ${Number(o.amount || 0).toFixed(2)} ${o.currency || ''}</div>
+                            <div><strong>Payment:</strong> ${o.paymentMethod || '-'}</div>
+                            <div><strong>VAT:</strong> ${o.vatApplied ? 'Applied' : 'No'}</div>
+                            <div><strong>Billing Address:</strong> ${o.billingAddress || '-'}</div>
+                        </div>
+                    </td>
+                    <td><span class="status-chip ${statusClass}">${o.status}</span></td>
+                    <td>
+                        <div class="order-action">
+                            <select id="order-status-${o._id}" ${disabled}>
+                                <option ${o.status === 'pending' ? 'selected' : ''}>pending</option>
+                                <option ${o.status === 'processing' ? 'selected' : ''}>processing</option>
+                                <option ${o.status === 'completed' ? 'selected' : ''}>completed</option>
+                                <option ${o.status === 'cancelled' ? 'selected' : ''}>cancelled</option>
+                                <option ${o.status === 'failed' ? 'selected' : ''}>failed</option>
+                            </select>
+                            <button ${disabled} onclick="updateOrderStatus('${o._id}')">Update</button>
+                            <button class="pdf-btn" onclick="downloadOrderPdf('${o._id}')">PDF</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function downloadOrderPdf(orderId) {
+            window.open(`/api/dashboard/orders/${orderId}/pdf`, '_blank');
+        }
+
+        async function updateOrderStatus(orderId) {
+            if (!canEditOrders()) return;
+            const status = document.getElementById(`order-status-${orderId}`).value;
+            const res = await fetch(`/api/dashboard/orders/${orderId}/status`, {
+                method: 'PATCH',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status })
+            });
+            if (!res.ok) { alert('Failed to update order status'); return; }
+            await loadOrders();
+        }
+
+        async function loadUsers() {
+            const res = await fetch('/api/dashboard/users', { credentials: 'include' });
+            const data = await res.json();
+            allUsers = Array.isArray(data.users) ? data.users : [];
+            renderUsers();
+        }
+
+        async function loadCustomers() {
+            const res = await fetch('/api/dashboard/customers', { credentials: 'include' });
+            const data = await res.json();
+            allCustomers = Array.isArray(data.customers) ? data.customers : [];
+            renderCustomers();
+        }
+
+        function renderCustomers() {
+            const keyword = (document.getElementById('customers-search')?.value || '').trim().toLowerCase();
+            const tbody = document.querySelector('#customers-table tbody');
+            tbody.innerHTML = '';
+            const visible = allCustomers.filter((c) => {
+                if (!keyword) return true;
+                const hay = [
+                    c.name, c.email, c.phone, c.gender, c.age, c.state,
+                    c.companyName, c.companyLocation
+                ].filter(Boolean).join(' ').toLowerCase();
+                return hay.includes(keyword);
+            });
+
+            visible.forEach((c) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${c.name || '-'}</td>
+                    <td>${c.email || '-'}</td>
+                    <td>${c.phone || '-'}</td>
+                    <td>${c.gender || '-'} | Age: ${c.age ?? '-'}</td>
+                    <td>${c.state || '-'}<br><small class="muted">${c.companyName || '-'} / ${c.companyLocation || '-'}</small></td>
+                    <td><small class="muted">${c.createdAt ? new Date(c.createdAt).toLocaleString() : '-'}</small></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderUsers() {
+            const keyword = (document.getElementById('users-search')?.value || '').trim().toLowerCase();
+            const tbody = document.querySelector('#users-table tbody');
+            tbody.innerHTML = '';
+            const visible = allUsers.filter((u) => {
+                if (!keyword) return true;
+                const hay = `${u.name || ''} ${u.email || ''} ${u.role || ''}`.toLowerCase();
+                return hay.includes(keyword);
+            });
+
+            visible.forEach(u => {
+                const canDelete = canDeleteUserRole(u.role) && String(u._id) !== String(currentUserId);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${u.name || '-'}</td>
+                    <td>${u.email}</td>
+                    <td>${u.role}</td>
+                    <td>
+                        <button ${canDelete ? '' : 'disabled'} onclick="deleteUser('${u._id}')">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function createUser() {
+            if (!canManageUsers()) return;
+            const name = document.getElementById('new-user-name').value.trim();
+            const email = document.getElementById('new-user-email').value.trim();
+            const password = document.getElementById('new-user-password').value;
+            const role = document.getElementById('new-user-role').value;
+            const res = await fetch('/api/dashboard/users', {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password, role })
+            });
+            const data = await res.json();
+            if (!res.ok) { alert(data.error || 'Create user failed'); return; }
+            document.getElementById('new-user-name').value = '';
+            document.getElementById('new-user-email').value = '';
+            document.getElementById('new-user-password').value = '';
+            await loadUsers();
+        }
+
+        async function deleteUser(userId) {
+            const res = await fetch(`/api/dashboard/users/${userId}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+            const data = await res.json();
+            if (!res.ok) { alert(data.error || 'Delete user failed'); return; }
+            await loadUsers();
+        }
+
+        document.getElementById('status-filter').addEventListener('change', loadOrders);
+        document.getElementById('inventory-search').addEventListener('input', renderProducts);
+        document.getElementById('orders-search').addEventListener('input', renderOrders);
+        document.getElementById('customers-search').addEventListener('input', renderCustomers);
+        document.getElementById('users-search').addEventListener('input', renderUsers);
+        document.getElementById('create-user-btn').addEventListener('click', createUser);
+        document.getElementById('dash-logout-btn').addEventListener('click', async () => {
+            await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+            window.location.href = '/auth.html';
+        });
+        document.querySelectorAll('.dash-tab').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.dash-tab').forEach((b) => b.classList.remove('active'));
+                document.querySelectorAll('.dash-section').forEach((s) => s.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.section).classList.add('active');
+            });
+        });
+
+        (async () => {
+            const ok = await ensureStaff();
+            if (!ok) return;
+
+            if (!['manager', 'primary'].includes(currentRole)) {
+                document.getElementById('user-create-form').style.display = 'none';
+                document.getElementById('user-mgmt-note').textContent = currentRole === 'employee'
+                    ? 'Employee cannot create accounts.'
+                    : 'Read-only role for user management.';
+            }
+            if (currentRole === 'technical') {
+                document.getElementById('user-mgmt-note').textContent = 'Technical role: view-only access.';
+            }
+
+            await Promise.all([loadProducts(), loadOrders(), loadCustomers(), loadUsers()]);
+        })();
+    </script>
+</body>
+</html>

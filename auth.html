@@ -77,6 +77,24 @@
             display: block;
         }
 
+        .signup-grid {
+            display: none;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 1rem;
+        }
+
+        .signup-grid.active {
+            display: grid;
+        }
+
+        .signup-grid .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .signup-grid .full-width {
+            grid-column: 1 / -1;
+        }
+
         .form-group {
             margin-bottom: 1.5rem;
         }
@@ -98,7 +116,48 @@
             font-size: clamp(0.9rem, 2vw, 1rem);
         }
 
+        .password-field {
+            position: relative;
+        }
+
+        .password-field input {
+            padding-right: 2.6rem;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: transparent;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 0.2rem;
+            font-size: 1rem;
+        }
+
+        .toggle-password:hover {
+            color: var(--primary-color);
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: clamp(0.7rem, 2vw, 0.8rem);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            background: white;
+        }
+
         .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0, 153, 204, 0.1);
+        }
+
+        .form-group select:focus {
             outline: none;
             border-color: var(--primary-color);
             box-shadow: 0 0 0 2px rgba(0, 153, 204, 0.1);
@@ -181,6 +240,27 @@
             text-decoration: underline;
         }
 
+        .form-message {
+            margin-top: 0.5rem;
+            margin-bottom: 0.75rem;
+            padding: 0.65rem 0.8rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            border: 1px solid transparent;
+        }
+
+        .form-message.error {
+            color: #991b1b;
+            background: #fee2e2;
+            border-color: #fecaca;
+        }
+
+        .form-message.success {
+            color: #166534;
+            background: #dcfce7;
+            border-color: #86efac;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .auth-container {
@@ -193,6 +273,16 @@
 
             .social-buttons {
                 gap: 0.5rem;
+            }
+
+            .signup-grid.active {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (min-width: 900px) {
+            .auth-card {
+                max-width: 920px;
             }
         }
 
@@ -257,7 +347,12 @@
                 </div>
                 <div class="form-group">
                     <label for="signin-password">Password</label>
-                    <input type="password" id="signin-password" required>
+                    <div class="password-field">
+                        <input type="password" id="signin-password" required>
+                        <button type="button" class="toggle-password" data-target="signin-password" aria-label="Show password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="forgot-password">
                     <a href="#">Forgot Password?</a>
@@ -265,37 +360,102 @@
                 <button type="submit" class="auth-btn">Sign In</button>
             </form>
 
-            <form class="auth-form" id="signup-form">
+            <form class="auth-form signup-grid" id="signup-form">
                 <div class="form-group">
                     <label for="signup-name">Full Name</label>
                     <input type="text" id="signup-name" required>
                 </div>
                 <div class="form-group">
+                    <label for="signup-phone">Phone Number (Egypt)</label>
+                    <input type="tel" id="signup-phone" placeholder="01XXXXXXXXX" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-age">Age</label>
+                    <input type="number" id="signup-age" min="16" max="100" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-gender">Gender</label>
+                    <select id="signup-gender" required>
+                        <option value="">Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="prefer_not_to_say">Prefer not to say</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="signup-state">State in Egypt</label>
+                    <select id="signup-state" required>
+                        <option value="">Select State</option>
+                        <option value="Cairo">Cairo</option>
+                        <option value="Giza">Giza</option>
+                        <option value="Alexandria">Alexandria</option>
+                        <option value="Qalyubia">Qalyubia</option>
+                        <option value="Dakahlia">Dakahlia</option>
+                        <option value="Red Sea">Red Sea</option>
+                        <option value="Beheira">Beheira</option>
+                        <option value="Fayoum">Fayoum</option>
+                        <option value="Gharbia">Gharbia</option>
+                        <option value="Ismailia">Ismailia</option>
+                        <option value="Menofia">Menofia</option>
+                        <option value="Minya">Minya</option>
+                        <option value="Qena">Qena</option>
+                        <option value="Aswan">Aswan</option>
+                        <option value="Sohag">Sohag</option>
+                        <option value="Suez">Suez</option>
+                        <option value="Sharqia">Sharqia</option>
+                        <option value="Assiut">Assiut</option>
+                        <option value="Beni Suef">Beni Suef</option>
+                        <option value="Port Said">Port Said</option>
+                        <option value="Damietta">Damietta</option>
+                        <option value="Luxor">Luxor</option>
+                        <option value="Matrouh">Matrouh</option>
+                        <option value="North Sinai">North Sinai</option>
+                        <option value="South Sinai">South Sinai</option>
+                        <option value="Kafr El Sheikh">Kafr El Sheikh</option>
+                        <option value="Monufia">Monufia</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="signup-company-name">Company Name (optional)</label>
+                    <input type="text" id="signup-company-name" placeholder="Your company name">
+                </div>
+                <div class="form-group full-width">
+                    <label for="signup-company-location">Company Location (optional)</label>
+                    <input type="text" id="signup-company-location" placeholder="City / Address">
+                </div>
+                <div class="form-group full-width">
                     <label for="signup-email">Email</label>
                     <input type="email" id="signup-email" required>
                 </div>
                 <div class="form-group">
                     <label for="signup-password">Password</label>
-                    <input type="password" id="signup-password" required>
+                    <div class="password-field">
+                        <input type="password" id="signup-password" required>
+                        <button type="button" class="toggle-password" data-target="signup-password" aria-label="Show password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="signup-confirm-password">Confirm Password</label>
-                    <input type="password" id="signup-confirm-password" required>
+                    <div class="password-field">
+                        <input type="password" id="signup-confirm-password" required>
+                        <button type="button" class="toggle-password" data-target="signup-confirm-password" aria-label="Show password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
-                <button type="submit" class="auth-btn">Create Account</button>
+                <button type="submit" class="auth-btn full-width">Create Account</button>
             </form>
 
             <div class="social-auth">
                 <p>Or continue with</p>
                 <div class="social-buttons">
-                    <button class="social-btn" aria-label="Sign in with Google">
+                    <button class="social-btn" id="google-auth-btn" aria-label="Sign in with Google">
                         <i class="fab fa-google"></i>
                     </button>
-                    <button class="social-btn" aria-label="Sign in with Facebook">
+                    <button class="social-btn" id="facebook-auth-btn" aria-label="Sign in with Facebook">
                         <i class="fab fa-facebook-f"></i>
-                    </button>
-                    <button class="social-btn" aria-label="Sign in with Apple">
-                        <i class="fab fa-apple"></i>
                     </button>
                 </div>
             </div>
@@ -306,28 +466,34 @@
         // Check if user is already logged in
         async function checkAuth() {
             try {
-                const res = await fetch("/api/user");
+                const res = await fetch("/api/user", { credentials: "include" });
                 if (res.ok) {
                     const data = await res.json();
-                    window.location.href = "/index.html"; // Redirect to home page if logged in
+                    const role = data?.user?.role || 'customer';
+                    window.location.href = (['employee', 'manager', 'primary', 'technical'].includes(role))
+                        ? "/dashboard.html"
+                        : "/index.html";
                 }
             } catch (error) {
                 console.error("Auth check failed:", error);
             }
         }
 
-        function showError(formId, message) {
+        function showFormMessage(formId, message, type = 'error') {
             const form = document.getElementById(formId);
-            let errorDiv = form.querySelector('.error-message');
-            if (!errorDiv) {
-                errorDiv = document.createElement('div');
-                errorDiv.className = 'error-message';
-                form.insertBefore(errorDiv, form.querySelector('button'));
+            let messageDiv = form.querySelector('.form-message');
+            const submitBtn = form.querySelector('.auth-btn');
+            if (!messageDiv) {
+                messageDiv = document.createElement('div');
+                messageDiv.className = 'form-message';
+                if (submitBtn) {
+                    form.insertBefore(messageDiv, submitBtn);
+                } else {
+                    form.appendChild(messageDiv);
+                }
             }
-            errorDiv.textContent = message;
-            errorDiv.style.color = '#dc3545';
-            errorDiv.style.marginTop = '0.5rem';
-            errorDiv.style.fontSize = '0.9rem';
+            messageDiv.textContent = message;
+            messageDiv.className = `form-message ${type}`;
         }
 
         function switchTab(tab) {
@@ -360,6 +526,7 @@
             try {
                 const res = await fetch("/api/login", {
                     method: "POST",
+                    credentials: "include",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ email, password }),
                 });
@@ -367,49 +534,69 @@
                 const data = await res.json();
 
                 if (!res.ok) {
-                    showError('signin-form', data.error);
+                    showFormMessage('signin-form', data.error, 'error');
                     return;
                 }
 
                 // Successful login
-                window.location.href = "/index.html";
+                const role = data?.user?.role || 'customer';
+                window.location.href = (['employee', 'manager', 'primary', 'technical'].includes(role))
+                    ? "/dashboard.html"
+                    : "/index.html";
             } catch (error) {
-                showError('signin-form', "An error occurred during login");
+                showFormMessage('signin-form', "An error occurred during login", 'error');
             }
         });
 
         document.getElementById('signup-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             const name = document.getElementById('signup-name').value;
+            const phone = document.getElementById('signup-phone').value;
+            const age = document.getElementById('signup-age').value;
+            const gender = document.getElementById('signup-gender').value;
+            const state = document.getElementById('signup-state').value;
+            const companyName = document.getElementById('signup-company-name').value;
+            const companyLocation = document.getElementById('signup-company-location').value;
             const email = document.getElementById('signup-email').value;
             const password = document.getElementById('signup-password').value;
             const confirmPassword = document.getElementById('signup-confirm-password').value;
 
             if (password !== confirmPassword) {
-                showError('signup-form', "Passwords do not match");
+                showFormMessage('signup-form', "Passwords do not match", 'error');
                 return;
             }
 
             try {
                 const res = await fetch("/api/register", {
                     method: "POST",
+                    credentials: "include",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email, password, name }),
+                    body: JSON.stringify({
+                        email,
+                        password,
+                        name,
+                        phone,
+                        age,
+                        gender,
+                        state,
+                        companyName,
+                        companyLocation
+                    }),
                 });
 
                 const data = await res.json();
 
                 if (!res.ok) {
-                    showError('signup-form', data.error);
+                    showFormMessage('signup-form', data.error, 'error');
                     return;
                 }
 
                 // Successful registration - switch to login tab
                 switchTab('signin');
                 document.getElementById('signin-email').value = email;
-                showError('signin-form', "Registration successful! Please sign in.", true);
+                showFormMessage('signin-form', "Registration successful! Please sign in.", 'success');
             } catch (error) {
-                showError('signup-form', "An error occurred during registration");
+                showFormMessage('signup-form', "An error occurred during registration", 'error');
             }
         });
 
@@ -429,8 +616,43 @@
         handleResponsive();
         checkAuth();
 
+        // OAuth social login
+        const googleBtn = document.getElementById('google-auth-btn');
+        const facebookBtn = document.getElementById('facebook-auth-btn');
+        if (googleBtn) {
+            googleBtn.addEventListener('click', () => {
+                window.location.href = '/auth/google';
+            });
+        }
+        if (facebookBtn) {
+            facebookBtn.addEventListener('click', () => {
+                window.location.href = '/auth/facebook';
+            });
+        }
+
+        // Show OAuth errors from callback
+        const errorCode = new URLSearchParams(window.location.search).get('error');
+        if (errorCode === 'google_auth_failed' || errorCode === 'facebook_auth_failed') {
+            showFormMessage('signin-form', 'Social login failed. Please try again.', 'error');
+        }
+
         // Add resize listener
         window.addEventListener('resize', handleResponsive);
+
+        // Password visibility toggles
+        document.querySelectorAll('.toggle-password').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.getAttribute('data-target');
+                const input = document.getElementById(targetId);
+                if (!input) return;
+                const isPassword = input.type === 'password';
+                input.type = isPassword ? 'text' : 'password';
+                btn.innerHTML = isPassword
+                    ? '<i class="fas fa-eye-slash"></i>'
+                    : '<i class="fas fa-eye"></i>';
+                btn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+            });
+        });
     </script>
 </body>
 </html> 

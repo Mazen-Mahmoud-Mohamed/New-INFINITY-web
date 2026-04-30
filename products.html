@@ -62,6 +62,37 @@
             color: var(--primary-color);
         }
 
+        .cart-item {
+            display: flex;
+            gap: 0.8rem;
+            align-items: center;
+        }
+
+        .cart-item-image {
+            width: 56px;
+            height: 56px;
+            border-radius: 10px;
+            object-fit: cover;
+            flex-shrink: 0;
+            border: 1px solid #e5e7eb;
+            background: #f8fafc;
+        }
+
+        .stock-status {
+            display: inline-block;
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .stock-status.in-stock {
+            color: #15803d;
+        }
+
+        .stock-status.out-of-stock {
+            color: #b91c1c;
+        }
+
         .specs-section {
             margin-bottom: 2.5rem;
             padding-bottom: 1.5rem;
@@ -225,7 +256,8 @@
                 <li><a href="index.html#clients">Clients</a></li>
                 <li><a href="team.html">Our Team</a></li>
                 <li><a href="index.html#contact">Contact</a></li>
-                <li><a href="auth.html" class="auth-link"><i class="fas fa-user"></i> Sign In</a></li>
+                <li class="staff-dashboard-link" style="display:none;"><a href="dashboard.html" class="auth-link dashboard-nav-link"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                <li><a href="auth.html" class="auth-link account-link"><i class="fas fa-user"></i> Sign In</a></li>
             </ul>
             <div class="cart-icon">
                 <i class="fas fa-shopping-cart"></i>
@@ -275,7 +307,7 @@
         <div class="container">
             <div class="products-wrapper">
                 <!-- GPS Tracker FMB120 -->
-                <div class="product-card" data-category="gps">
+                <div class="product-card" data-category="gps" data-product-id="fmb120">
                     <div class="product-badge">Best Seller</div>
                     <img src="assets/products/fmb120.png" alt="GPS Tracker FMB120">
                     <div class="product-info">
@@ -303,7 +335,7 @@
                 </div>
 
                 <!-- Cut Off Engine -->
-                <div class="product-card" data-category="accessories">
+                <div class="product-card" data-category="accessories" data-product-id="cut-off">
                     <img src="assets/products/cut-off-engine.png" alt="Cut Off Engine">
                     <div class="product-info">
                         <h3>Cut Off Engine</h3>
@@ -326,7 +358,7 @@
                 </div>
 
                 <!-- Door Sensor -->
-                <div class="product-card" data-category="sensors">
+                <div class="product-card" data-category="sensors" data-product-id="door-sensor">
                     <img src="assets/products/door-sensor.png" alt="Door Sensor">
                     <div class="product-info">
                         <h3>Door Sensor</h3>
@@ -349,7 +381,7 @@
                 </div>
 
                 <!-- Driver ID Button -->
-                <div class="product-card" data-category="accessories">
+                <div class="product-card" data-category="accessories" data-product-id="driver-button">
                     <img src="assets/products/driver-button.png" alt="Driver ID Button">
                     <div class="product-info">
                         <h3>Driver ID Button</h3>
@@ -529,7 +561,7 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script.js?v=20260429-3"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const categoryBtns = document.querySelectorAll('.category-btn');
@@ -544,6 +576,132 @@
             const totalAmount = document.querySelector('.total-amount');
             const searchInput = document.getElementById('product-search');
             let cart = [];
+            let isLoggedIn = false;
+            let productStockMap = {};
+            const fallbackCartImage = 'assets/images/infinity-logo.png';
+
+            function getProductImageById(productId) {
+                const btn = document.querySelector(`.add-to-cart-btn[data-id="${productId}"]`);
+                const card = btn?.closest('.product-card');
+                return card?.querySelector('img')?.getAttribute('src') || fallbackCartImage;
+            }
+
+            function normalizeCartItems(items) {
+                return (items || []).map(item => ({
+                    ...item,
+                    image: item.image || getProductImageById(item.id)
+                }));
+            }
+
+            async function loadStockStatuses() {
+                try {
+                    const res = await fetch('/api/products/public');
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    const products = Array.isArray(data.products) ? data.products : [];
+                    productStockMap = {};
+                    products.forEach((p) => {
+                        productStockMap[p.productId] = Number(p.stock || 0);
+
+                        const card = document.querySelector(`.product-card[data-product-id="${p.productId}"]`);
+                        if (card) {
+                            const img = card.querySelector('img');
+                            const name = card.querySelector('.product-info h3');
+                            const addBtn = card.querySelector('.add-to-cart-btn');
+                            const priceEl = card.querySelector('.price');
+                            const installEl = card.querySelector('.installation-price span');
+
+                            if (img && p.image) img.src = p.image;
+                            if (name && p.name) name.textContent = p.name;
+                            if (priceEl && typeof p.price === 'number') {
+                                priceEl.textContent = `EGP ${Number(p.price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                            }
+                            if (installEl && typeof p.installation === 'number') {
+                                installEl.textContent = `Installation: EGP ${Number(p.installation).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                            }
+                            if (addBtn) {
+                                addBtn.dataset.name = p.name || addBtn.dataset.name;
+                                addBtn.dataset.price = String(p.price ?? addBtn.dataset.price);
+                                addBtn.dataset.installation = String(p.installation ?? addBtn.dataset.installation);
+                            }
+                        }
+                    });
+
+                    addToCartBtns.forEach((btn) => {
+                        const id = btn.dataset.id;
+                        const stock = productStockMap[id];
+                        let stockEl = btn.parentElement.querySelector('.stock-status');
+                        if (!stockEl) {
+                            stockEl = document.createElement('div');
+                            stockEl.className = 'stock-status';
+                            btn.parentElement.appendChild(stockEl);
+                        }
+                        if (typeof stock !== 'number' || stock <= 0) {
+                            stockEl.className = 'stock-status out-of-stock';
+                            stockEl.textContent = 'Out of stock';
+                            btn.disabled = true;
+                            btn.textContent = 'Out of Stock';
+                        } else {
+                            stockEl.className = 'stock-status in-stock';
+                            stockEl.textContent = `In stock: ${stock}`;
+                            btn.disabled = false;
+                        }
+                    });
+                } catch (e) {
+                    // keep old behavior on API failure
+                }
+            }
+
+            async function loadCartFromAccount() {
+                try {
+                    const userRes = await fetch('/api/user', { credentials: 'include' });
+                    isLoggedIn = userRes.ok;
+
+                    if (!isLoggedIn) {
+                        cart = JSON.parse(localStorage.getItem('cart')) || [];
+                        updateCart();
+                        return;
+                    }
+
+                    const cartRes = await fetch('/api/cart', { credentials: 'include' });
+                    if (!cartRes.ok) throw new Error('Failed to load cart');
+                    const data = await cartRes.json();
+                    cart = normalizeCartItems(Array.isArray(data.items) ? data.items : []);
+                    // Backfill missing images in DB once so refresh remains correct
+                    await fetch('/api/cart', {
+                        method: 'PUT',
+                        credentials: 'include',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ items: cart })
+                    });
+                    updateCart();
+                } catch (e) {
+                    cart = normalizeCartItems(JSON.parse(localStorage.getItem('cart')) || []);
+                    updateCart();
+                }
+            }
+
+            let saveTimer;
+            function persistCart() {
+                clearTimeout(saveTimer);
+                saveTimer = setTimeout(async () => {
+                    try {
+                        if (!isLoggedIn) {
+                            localStorage.setItem('cart', JSON.stringify(cart));
+                            return;
+                        }
+                        await fetch('/api/cart', {
+                            method: 'PUT',
+                            credentials: 'include',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ items: cart })
+                        });
+                    } catch (e) {
+                        // fallback to localStorage if API fails
+                        localStorage.setItem('cart', JSON.stringify(cart));
+                    }
+                }, 900);
+            }
 
             // Search functionality
             searchInput.addEventListener('input', function() {
@@ -628,6 +786,7 @@
                     
                     cartItems.innerHTML += `
                         <div class="cart-item">
+                            <img class="cart-item-image" src="${item.image || fallbackCartImage}" alt="${item.name}">
                             <div class="item-info">
                                 <h4>${item.name}</h4>
                                 <p>EGP ${item.price.toFixed(2)} × ${item.quantity}</p>
@@ -655,6 +814,14 @@
                     const name = btn.dataset.name;
                     const price = parseFloat(btn.dataset.price);
                     const installation = parseFloat(btn.dataset.installation) || 0;
+                    const image = getProductImageById(id);
+                    const availableStock = Number(productStockMap[id] ?? Infinity);
+                    const currentQtyInCart = cart.find(item => item.id === id)?.quantity || 0;
+
+                    if (currentQtyInCart >= availableStock) {
+                        alert('No more quantity available for this product.');
+                        return;
+                    }
 
                     const existingItem = cart.find(item => item.id === id);
                     if (existingItem) {
@@ -665,11 +832,13 @@
                             name,
                             price,
                             installation,
+                            image,
                             quantity: 1
                         });
                     }
 
                     updateCart();
+                    persistCart();
                     btn.classList.add('added');
                     btn.textContent = 'Added to Cart';
                     
@@ -695,12 +864,14 @@
                         }
                     }
                     updateCart();
+                    persistCart();
                 }
                 
                 if (e.target.classList.contains('remove-btn')) {
                     const id = e.target.dataset.id;
                     cart = cart.filter(item => item.id !== id);
                     updateCart();
+                    persistCart();
                 }
             });
 
@@ -710,11 +881,15 @@
                     alert('Your cart is empty!');
                     return;
                 }
-                // Save cart data to localStorage
-                localStorage.setItem('cart', JSON.stringify(cart));
+                // Ensure cart is saved before checkout
+                persistCart();
                 // Redirect to payment page
                 window.location.href = 'payment.html';
             });
+
+            // Load cart from account (or localStorage fallback)
+            loadCartFromAccount();
+            loadStockStatuses();
 
             // Modal functionality
             window.showProductModal = function() {

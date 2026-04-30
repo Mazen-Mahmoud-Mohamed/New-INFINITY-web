@@ -1,36 +1,24 @@
-// Scroll Progress Indicator with faster animation
-const scrollProgress = document.createElement('div');
-scrollProgress.className = 'scroll-progress';
-document.body.appendChild(scrollProgress);
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const isLowPowerDevice = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
 
-let lastScrollTop = 0;
-let ticking = false;
+// Keep lightweight scroll progress only on capable devices
+if (!reduceMotion && !isLowPowerDevice) {
+    const scrollProgress = document.createElement('div');
+    scrollProgress.className = 'scroll-progress';
+    document.body.appendChild(scrollProgress);
 
-window.addEventListener('scroll', () => {
-    if (!ticking) {
+    let progressTicking = false;
+    window.addEventListener('scroll', () => {
+        if (progressTicking) return;
+        progressTicking = true;
         window.requestAnimationFrame(() => {
-            const windowHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const windowHeight = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
             const scrolled = (window.scrollY / windowHeight) * 100;
-            const scrollDirection = window.scrollY > lastScrollTop ? 'down' : 'up';
-            
             scrollProgress.style.transform = `scaleX(${scrolled / 100})`;
-            lastScrollTop = window.scrollY;
-            
-            // Faster direction-based animations
-            document.querySelectorAll('.fade-in, .slide-in-left, .slide-in-right, .scale-in').forEach(el => {
-                if (el.getBoundingClientRect().top < window.innerHeight * 0.8) {
-                    el.classList.add('visible');
-                    if (scrollDirection === 'up') {
-                        el.style.animationDelay = '0s';
-                    }
-                }
-            });
-            
-            ticking = false;
+            progressTicking = false;
         });
-        ticking = true;
-    }
-});
+    }, { passive: true });
+}
 
 // Faster Scroll Reveal Animation
 const observerOptions = {
@@ -39,84 +27,85 @@ const observerOptions = {
     threshold: 0.1
 };
 
-const observer = new IntersectionObserver((entries) => {
+const revealObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
             entry.target.classList.add('visible');
-            const delay = entry.target.dataset.delay || 0;
-            
-            requestAnimationFrame(() => {
-                setTimeout(() => {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }, delay);
-            });
-        } else {
-            entry.target.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
-            entry.target.style.opacity = '0';
-            entry.target.style.transform = 'translateY(20px)';
+            revealObserver.unobserve(entry.target);
         }
     });
 }, observerOptions);
 
 // Add animation classes with faster staggered delays
 document.addEventListener('DOMContentLoaded', () => {
+    // Faster initial paint for images (lazy load offscreen)
+    document.querySelectorAll('img').forEach((img) => {
+        const isHeroLogo = img.classList.contains('hero-logo-image') || img.classList.contains('logo-image');
+        img.decoding = 'async';
+        if (!isHeroLogo) {
+            img.loading = 'lazy';
+            img.fetchPriority = 'low';
+        } else {
+            img.loading = 'eager';
+            img.fetchPriority = 'high';
+        }
+    });
+
     // Sections with faster fade-in
     document.querySelectorAll('section').forEach((section, index) => {
         section.classList.add('fade-in');
         section.dataset.delay = index * 80; // Reduced from 150
-        observer.observe(section);
+        revealObserver.observe(section);
     });
 
     // Feature cards with faster alternating slide-in
     document.querySelectorAll('.feature-card').forEach((card, index) => {
         card.classList.add(index % 2 === 0 ? 'slide-in-left' : 'slide-in-right');
         card.dataset.delay = index * 100; // Reduced from 200
-        observer.observe(card);
+        revealObserver.observe(card);
     });
 
     // Pricing cards with faster scale-in
     document.querySelectorAll('.pricing-card').forEach((card, index) => {
         card.classList.add('scale-in');
         card.dataset.delay = index * 120; // Reduced from 250
-        observer.observe(card);
+        revealObserver.observe(card);
     });
 
     // Testimonials with faster fade-in
     document.querySelectorAll('.testimonial-card').forEach((card, index) => {
         card.classList.add('fade-in');
         card.dataset.delay = index * 100; // Reduced from 200
-        observer.observe(card);
+        revealObserver.observe(card);
     });
 
     // Team members with faster alternating slide-in
     document.querySelectorAll('.team-member').forEach((member, index) => {
         member.classList.add(index % 2 === 0 ? 'slide-in-left' : 'slide-in-right');
         member.dataset.delay = index * 120; // Reduced from 250
-        observer.observe(member);
+        revealObserver.observe(member);
     });
 
     // Value cards with faster scale-in
     document.querySelectorAll('.value-card').forEach((card, index) => {
         card.classList.add('scale-in');
         card.dataset.delay = index * 100; // Reduced from 200
-        observer.observe(card);
+        revealObserver.observe(card);
     });
-
-    // Faster parallax effect
-    const hero = document.querySelector('.hero');
-    if (hero) {
-        let ticking = false;
-        window.addEventListener('scroll', () => {
-            if (!ticking) {
+    // Disable expensive parallax on low-power/reduced-motion devices
+    if (!reduceMotion && !isLowPowerDevice) {
+        const hero = document.querySelector('.hero');
+        if (hero) {
+            let heroTicking = false;
+            window.addEventListener('scroll', () => {
+                if (heroTicking) return;
+                heroTicking = true;
                 window.requestAnimationFrame(() => {
-                    const scrolled = window.pageYOffset;
-                    hero.style.backgroundPositionY = scrolled * 0.3 + 'px'; // Reduced from 0.5
-                    ticking = false;
+                    hero.style.backgroundPositionY = `${window.pageYOffset * 0.2}px`;
+                    heroTicking = false;
                 });
-                ticking = true;
-            }
-        });
+            }, { passive: true });
+        }
     }
 
     // Faster floating animation for feature icons
@@ -173,21 +162,7 @@ document.querySelectorAll('.cta-primary, .cta-secondary, .pricing-btn, .support-
     });
 });
 
-// Faster scroll-based animations for team member images
-document.querySelectorAll('.member-image img').forEach(img => {
-    let ticking = false;
-    window.addEventListener('scroll', () => {
-        if (!ticking) {
-            window.requestAnimationFrame(() => {
-                const scrolled = window.pageYOffset;
-                const speed = 0.3; // Reduced from 0.5
-                img.style.transform = `translateY(${scrolled * speed}px)`;
-                ticking = false;
-            });
-            ticking = true;
-        }
-    });
-});
+// Removed heavy per-image scroll transform for better rendering performance
 
 // Faster floating animation
 const style = document.createElement('style');
@@ -251,24 +226,66 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Add scroll animation to elements
-    const observerOptions = {
-        threshold: 0.1
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-            }
-        });
-    }, observerOptions);
-
-    document.querySelectorAll('.feature-card, .value-card, .team-member').forEach(el => {
-        el.classList.add('fade-in');
-        observer.observe(el);
-    });
+    // Reveal animations already handled by shared observer above
 });
+
+// Auth UI (show first name + logout icon)
+async function initAuthUI() {
+    const authLink = document.querySelector('a.account-link');
+    if (!authLink) return;
+
+    try {
+        const res = await fetch('/api/user', { credentials: 'include' });
+        if (!res.ok) {
+            document.querySelectorAll('.staff-dashboard-link').forEach((el) => {
+                el.style.display = 'none';
+            });
+            authLink.href = 'auth.html';
+            authLink.innerHTML = '<i class="fas fa-user"></i> Sign In';
+            return;
+        }
+
+        const data = await res.json();
+        const fullName = (data?.user?.name || '').trim();
+        const firstName = (fullName.split(/\s+/)[0] || 'Account').slice(0, 20);
+        const role = data?.user?.role || 'customer';
+        // Show dashboard shortcut for staff roles only.
+        const canSeeDashboard = ['employee', 'manager', 'primary', 'technical'].includes(role);
+
+        if (canSeeDashboard) {
+            // Reveal static dashboard links in nav (more reliable than injecting only).
+            document.querySelectorAll('.staff-dashboard-link').forEach((el) => {
+                el.style.display = '';
+            });
+            document.querySelectorAll('.dashboard-nav-link').forEach((link) => {
+                link.innerHTML = '<i class="fas fa-chart-line"></i> Dashboard';
+            });
+        } else {
+            document.querySelectorAll('.staff-dashboard-link').forEach((el) => {
+                el.style.display = 'none';
+            });
+        }
+
+        authLink.href = '#';
+        authLink.innerHTML = `<i class="fas fa-user"></i> <span class="auth-name">${firstName}</span> <i class="fas fa-sign-out-alt auth-logout-icon" aria-hidden="true"></i>`;
+        authLink.addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+            } finally {
+                window.location.href = '/index.html';
+            }
+        }, { once: true });
+    } catch (e) {
+        document.querySelectorAll('.staff-dashboard-link').forEach((el) => {
+            el.style.display = 'none';
+        });
+        authLink.href = 'auth.html';
+        authLink.innerHTML = '<i class="fas fa-user"></i> Sign In';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', initAuthUI);
 
 // Database API Functions
 const API_URL = 'http://localhost:3000/api';

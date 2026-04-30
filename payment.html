@@ -266,6 +266,124 @@
             margin-bottom: 1rem;
         }
 
+        /* Visa Payment Form Styles */
+        .visa-form {
+            margin-top: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: #999;
+        }
+
+        .payment-security {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: #f0f8ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 8px;
+            color: #0066cc;
+            font-size: 0.9rem;
+        }
+
+        .payment-security i {
+            color: #22c55e;
+        }
+
+        .processing-payment {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .processing-payment.show {
+            display: block;
+        }
+
+        .payment-result {
+            display: none;
+            margin: 1rem 0;
+            padding: 1rem 1.25rem;
+            border-radius: 10px;
+            border: 1px solid transparent;
+            text-align: left;
+        }
+
+        .payment-result.show {
+            display: block;
+        }
+
+        .payment-result.success {
+            background: #ecfdf5;
+            border-color: #86efac;
+            color: #166534;
+        }
+
+        .payment-result.error {
+            background: #fef2f2;
+            border-color: #fca5a5;
+            color: #991b1b;
+        }
+
+        .payment-result h4 {
+            margin: 0 0 0.5rem 0;
+        }
+
+        .payment-result p {
+            margin: 0.3rem 0;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         @media (max-width: 768px) {
             .payment-container {
                 margin: 1rem;
@@ -314,6 +432,10 @@
         <div class="payment-methods">
             <h3>Select Payment Method</h3>
             <div class="payment-method-selector">
+                <div class="method-option" data-method="visa">
+                    <i class="fas fa-credit-card"></i>
+                    <h4>Visa Card</h4>
+                </div>
                 <div class="method-option" data-method="bank">
                     <i class="fas fa-university"></i>
                     <h4>Bank Transfer</h4>
@@ -408,6 +530,49 @@
                         <p>Our delivery team will contact you to arrange the delivery time.</p>
                     </div>
                 </div>
+
+                <!-- Visa Payment Content -->
+                <div id="visa-content">
+                    <div class="bank-info">
+                        <h3>Visa Card Payment</h3>
+                        <form id="visa-payment-form" class="visa-form">
+                            <div class="form-group">
+                                <label for="card-number">Card Number</label>
+                                <input type="text" id="card-number" name="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="expiry-date">Expiry Date</label>
+                                    <input type="text" id="expiry-date" name="expiryDate" placeholder="MM/YY" maxlength="5" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="cvv">CVV</label>
+                                    <input type="text" id="cvv" name="cvv" placeholder="123" maxlength="4" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="cardholder-name">Cardholder Name</label>
+                                <input type="text" id="cardholder-name" name="cardholderName" placeholder="John Doe" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="billing-email">Email Address</label>
+                                <input type="email" id="billing-email" name="billingEmail" placeholder="john@example.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="billing-phone">Phone Number</label>
+                                <input type="tel" id="billing-phone" name="billingPhone" placeholder="+201234567890" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="billing-address">Billing Address</label>
+                                <textarea id="billing-address" name="billingAddress" placeholder="Enter your billing address" rows="3" required></textarea>
+                            </div>
+                            <div class="payment-security">
+                                <i class="fas fa-lock"></i>
+                                <span>Your payment information is secure and encrypted</span>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
 
             <div class="order-summary">
@@ -440,6 +605,14 @@
             <button id="submit-order" class="submit-order-btn" disabled>
                 Submit Order
             </button>
+
+            <div id="processing-payment" class="processing-payment">
+                <div class="spinner"></div>
+                <h3>Processing Payment...</h3>
+                <p>Please wait while we process your payment securely.</p>
+            </div>
+
+            <div id="payment-result" class="payment-result" role="status" aria-live="polite"></div>
 
             <div class="payment-instructions">
                 <h4><i class="fas fa-info-circle"></i> Payment Instructions</h4>
@@ -480,11 +653,80 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Require login before allowing payment
+            (async () => {
+                try {
+                    const res = await fetch("/api/user", { credentials: "include" });
+                    if (!res.ok) {
+                        window.location.href = "/auth.html";
+                    }
+                } catch (e) {
+                    window.location.href = "/auth.html";
+                }
+            })();
+
             // Payment method selection
             const methodOptions = document.querySelectorAll('.method-option');
             const paymentContents = document.querySelectorAll('.payment-content > div');
             const paymentInfoSection = document.querySelector('.payment-info-section');
             const submitOrderBtn = document.getElementById('submit-order');
+            const processingPayment = document.getElementById('processing-payment');
+            const paymentResult = document.getElementById('payment-result');
+
+            function showProcessing() {
+                submitOrderBtn.disabled = true;
+                submitOrderBtn.style.display = 'none';
+                processingPayment.classList.add('show');
+                paymentResult.className = 'payment-result';
+                paymentResult.innerHTML = '';
+            }
+
+            function hideProcessing() {
+                processingPayment.classList.remove('show');
+                submitOrderBtn.style.display = 'block';
+                submitOrderBtn.disabled = false;
+            }
+
+            function showResult(type, title, details) {
+                paymentResult.className = `payment-result show ${type}`;
+                paymentResult.innerHTML = `
+                    <h4>${title}</h4>
+                    ${details.map(d => `<p>${d}</p>`).join('')}
+                `;
+                paymentResult.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            // Visa form input formatting
+            const cardNumberInput = document.getElementById('card-number');
+            const expiryDateInput = document.getElementById('expiry-date');
+            const cvvInput = document.getElementById('cvv');
+
+            // Format card number with spaces
+            if (cardNumberInput) {
+                cardNumberInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+                    let formattedValue = value.replace(/\d{4}(?=.)/g, '$& ');
+                    e.target.value = formattedValue;
+                });
+            }
+
+            // Format expiry date
+            if (expiryDateInput) {
+                expiryDateInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.length >= 2) {
+                        value = value.slice(0, 2) + '/' + value.slice(2, 4);
+                    }
+                    e.target.value = value;
+                });
+            }
+
+            // Format CVV (numbers only)
+            if (cvvInput) {
+                cvvInput.addEventListener('input', function(e) {
+                    e.target.value = e.target.value.replace(/\D/g, '');
+                });
+            }
 
             methodOptions.forEach(option => {
                 option.addEventListener('click', function() {
@@ -525,8 +767,18 @@
                 });
             });
 
-            // Get cart data from localStorage
-            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            // Get cart data from account (MongoDB) with localStorage fallback
+            let cart = [];
+            async function loadCart() {
+                try {
+                    const res = await fetch('/api/cart', { credentials: 'include' });
+                    if (!res.ok) throw new Error('Not authenticated');
+                    const data = await res.json();
+                    cart = Array.isArray(data.items) ? data.items : [];
+                } catch (e) {
+                    cart = JSON.parse(localStorage.getItem('cart')) || [];
+                }
+            }
             const orderDetails = document.getElementById('order-details');
             const subtotalElement = document.getElementById('subtotal');
             const vatAmountElement = document.getElementById('vat-amount');
@@ -561,32 +813,126 @@
                 finalTotalElement.textContent = `EGP ${total.toFixed(2)}`;
             }
 
-            // Initial update
-            updateOrderSummary();
+            // Initial load + update
+            (async () => {
+                await loadCart();
+                updateOrderSummary();
+            })();
 
             // Update when VAT checkbox changes
             vatCheckbox.addEventListener('change', updateOrderSummary);
 
             // Handle order submission
-            submitOrderBtn.addEventListener('click', function() {
+            submitOrderBtn.addEventListener('click', async function() {
                 const selectedMethod = document.querySelector('.method-option.selected');
                 if (!selectedMethod) {
-                    alert('Please select a payment method first.');
+                    showResult('error', 'Select a Payment Method', ['Please select a payment method first.']);
                     return;
                 }
 
                 const method = selectedMethod.dataset.method;
                 const total = finalTotalElement.textContent;
                 
-                // Here you would typically send this data to your server
-                alert(`Order submitted successfully!\nPayment Method: ${method}\nTotal Amount: ${total}\n\nOur team will contact you shortly to confirm your order.`);
-                
-                // Clear cart after successful submission
-                localStorage.removeItem('cart');
-                
-                // Redirect to home page
-                window.location.href = 'index.html';
+                if (method === 'visa') {
+                    // Handle Visa payment
+                    await handleVisaPayment();
+                } else {
+                    // Save non-card order to backend (MongoDB)
+                    try {
+                        showProcessing();
+                        const amount = parseFloat(finalTotalElement.textContent.replace('EGP ', ''));
+                        const response = await fetch('/api/orders', {
+                            method: 'POST',
+                            credentials: 'include',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                paymentMethod: method,
+                                amount,
+                                currency: 'EGP',
+                                vatApplied: vatCheckbox.checked,
+                                orderItems: cart
+                            })
+                        });
+
+                        const result = await response.json();
+                        if (!response.ok) throw new Error(result.error || 'Failed to create order');
+
+                        showResult('success', 'Order Saved Successfully', [
+                            `Order ID: ${result.orderId}`,
+                            `Payment Method: ${method.toUpperCase()}`,
+                            `Total Amount: ${total}`,
+                            'Your order is now saved in your account.'
+                        ]);
+
+                        try { await fetch('/api/cart', { method: 'DELETE', credentials: 'include' }); } catch (e) {}
+                        localStorage.removeItem('cart');
+                    } catch (error) {
+                        showResult('error', 'Order Failed', [error.message || 'Could not save order. Please try again.']);
+                    } finally {
+                        hideProcessing();
+                    }
+                }
             });
+
+            // Handle Visa payment
+            async function handleVisaPayment() {
+                const visaForm = document.getElementById('visa-payment-form');
+                const formData = new FormData(visaForm);
+                
+                // Validate form
+                if (!visaForm.checkValidity()) {
+                    visaForm.reportValidity();
+                    return;
+                }
+
+                // Show processing
+                showProcessing();
+
+                try {
+                    const paymentData = {
+                        cardNumber: formData.get('cardNumber').replace(/\s/g, ''),
+                        expiryDate: formData.get('expiryDate'),
+                        cvv: formData.get('cvv'),
+                        cardholderName: formData.get('cardholderName'),
+                        billingEmail: formData.get('billingEmail'),
+                        billingPhone: formData.get('billingPhone'),
+                        billingAddress: formData.get('billingAddress'),
+                        amount: parseFloat(finalTotalElement.textContent.replace('EGP ', '')),
+                        currency: 'EGP',
+                        orderItems: cart
+                    };
+
+                    const response = await fetch('/api/process-payment', {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(paymentData)
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        showResult('success', 'Payment Completed Successfully', [
+                            `Transaction ID: ${result.transactionId}`,
+                            `Order ID: ${result.orderId || '-'}`,
+                            `Amount: ${finalTotalElement.textContent}`,
+                            'Thank you for your purchase.'
+                        ]);
+                        
+                        // Clear cart after successful payment
+                        try { await fetch('/api/cart', { method: 'DELETE', credentials: 'include' }); } catch (e) {}
+                        localStorage.removeItem('cart');
+                    } else {
+                        throw new Error(result.error || 'Payment failed');
+                    }
+                } catch (error) {
+                    showResult('error', 'Payment Failed', [error.message || 'Payment could not be completed.']);
+                } finally {
+                    hideProcessing();
+                }
+            }
         });
     </script>
 </body>

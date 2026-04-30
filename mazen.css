@@ -7206,6 +7206,21 @@ footer h2 {
     border-radius: var(--border-radius);
     transition: var(--transition);
     font-size: clamp(0.9rem, 2vw, 1rem);
+    max-width: 220px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.auth-link .auth-name {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.auth-link .auth-logout-icon {
+    font-size: 0.9rem;
+    opacity: 0.9;
 }
 
 .auth-link:hover {
