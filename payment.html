@@ -128,6 +128,10 @@
             font-family: monospace;
             font-size: 1.1rem;
             color: var(--primary-color);
+            max-width: 58%;
+            text-align: right;
+            overflow-wrap: anywhere;
+            word-break: break-word;
         }
 
         .copy-btn {
@@ -395,14 +399,33 @@
                 padding: 1rem;
             }
 
+            .bank-info {
+                padding: 1rem;
+                margin: 1rem 0;
+            }
+
             .detail-row {
                 flex-direction: column;
                 text-align: center;
                 gap: 0.5rem;
             }
 
+            .detail-value {
+                max-width: 100%;
+                text-align: center;
+                font-size: 1rem;
+            }
+
+            .copy-btn {
+                width: 100%;
+            }
+
             .method-option {
                 padding: 1rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
             }
         }
     </style>

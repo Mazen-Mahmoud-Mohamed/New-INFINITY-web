@@ -131,8 +131,18 @@
         .pdf-btn:hover { background: #115e59 !important; }
         @media (max-width: 1050px) { .user-create { grid-template-columns: 1fr 1fr; } }
         @media (max-width: 680px) {
+            .dashboard-wrap { padding: 0 .55rem; margin: 1rem auto; }
+            .dash-card {
+                padding: .75rem;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .dash-table { min-width: 920px; }
+            .dash-table th, .dash-table td { padding: .5rem .45rem; }
             .user-create { grid-template-columns: 1fr; }
             .dash-topbar { flex-direction: column; align-items: flex-start; }
+            .dash-actions { width: 100%; }
+            .dash-actions .dash-btn { flex: 1; text-align: center; justify-content: center; }
             .order-action { flex-direction: column; align-items: stretch; min-width: 130px; }
             .dash-search { min-width: 100%; width: 100%; }
         }

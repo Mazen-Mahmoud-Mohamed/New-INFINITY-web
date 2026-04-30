@@ -235,6 +235,34 @@
                 font-size: 0.9rem;
             }
         }
+
+        @media (max-width: 680px) {
+            .cart-sidebar {
+                width: 100%;
+                right: -100%;
+            }
+
+            .cart-item {
+                align-items: flex-start;
+                gap: 0.65rem;
+            }
+
+            .cart-item .item-info {
+                min-width: 0;
+                flex: 1;
+            }
+
+            .cart-item .item-info h4,
+            .cart-item .item-info p {
+                overflow-wrap: anywhere;
+                word-break: break-word;
+            }
+
+            .cart-item .item-actions {
+                min-width: 40px;
+                gap: 0.45rem;
+            }
+        }
     </style>
 </head>
 <body class="products-page">
