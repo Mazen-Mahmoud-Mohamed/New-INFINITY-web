@@ -213,9 +213,17 @@
             .dash-table { min-width: 920px; }
             .dash-table th, .dash-table td { padding: .5rem .45rem; }
             .user-create { grid-template-columns: 1fr; }
-            .dash-topbar { flex-direction: column; align-items: flex-start; }
-            .dash-actions { width: 100%; }
-            .dash-actions .dash-btn { flex: 1; text-align: center; justify-content: center; }
+            .dash-topbar { flex-direction: column; align-items: stretch; }
+            .dash-actions { width: 100%; display: flex; flex-wrap: wrap; gap: .6rem; }
+            .dash-actions .dash-btn { flex: 1 1 100%; text-align: center; justify-content: center; }
+            .dash-tabs { justify-content: stretch; }
+            .dash-tabs .dash-tab { flex: 1 1 calc(50% - .3rem); min-width: 130px; }
+            .section-head { flex-direction: column; align-items: stretch; gap: .75rem; }
+            .section-tools { display: flex; flex-direction: column; align-items: stretch; gap: .6rem; width: 100%; }
+            .section-tools input,
+            .section-tools select,
+            .section-tools .dash-btn { width: 100%; }
+            .section-tools label { width: 100%; }
             .order-action { flex-direction: column; align-items: stretch; min-width: 130px; }
             .dash-search { min-width: 100%; width: 100%; }
             #products-table input[type="number"] {

@@ -7682,8 +7682,8 @@ nav {
 /* Home page mobile polish (index.html only) */
 @media (max-width: 768px) {
     .home-page .hero {
-        min-height: auto;
-        padding: clamp(6.6rem, 19vw, 8.2rem) 0 clamp(2.8rem, 8vw, 3.8rem);
+        min-height: calc(100vh + 1.2rem);
+        padding: clamp(6rem, 14vw, 8rem) 0 clamp(3rem, 8vw, 4rem);
     }
 
     .home-page .hero-content {
@@ -7695,12 +7695,22 @@ nav {
     }
 
     .home-page .hero-logo-image {
-        width: clamp(92px, 30vw, 130px);
+        width: 150px;
+        max-width: 100%;
+        height: auto;
     }
 
     .home-page .hero-text {
         max-width: 34ch;
         margin-inline: auto;
+    }
+
+    .home-page .hero h1 {
+        font-size: clamp(2.2rem, 8vw, 2.8rem);
+    }
+
+    .home-page .hero-subtitle {
+        font-size: clamp(1.2rem, 4vw, 1.5rem);
     }
 
     .home-page .cta-buttons {
@@ -7712,6 +7722,33 @@ nav {
         min-width: 136px;
         padding: 0.72rem 0.95rem;
         border-radius: 12px;
+    }
+
+    .home-page .center-card {
+        width: min(100%, 420px);
+        max-width: 420px;
+        margin: 0 auto 2rem;
+        padding: clamp(1.75rem, 3vw, 2.25rem);
+        overflow: visible;
+        box-shadow: var(--box-shadow);
+        border-radius: var(--border-radius);
+        background: white;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .home-page .center-card p {
+        line-height: 1.7;
+    }
+
+    .home-page .center-card {
+        background: white !important;
+        border: 1px solid rgba(0, 0, 0, 0.05) !important;
+        box-shadow: var(--box-shadow) !important;
+    }
+
+    .home-page .center-card:hover {
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08) !important;
+        border-color: rgba(0, 0, 0, 0.09) !important;
     }
 
     .home-page .features,
