@@ -7557,38 +7557,18 @@ footer h2 {
         hyphens: none;
     }
 
+    /* Controls sit under product text, left-aligned (same column as title) */
     body.products-page .cart-item .item-actions {
-        grid-column: 1 / -1;
+        grid-column: 2;
         grid-row: 2;
         flex-direction: row;
         flex-wrap: wrap;
         align-items: center;
-        justify-content: center;
-        gap: 0.45rem;
-        padding-top: 0.15rem;
+        justify-content: flex-start;
+        gap: 0.55rem;
+        padding-top: 0.65rem;
+        margin-top: 0.2rem;
         border-top: 1px solid rgba(226, 232, 240, 0.95);
-        margin-top: 0.1rem;
-    }
-
-    body.products-page .cart-item .item-actions .cart-qty-input {
-        min-height: 36px;
-        flex: 0 1 auto;
-        max-width: min(7rem, 42vw);
-    }
-
-    body.products-page .quantity-btn {
-        width: 36px;
-        height: 36px;
-        min-width: 36px;
-        min-height: 36px;
-        font-size: 1rem;
-    }
-
-    body.products-page .remove-btn {
-        padding: 0.35rem 0.45rem;
-        font-size: 1.35rem;
-        line-height: 1;
-        margin-left: 0;
     }
 }
 
