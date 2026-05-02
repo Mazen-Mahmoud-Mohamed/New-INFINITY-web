@@ -8,11 +8,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .cp-wrap {
-            min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 1rem;
+            padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
             background: var(--light-gray);
         }
         .cp-card {
@@ -38,7 +38,8 @@
             padding: .68rem .72rem;
             border: 1px solid #cbd5e1;
             border-radius: 10px;
-            font-size: .95rem;
+            font-size: 16px;
+            min-height: 44px;
         }
         .cp-group input:focus, .cp-group select:focus {
             outline: none;
@@ -78,6 +79,8 @@
         @media (max-width: 760px) {
             .cp-grid { grid-template-columns: 1fr; }
             .cp-card { padding: 1rem; }
+            .cp-actions { flex-direction: column; }
+            .cp-btn { width: 100%; min-height: 48px; }
         }
     </style>
 </head>

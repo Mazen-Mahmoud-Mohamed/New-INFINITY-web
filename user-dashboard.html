@@ -98,9 +98,13 @@
             .my-wrap { margin-top: 5.8rem; }
         }
         @media (max-width: 680px) {
-            .my-wrap { padding: 0 .6rem; margin-top: 5.5rem; }
+            .my-wrap { padding: 0 max(0.6rem, env(safe-area-inset-left)) 0 max(0.6rem, env(safe-area-inset-right)); margin-top: 5.5rem; }
             .tools { display: grid; grid-template-columns: 1fr; }
-            .tools input, .tools select { min-width: 0; width: 100%; }
+            .tools input, .tools select { min-width: 0; width: 100%; min-height: 44px; font-size: 16px; }
+            .order-top { flex-direction: column; align-items: stretch; gap: 0.5rem; }
+            .order-top .status-chip { align-self: flex-start; }
+            .order-id { word-break: break-word; }
+            .pdf-btn { width: 100%; min-height: 48px; font-size: 0.95rem; }
         }
     </style>
 </head>

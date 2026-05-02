@@ -179,9 +179,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Get existing menu toggle button and menu
     const menuToggle = document.querySelector('.menu-toggle');
     const menu = document.querySelector('nav ul');
+    if (!menuToggle || !menu) return;
 
-    // Handle menu toggle
-    menuToggle.addEventListener('click', function() {
+    // Handle menu toggle (stopPropagation so document/outside handlers never eat the tap; icon uses pointer-events:none in CSS)
+    menuToggle.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
         menu.classList.toggle('active');
         menuToggle.classList.toggle('active');
         
@@ -216,9 +219,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Close menu on window resize if switching to desktop view
+    // Close menu on window resize if switching to desktop view (matches CSS hamburger breakpoint)
     window.addEventListener('resize', function() {
-        if (window.innerWidth > 768 && menu.classList.contains('active')) {
+        if (window.innerWidth > 992 && menu.classList.contains('active')) {
             menu.classList.remove('active');
             menuToggle.classList.remove('active');
             menuToggle.setAttribute('aria-expanded', 'false');

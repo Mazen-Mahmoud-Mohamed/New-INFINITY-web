@@ -201,9 +201,9 @@
             .order-action { flex-direction: column; align-items: stretch; min-width: 130px; }
             .dash-search { min-width: 100%; width: 100%; }
             .dash-toast {
-                right: .55rem;
-                left: .55rem;
-                bottom: .75rem;
+                right: max(0.55rem, env(safe-area-inset-right));
+                left: max(0.55rem, env(safe-area-inset-left));
+                bottom: max(0.75rem, env(safe-area-inset-bottom));
                 max-width: none;
                 min-width: 0;
                 font-size: .9rem;

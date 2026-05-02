@@ -208,80 +208,31 @@
                 </div>
             </div>
             
-            <!-- First Row -->
-            <div class="clients-grid">
-                <div class="client-logo">
-                    <img src="client-logos/kraft-heinz.png" alt="Kraft Heinz">
-                </div>
-                <div class="client-logo">
-                    <img src="client-logos/elsewedy.png" alt="Elsewedy Electric">
-                </div>
-                <div class="client-logo">
-                    <img src="client-logos/raya.png" alt="Raya">
-                </div>
-                <div class="client-logo">
-                    <img src="client-logos/europcar.png" alt="Europcar">
-                </div>
-            </div>
-
-            <!-- Second Row -->
-            <div class="clients-grid">
-                <div class="client-logo">
-                    <img src="client-logos/coca-cola.png" alt="Coca Cola">
-                </div>
-                <div class="client-logo">
-                    <img src="client-logos/ccba.png" alt="CCBA">
-                </div>
-                <div class="client-logo">
-                    <img src="client-logos/guc.png" alt="GUC">
-                </div>
-                <div class="client-logo">
-                    <img src="client-logos/public-transport.png" alt="Public Transport Authority">
-                </div>
-            </div>
-
-            <!-- Third Row -->
-            <div class="clients-grid">
-                <div class="client-logo">
-                    <img src="client-logos/rme.png" alt="RME">
-                </div>
-                <div class="client-logo">
-                    <img src="client-logos/lafarge.png" alt="Lafarge">
-                </div>
-                <div class="client-logo">
-                    <img src="client-logos/ucp.png" alt="United Company of Pharmacists">
-                </div>
-                <div class="client-logo">
-                    <img src="client-logos/dhl.png" alt="DHL">
-                </div>
-            </div>
-
-            <!-- Fourth Row -->
-            <div class="clients-grid">
-                <div class="client-logo">
-                    <img src="client-logos/eni.png" alt="ENI">
-                </div>
-                <div class="client-logo">
-                    <img src="client-logos/beyti.png" alt="Beyti">
-                </div>
-                <div class="client-logo">
-                    <img src="client-logos/pfizer.png" alt="Pfizer">
-                </div>
-                <div class="client-logo">
-                    <img src="client-logos/cat.png" alt="CAT">
-                </div>
-            </div>
-
-            <!-- Last Row (Centered) -->
-            <div class="clients-grid centered-logos">
-                <div class="client-logo">
-                    <img src="client-logos/juhayna.png" alt="Juhayna">
-                </div>
-                <div class="client-logo">
-                    <img src="client-logos/egyptian-airports.png" alt="Egyptian Airports Co.">
-                </div>
-                <div class="client-logo">
-                    <img src="client-logos/al-ahram.png" alt="Al Ahram Beverages Company">
+            <div class="clients-marquee" role="region" aria-label="Client logos carousel">
+                <div class="clients-marquee-inner">
+                    <div class="clients-marquee-track">
+                        <div class="clients-marquee-group">
+                            <div class="client-logo"><img src="client-logos/kraft-heinz.png" alt="Kraft Heinz"></div>
+                            <div class="client-logo"><img src="client-logos/elsewedy.png" alt="Elsewedy Electric"></div>
+                            <div class="client-logo"><img src="client-logos/raya.png" alt="Raya"></div>
+                            <div class="client-logo"><img src="client-logos/europcar.png" alt="Europcar"></div>
+                            <div class="client-logo"><img src="client-logos/coca-cola.png" alt="Coca Cola"></div>
+                            <div class="client-logo"><img src="client-logos/ccba.png" alt="CCBA"></div>
+                            <div class="client-logo"><img src="client-logos/guc.png" alt="GUC"></div>
+                            <div class="client-logo"><img src="client-logos/public-transport.png" alt="Public Transport Authority"></div>
+                            <div class="client-logo"><img src="client-logos/rme.png" alt="RME"></div>
+                            <div class="client-logo"><img src="client-logos/lafarge.png" alt="Lafarge"></div>
+                            <div class="client-logo"><img src="client-logos/ucp.png" alt="United Company of Pharmacists"></div>
+                            <div class="client-logo"><img src="client-logos/dhl.png" alt="DHL"></div>
+                            <div class="client-logo"><img src="client-logos/eni.png" alt="ENI"></div>
+                            <div class="client-logo"><img src="client-logos/beyti.png" alt="Beyti"></div>
+                            <div class="client-logo"><img src="client-logos/pfizer.png" alt="Pfizer"></div>
+                            <div class="client-logo"><img src="client-logos/cat.png" alt="CAT"></div>
+                            <div class="client-logo"><img src="client-logos/juhayna.png" alt="Juhayna"></div>
+                            <div class="client-logo"><img src="client-logos/egyptian-airports.png" alt="Egyptian Airports Co."></div>
+                            <div class="client-logo"><img src="client-logos/al-ahram.png" alt="Al Ahram Beverages Company"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -312,6 +263,23 @@
     </footer>
 
     <script src="script.js?v=20260429-3"></script>
+    <script>
+    (function initClientsMarquee() {
+        function duplicateMarqueeGroup() {
+            var track = document.querySelector('.clients-marquee-track');
+            var source = document.querySelector('.clients-marquee-group');
+            if (!track || !source || track.querySelectorAll('.clients-marquee-group').length >= 2) return;
+            var clone = source.cloneNode(true);
+            clone.setAttribute('aria-hidden', 'true');
+            track.appendChild(clone);
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', duplicateMarqueeGroup);
+        } else {
+            duplicateMarqueeGroup();
+        }
+    })();
+    </script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const hero = document.querySelector('.hero');

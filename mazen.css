@@ -83,6 +83,8 @@
 html {
     font-size: 16px;
     scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
 }
 
 body {
@@ -90,6 +92,7 @@ body {
     color: var(--text-color);
     background-color: white;
     overflow-x: hidden;
+    padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
 .container {
@@ -118,6 +121,7 @@ nav .container {
     max-width: 1400px;
     margin: 0 auto;
     padding: 0 1rem;
+    position: relative;
 }
 
 /* Logo styling */
@@ -7279,4 +7283,341 @@ footer h2 {
     .auth-link {
         padding: 0.5rem 0.8rem !important;
     }
+}
+
+/* --- Clients horizontal marquee (index) --- */
+.clients-marquee {
+    position: relative;
+    width: 100%;
+    margin: 0 auto 2rem;
+    /* Vertical padding so card box-shadows are not clipped by overflow:hidden */
+    padding: clamp(0.75rem, 2vw, 1.25rem) 0 clamp(1rem, 2.5vw, 1.75rem);
+    overflow: hidden;
+    mask-image: linear-gradient(90deg, transparent 0%, #000 4%, #000 96%, transparent 100%);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 4%, #000 96%, transparent 100%);
+}
+
+.clients-marquee-inner {
+    width: 100%;
+    overflow: visible;
+}
+
+.clients-marquee-track {
+    display: flex;
+    width: max-content;
+    animation: clientsMarqueeScroll 55s linear infinite;
+    will-change: transform;
+}
+
+/* Pause marquee only on devices with real hover (avoids sticky "paused" on touch) */
+@media (hover: hover) and (pointer: fine) {
+    .clients-marquee:hover .clients-marquee-track {
+        animation-play-state: paused;
+    }
+}
+
+.clients-marquee-group {
+    display: flex;
+    align-items: stretch;
+    gap: clamp(1rem, 2.5vw, 1.75rem);
+    padding-right: clamp(1rem, 2.5vw, 1.75rem);
+    flex-shrink: 0;
+}
+
+.clients-marquee .client-logo {
+    flex: 0 0 auto;
+    width: clamp(140px, 22vw, 200px);
+    min-height: 100px;
+    aspect-ratio: 16 / 10;
+    margin: 0.35rem 0 0.85rem;
+    animation: none !important;
+    opacity: 1 !important;
+}
+
+.clients-marquee .client-logo:hover {
+    transform: translateY(-4px);
+    z-index: 1;
+    position: relative;
+}
+
+@keyframes clientsMarqueeScroll {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .clients-marquee-track {
+        animation: none;
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100% !important;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .clients-marquee-group {
+        flex-wrap: wrap;
+        justify-content: center;
+        padding-right: 0;
+    }
+
+    .clients-marquee-group[aria-hidden="true"] {
+        display: none;
+    }
+
+    .clients-marquee {
+        mask-image: none;
+        -webkit-mask-image: none;
+    }
+}
+
+/* === Small-screen & tablet UX (nav overflow, touch targets, clients strip) === */
+@media (min-width: 769px) and (max-width: 992px) {
+    nav .menu-toggle {
+        display: block !important;
+        flex-shrink: 0;
+        margin-left: auto;
+    }
+
+    nav ul {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        width: 100%;
+        max-height: min(72vh, 30rem);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        background: #fff;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        white-space: normal;
+        justify-content: flex-start;
+        padding: 0.5rem 0 1rem;
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+        z-index: 1001;
+        gap: 0;
+        margin: 0;
+    }
+
+    nav ul.active {
+        display: flex;
+    }
+
+    nav ul li {
+        width: 100%;
+    }
+
+    nav ul li a {
+        padding: 0.85rem 1.25rem;
+        font-size: 1rem;
+        text-align: center;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    nav ul li a.auth-link {
+        margin: 0.35rem auto;
+        max-width: min(22rem, calc(100% - 2rem));
+        width: calc(100% - 2rem);
+        justify-content: center;
+    }
+}
+
+@media (max-width: 768px) {
+    nav .menu-toggle {
+        min-width: 44px;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    nav ul {
+        max-height: min(72vh, 30rem);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+    }
+}
+
+@media (max-width: 576px) {
+    .logo {
+        min-width: 0;
+        flex: 1;
+        max-width: calc(100% - 3.5rem);
+    }
+
+    .logo-text {
+        font-size: clamp(1.05rem, 5vw, 1.35rem);
+    }
+
+    .logo-subtext {
+        font-size: 0.62rem;
+    }
+
+    .client-logo.featured {
+        max-width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .clients-marquee {
+        padding-top: clamp(0.5rem, 2vw, 1rem);
+        padding-bottom: clamp(1.35rem, 5vw, 2.25rem);
+    }
+
+    .clients-marquee .client-logo {
+        width: min(200px, 78vw);
+        min-height: 90px;
+    }
+}
+
+@media (max-width: 380px) {
+    .clients-marquee .client-logo {
+        width: min(200px, 82vw);
+    }
+}
+
+@media (hover: none), (pointer: coarse) {
+    .clients-marquee .client-logo:hover {
+        transform: none;
+    }
+}
+
+/* Mobile nav: center menu links (overrides earlier left-aligned rules) */
+@media (max-width: 992px) {
+    nav ul {
+        align-items: stretch;
+    }
+
+    nav ul li a {
+        text-align: center;
+        justify-content: center;
+    }
+
+    nav ul li a.auth-link {
+        justify-content: center;
+        margin-left: auto;
+        margin-right: auto;
+        max-width: min(22rem, calc(100% - 2rem));
+    }
+}
+
+/* Products cart row: controls aligned right on small screens */
+@media (max-width: 768px) {
+    body.products-page .cart-item {
+        display: grid;
+        grid-template-columns: 52px minmax(0, 1fr) auto;
+        grid-template-rows: auto auto;
+        align-items: center;
+        column-gap: 0.75rem;
+        row-gap: 0.35rem;
+        padding: 0.85rem 0.75rem;
+    }
+
+    body.products-page .cart-item .cart-item-image {
+        grid-column: 1;
+        grid-row: 1 / span 2;
+        align-self: center;
+        width: 52px;
+        height: 52px;
+    }
+
+    body.products-page .cart-item .item-info {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        min-width: 0;
+        padding-right: 0;
+    }
+
+    body.products-page .cart-item .item-actions {
+        grid-column: 3;
+        grid-row: 1 / span 2;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.35rem;
+        align-self: center;
+    }
+
+    body.products-page .cart-item .item-actions .cart-qty-input {
+        min-height: 36px;
+    }
+
+    body.products-page .quantity-btn {
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        min-height: 36px;
+        font-size: 1rem;
+    }
+
+    body.products-page .remove-btn {
+        padding: 0.35rem 0.45rem;
+        font-size: 1.35rem;
+        line-height: 1;
+        margin-left: 0.15rem;
+    }
+}
+
+/* Mobile nav: full hamburger hit target, menu above overlays, first link not clipped under header */
+nav {
+    overflow: visible;
+    z-index: 1100;
+}
+
+.scroll-progress {
+    z-index: 998;
+}
+
+@media (max-width: 992px) {
+    /* Match specificity of nav .menu-toggle { display: block } in tablet block */
+    nav .menu-toggle {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        min-width: 48px;
+        min-height: 48px;
+        padding: 0;
+        position: relative;
+        z-index: 1103;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    nav .menu-toggle i {
+        pointer-events: none;
+    }
+
+    nav ul {
+        top: calc(100% + 6px);
+        z-index: 1102;
+        padding-top: max(0.85rem, env(safe-area-inset-top, 0px));
+        max-height: min(85vh, calc(100dvh - 5.5rem));
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* Cart drawer above fixed nav (nav is 1100) so close button and header receive clicks */
+.cart-sidebar {
+    z-index: 2000;
+}
+
+.close-cart {
+    position: relative;
+    z-index: 1;
+}
+
+.close-cart i {
+    pointer-events: none;
 }

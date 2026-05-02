@@ -9,7 +9,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { background: #f4f7fb; }
-        .success-wrap { max-width: 1080px; margin: 6.4rem auto 1.2rem; padding: 0 1rem; }
+        .success-wrap {
+            max-width: 1080px;
+            margin: 6.4rem auto 1.2rem;
+            padding: 0 max(1rem, env(safe-area-inset-right)) 0 max(1rem, env(safe-area-inset-left));
+        }
         .success-title { margin: 0 0 .35rem; color: #0891b2; }
         .success-subtitle { margin: 0; color: #475569; font-size: .95rem; }
         .s-btn {
@@ -99,8 +103,7 @@
             .meta-grid { grid-template-columns: 1fr; }
         }
         @media (max-width: 680px) {
-            .success-wrap { padding: 0 .6rem; margin: .8rem auto; }
-            .success-wrap { margin-top: 5.6rem; }
+            .success-wrap { padding: 0 max(0.6rem, env(safe-area-inset-right)) 0 max(0.6rem, env(safe-area-inset-left)); margin: .8rem auto; margin-top: 5.6rem; }
             .success-actions { display: grid; grid-template-columns: 1fr 1fr; }
             .s-btn { justify-content: center; }
             .item-row { align-items: flex-start; }
