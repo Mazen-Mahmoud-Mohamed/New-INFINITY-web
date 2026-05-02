@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body>
+<body class="home-page">
     <!-- Navigation -->
     <nav>
         <div class="container">
@@ -245,7 +245,7 @@
             <div class="contact-info">
                 <p>
                     <i class="fas fa-phone"></i>
-                    Phone: +20102111480
+                    Phone: +20 10 21111480
                 </p>
                 <p>
                     <i class="fas fa-envelope"></i>
@@ -258,7 +258,7 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2024 Infinity Total-Com Solutions. All rights reserved.</p>
+            <p>&copy; 2026 Infinity Total-Com Solutions. All rights reserved.</p>
         </div>
     </footer>
 
@@ -313,6 +313,10 @@
             var autoPausedUntil = 0;
             var AUTO_RESUME_MS = 2800;
             var lastTs = 0;
+            var logos = Array.prototype.slice.call(track.querySelectorAll('.client-logo'));
+            var lastSpots = [];
+            var lastSpotAt = 0;
+            var SPOT_EVERY_MS = 140;
 
             function wrapPos(p) {
                 var w = loopW;
@@ -326,6 +330,35 @@
                 return loopW > 0 ? loopW / 55 : 48;
             }
 
+            function updateSpotlight(now) {
+                if (dragging) return;
+                if (now - lastSpotAt < SPOT_EVERY_MS) return;
+                lastSpotAt = now;
+                if (!logos.length) return;
+
+                var wrapRect = wrap.getBoundingClientRect();
+                var cx = wrapRect.left + wrapRect.width / 2;
+                var spotCount = wrapRect.width <= 420 ? 1 : (wrapRect.width <= 720 ? 2 : 4);
+                var scored = [];
+                for (var i = 0; i < logos.length; i++) {
+                    var r = logos[i].getBoundingClientRect();
+                    var mid = r.left + r.width / 2;
+                    scored.push({ el: logos[i], d: Math.abs(mid - cx) });
+                }
+                scored.sort(function (a, b) { return a.d - b.d; });
+                var next = scored.slice(0, spotCount).map(function (x) { return x.el; });
+
+                // remove old
+                for (var j = 0; j < lastSpots.length; j++) {
+                    if (next.indexOf(lastSpots[j]) === -1) lastSpots[j].classList.remove('is-spotlight');
+                }
+                // add new
+                for (var k = 0; k < next.length; k++) {
+                    next[k].classList.add('is-spotlight');
+                }
+                lastSpots = next;
+            }
+
             function tick(ts) {
                 if (!lastTs) lastTs = ts;
                 var dt = Math.min(0.064, (ts - lastTs) / 1000);
@@ -335,12 +368,15 @@
                     position = wrapPos(position + autoSpeed() * dt);
                 }
                 track.style.transform = 'translate3d(' + (-position) + 'px,0,0)';
+                updateSpotlight(performance.now());
                 requestAnimationFrame(tick);
             }
 
             function onPointerDown(e) {
                 if (!e.isPrimary) return;
                 if (e.pointerType === 'mouse' && e.button !== 0) return;
+                if (e.cancelable) e.preventDefault();
+                wrap.classList.add('is-dragging');
                 dragging = true;
                 dragStartX = e.clientX;
                 dragStartPos = position;
@@ -356,6 +392,7 @@
             function endDrag(e) {
                 if (!dragging) return;
                 dragging = false;
+                wrap.classList.remove('is-dragging');
                 try {
                     if (e && e.pointerId != null) wrap.releasePointerCapture(e.pointerId);
                 } catch (_) {}
@@ -366,6 +403,7 @@
             wrap.addEventListener('pointermove', onPointerMove);
             wrap.addEventListener('pointerup', endDrag);
             wrap.addEventListener('pointercancel', endDrag);
+            wrap.addEventListener('dragstart', function (e) { e.preventDefault(); });
 
             wrap.addEventListener('wheel', function (e) {
                 if (Math.abs(e.deltaX) < Math.abs(e.deltaY)) return;

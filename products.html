@@ -17,7 +17,7 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
+            z-index: 2205;
             opacity: 0;
             transition: opacity 0.3s ease;
         }
@@ -215,8 +215,15 @@
         }
 
         @media (max-width: 768px) {
+            .modal {
+                padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+                align-items: flex-start;
+            }
+
             .modal-content {
+                margin: calc(4.25rem + env(safe-area-inset-top, 0px)) auto 0;
                 padding: 1.5rem;
+                max-height: min(84vh, calc(100dvh - 5.5rem));
             }
 
             .specs-section h3 {
@@ -720,7 +727,7 @@
             <div class="contact-info">
                 <p>
                     <i class="fas fa-phone"></i>
-                    Phone: +20102111480
+                    Phone: +20 10 21111480
                 </p>
                 <p>
                     <i class="fas fa-envelope"></i>
@@ -733,7 +740,7 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2024 Infinity Total-Com Solutions. All rights reserved.</p>
+            <p>&copy; 2026 Infinity Total-Com Solutions. All rights reserved.</p>
         </div>
     </footer>
 

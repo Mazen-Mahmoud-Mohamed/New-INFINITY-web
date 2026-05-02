@@ -14,12 +14,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .payment-container {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 2rem auto;
             padding: 2rem;
             background: white;
             border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 28px rgba(2, 6, 23, 0.10);
         }
 
         .payment-methods {
@@ -31,6 +31,55 @@
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1rem;
             margin-bottom: 2rem;
+        }
+
+        /* Desktop layout: use the wide screen better */
+        @media (min-width: 992px) {
+            body {
+                background: #f4f7fb;
+            }
+
+            .payment-container {
+                display: grid;
+                grid-template-columns: 420px 1fr;
+                gap: 1.25rem 1.5rem;
+                align-items: start;
+            }
+
+            .payment-methods {
+                margin-bottom: 0;
+                position: sticky;
+                top: 5.75rem;
+                align-self: start;
+            }
+
+            .payment-methods h3 {
+                margin-top: 0.25rem;
+                margin-bottom: 1rem;
+            }
+
+            .payment-method-selector {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                margin-bottom: 0;
+            }
+
+            .method-option {
+                padding: 1.15rem 0.9rem;
+                border-radius: 12px;
+            }
+
+            .method-option i {
+                font-size: 1.8rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .payment-info-section.visible {
+                margin: 0;
+            }
+
+            .bank-info {
+                margin: 0;
+            }
         }
 
         .method-option {
@@ -76,12 +125,30 @@
             transform: translateY(0);
         }
 
+        .payment-placeholder {
+            display: block;
+            opacity: 1;
+            transform: none;
+        }
+
         .payment-info-section {
             max-height: 0;
             overflow: hidden;
             opacity: 0;
             transition: max-height 0.5s ease, opacity 0.3s ease, margin 0.3s ease;
             margin: 0;
+        }
+
+        @media (min-width: 992px) {
+            /* On desktop we always show a right panel (placeholder/instructions) */
+            .payment-info-section {
+                max-height: none;
+                overflow: visible;
+                opacity: 1;
+            }
+            .payment-info-section.visible {
+                margin: 0;
+            }
         }
 
         .payment-info-section.visible {
@@ -483,6 +550,14 @@
 
         <div class="payment-info-section">
             <div class="payment-content">
+                <div id="payment-placeholder" class="payment-placeholder active">
+                    <div class="bank-info" style="margin:0;">
+                        <h3>Select a payment method</h3>
+                        <p style="margin:0; color: var(--text-light); line-height: 1.6;">
+                            Choose one of the options on the left to see the instructions and details here.
+                        </p>
+                    </div>
+                </div>
                 <!-- Bank Transfer Content -->
                 <div id="bank-content">
                     <div class="bank-info">
@@ -539,8 +614,8 @@
                         <div class="bank-details">
                             <div class="detail-row">
                                 <span class="detail-label">InstaPay Number:</span>
-                                <span class="detail-value">+20102111480</span>
-                                <button class="copy-btn" data-copy="+20102111480">Copy</button>
+                                <span class="detail-value">+20 10 21111480</span>
+                                <button class="copy-btn" data-copy="+20 10 21111480">Copy</button>
                             </div>
                             <div class="detail-row">
                                 <span class="detail-label">Account Name:</span>
@@ -665,7 +740,7 @@
             <div class="contact-info">
                 <p>
                     <i class="fas fa-phone"></i>
-                    Phone: +20102111480
+                    Phone: +20 10 21111480
                 </p>
                 <p>
                     <i class="fas fa-envelope"></i>
@@ -678,7 +753,7 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2024 Infinity Total-Com Solutions. All rights reserved.</p>
+            <p>&copy; 2026 Infinity Total-Com Solutions. All rights reserved.</p>
         </div>
     </footer>
 
@@ -773,6 +848,8 @@
 
                     // Hide all content sections
                     paymentContents.forEach(content => content.classList.remove('active'));
+                    const placeholder = document.getElementById('payment-placeholder');
+                    if (placeholder) placeholder.classList.remove('active');
                     // Show selected content
                     const method = this.dataset.method;
                     document.getElementById(`${method}-content`).classList.add('active');

@@ -7350,6 +7350,45 @@ footer h2 {
     opacity: 1 !important;
 }
 
+/* Spotlight: center logo glows/zooms briefly */
+.clients-marquee--js .client-logo {
+    transition: transform 260ms ease, box-shadow 260ms ease, filter 260ms ease;
+    will-change: transform;
+}
+
+.clients-marquee--js .client-logo img {
+    transition: transform 260ms ease, filter 260ms ease;
+    will-change: transform;
+}
+
+/* Prevent image dragging/selection while swiping the marquee */
+.clients-marquee--js .client-logo img {
+    pointer-events: none;
+    -webkit-user-drag: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.clients-marquee--js .client-logo.is-spotlight {
+    box-shadow: 0 10px 22px rgba(2, 6, 23, 0.12);
+    filter: saturate(1.08) contrast(1.05);
+    position: relative;
+    z-index: 2;
+}
+
+.clients-marquee--js .client-logo.is-spotlight img {
+    filter: saturate(1.08) contrast(1.05);
+}
+
+/* Only zoom while user is actively dragging/sliding */
+.clients-marquee--js.is-dragging .client-logo.is-spotlight {
+    transform: translateY(-6px) scale(1.06);
+}
+
+.clients-marquee--js.is-dragging .client-logo.is-spotlight img {
+    transform: scale(1.04);
+}
+
 .clients-marquee .client-logo:hover {
     transform: translateY(-4px);
     z-index: 1;
@@ -7638,4 +7677,428 @@ nav {
 
 .close-cart i {
     pointer-events: none;
+}
+
+/* Home page mobile polish (index.html only) */
+@media (max-width: 768px) {
+    .home-page .hero {
+        min-height: auto;
+        padding: clamp(6.6rem, 19vw, 8.2rem) 0 clamp(2.8rem, 8vw, 3.8rem);
+    }
+
+    .home-page .hero-content {
+        padding: 0 0.75rem;
+    }
+
+    .home-page .hero-main {
+        gap: 0.9rem;
+    }
+
+    .home-page .hero-logo-image {
+        width: clamp(92px, 30vw, 130px);
+    }
+
+    .home-page .hero-text {
+        max-width: 34ch;
+        margin-inline: auto;
+    }
+
+    .home-page .cta-buttons {
+        gap: 0.6rem;
+        justify-content: center;
+    }
+
+    .home-page .cta-buttons a {
+        min-width: 136px;
+        padding: 0.72rem 0.95rem;
+        border-radius: 12px;
+    }
+
+    .home-page .features,
+    .home-page .values-section,
+    .home-page .clients {
+        padding: clamp(2.2rem, 7vw, 3.1rem) 0;
+    }
+
+    .home-page .features .container,
+    .home-page .values-section .container,
+    .home-page .clients .container,
+    .home-page footer .container {
+        padding-left: 0.8rem;
+        padding-right: 0.8rem;
+    }
+
+    .home-page .features .container > p,
+    .home-page .features .feature-card p {
+        font-size: 0.95rem;
+        line-height: 1.65;
+    }
+
+    .home-page .features-grid,
+    .home-page .values-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    /* Compact icon cards: two columns for mission/values/contracts on phones */
+    .home-page #mission .container {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.6rem;
+        align-items: stretch;
+    }
+
+    .home-page #mission .container > h2 {
+        grid-column: 1 / -1;
+        margin-bottom: 0.2rem;
+    }
+
+    .home-page #mission .features-grid,
+    .home-page .values-grid,
+    .home-page #contracts .features-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.6rem;
+    }
+
+    .home-page #mission .features-grid {
+        display: contents;
+    }
+
+    .home-page #mission .feature-card,
+    .home-page .value-card,
+    .home-page #contracts .feature-card {
+        min-height: 116px;
+        padding: 0.8rem 0.55rem;
+        border-radius: 12px;
+        gap: 0.45rem;
+    }
+
+    .home-page #mission .feature-card i,
+    .home-page #contracts .feature-card i {
+        font-size: 1.7rem;
+        margin-bottom: 0;
+    }
+
+    .home-page #mission .feature-card h3,
+    .home-page #contracts .feature-card h3 {
+        font-size: 1.02rem;
+        line-height: 1.2;
+        margin: 0;
+    }
+
+    .home-page #mission .feature-card p {
+        font-size: 0.84rem;
+        line-height: 1.35;
+        margin: 0;
+    }
+
+    .home-page #mission .center-card {
+        grid-column: auto;
+        margin: 0;
+    }
+
+    .home-page #contracts .features-grid .feature-card:last-child {
+        grid-column: 1 / -1;
+    }
+
+    .home-page .value-card {
+        min-height: 116px;
+        padding: 0.8rem 0.55rem;
+        border-radius: 12px;
+        gap: 0.45rem;
+        justify-content: center;
+    }
+
+    .home-page .value-card i {
+        font-size: 1.7rem;
+        margin-bottom: 0;
+        display: inline-block;
+        animation: homeValueIconFloat 3.6s ease-in-out infinite;
+    }
+
+    .home-page .feature-card h3,
+    .home-page .value-card h3 {
+        line-height: 1.2;
+        margin: 0;
+        font-size: 1.02rem;
+    }
+
+    /* Goals cards on phone: 2 columns and compact sizing */
+    .home-page #goals .features-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.6rem;
+    }
+
+    .home-page #goals .feature-card {
+        min-height: 118px;
+        padding: 0.8rem 0.55rem;
+        border-radius: 12px;
+        gap: 0.45rem;
+    }
+
+    .home-page #goals .feature-card i {
+        font-size: 1.7rem;
+        margin-bottom: 0;
+    }
+
+    .home-page #goals .feature-card h3 {
+        font-size: 1.05rem;
+        line-height: 1.2;
+        margin: 0;
+    }
+
+    .home-page .client-logo.featured {
+        width: min(220px, 88vw);
+        min-height: 100px;
+    }
+
+    .home-page .clients-marquee {
+        margin-bottom: 1.1rem;
+    }
+
+    .home-page .clients-marquee .client-logo {
+        width: min(190px, 74vw);
+        min-height: 90px;
+    }
+
+    /* Footer contact cards: apply to all pages with contact footer */
+    footer#contact {
+        padding-top: clamp(2.3rem, 8vw, 3rem);
+    }
+
+    footer#contact h2 {
+        margin-bottom: 1rem;
+    }
+
+    footer#contact .contact-info {
+        gap: 0.7rem;
+    }
+
+    footer#contact .contact-info p {
+        align-items: flex-start;
+        line-height: 1.55;
+        border-radius: 12px;
+        padding: 0.75rem 0.8rem;
+        background: rgba(255, 255, 255, 0.08);
+    }
+}
+
+@media (max-width: 420px) {
+    .home-page .hero-text {
+        font-size: 0.95rem;
+    }
+
+    .home-page .cta-buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .home-page .cta-buttons a {
+        width: 100%;
+        text-align: center;
+    }
+
+    .home-page .clients-marquee .client-logo {
+        width: min(188px, 80vw);
+    }
+
+    .home-page #mission .features-grid,
+    .home-page .values-grid,
+    .home-page #contracts .features-grid,
+    .home-page #goals .features-grid {
+        gap: 0.5rem;
+    }
+
+    .home-page #mission .container {
+        gap: 0.5rem;
+    }
+
+    .home-page #mission .feature-card,
+    .home-page #contracts .feature-card {
+        min-height: 104px;
+        padding: 0.7rem 0.45rem;
+    }
+
+    .home-page #contracts .features-grid .feature-card:last-child {
+        grid-column: 1 / -1;
+    }
+
+    .home-page #mission .feature-card i,
+    .home-page #contracts .feature-card i {
+        font-size: 1.5rem;
+    }
+
+    .home-page #mission .feature-card h3,
+    .home-page #contracts .feature-card h3 {
+        font-size: 0.95rem;
+    }
+
+    .home-page #mission .feature-card p {
+        font-size: 0.78rem;
+        line-height: 1.28;
+    }
+
+    .home-page #goals .features-grid {
+        gap: 0.5rem;
+    }
+
+    .home-page #goals .feature-card {
+        min-height: 108px;
+        padding: 0.7rem 0.45rem;
+    }
+
+    .home-page #goals .feature-card i {
+        font-size: 1.55rem;
+    }
+
+    .home-page #goals .feature-card h3 {
+        font-size: 0.98rem;
+    }
+
+    .home-page .value-card {
+        min-height: 104px;
+        padding: 0.7rem 0.45rem;
+    }
+
+    .home-page .value-card i {
+        font-size: 1.45rem;
+    }
+
+    .home-page .value-card h3 {
+        font-size: 0.95rem;
+    }
+}
+
+@keyframes homeValueIconFloat {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-4px);
+    }
+}
+
+/* Team page mobile polish (team.html only) */
+@media (max-width: 768px) {
+    .team-page .team-hero {
+        min-height: auto;
+        padding: clamp(6.4rem, 18vw, 8rem) 0 clamp(2.6rem, 8vw, 3.4rem);
+    }
+
+    .team-page .team-hero h1 {
+        font-size: clamp(2rem, 8vw, 2.5rem);
+        margin-bottom: 0.5rem;
+    }
+
+    .team-page .team-hero .hero-text {
+        max-width: 32ch;
+        margin-inline: auto;
+    }
+
+    .team-page .team-section,
+    .team-page .values-section {
+        padding: clamp(2.1rem, 7vw, 3rem) 0;
+    }
+
+    .team-page .team-section .container,
+    .team-page .values-section .container,
+    .team-page footer .container {
+        padding-left: 0.8rem;
+        padding-right: 0.8rem;
+    }
+
+    .team-page .team-grid {
+        grid-template-columns: 1fr;
+        gap: 0.85rem;
+        padding: 0.5rem 0;
+    }
+
+    .team-page .team-member {
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+    .team-page .member-image {
+        height: clamp(180px, 48vw, 240px);
+    }
+
+    .team-page .member-info {
+        padding: 1.05rem 0.9rem 1rem;
+    }
+
+    .team-page .member-info h3 {
+        font-size: 1.22rem;
+        margin-bottom: 0.35rem;
+    }
+
+    .team-page .member-info .position {
+        font-size: 0.93rem;
+        margin-bottom: 0.65rem;
+    }
+
+    .team-page .member-info .bio {
+        font-size: 0.94rem;
+        line-height: 1.55;
+        margin-bottom: 0.85rem;
+    }
+
+    .team-page .skills {
+        gap: 0.4rem;
+    }
+
+    .team-page .skill-tag {
+        padding: 0.3rem 0.62rem;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        line-height: 1.2;
+    }
+
+    .team-page .values-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.6rem;
+        margin: 1rem auto 0;
+    }
+
+    .team-page .value-card {
+        min-height: 108px;
+        padding: 0.75rem 0.5rem;
+        border-radius: 12px;
+        gap: 0.42rem;
+    }
+
+    .team-page .value-card i {
+        font-size: 1.55rem;
+        margin-bottom: 0;
+        display: inline-block;
+        animation: homeValueIconFloat 3.6s ease-in-out infinite;
+    }
+
+    .team-page .value-card h3 {
+        font-size: 0.95rem;
+        line-height: 1.2;
+        margin: 0;
+    }
+
+    .team-page footer {
+        padding-top: clamp(2.1rem, 7vw, 2.8rem);
+    }
+}
+
+@media (max-width: 420px) {
+    .team-page .values-grid {
+        gap: 0.5rem;
+    }
+
+    .team-page .value-card {
+        min-height: 100px;
+        padding: 0.65rem 0.45rem;
+    }
+
+    .team-page .value-card i {
+        font-size: 1.4rem;
+    }
+
+    .team-page .value-card h3 {
+        font-size: 0.9rem;
+    }
 }
