@@ -273,10 +273,122 @@
             clone.setAttribute('aria-hidden', 'true');
             track.appendChild(clone);
         }
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', duplicateMarqueeGroup);
-        } else {
+
+        function setupInteractiveMarquee() {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+            var wrap = document.querySelector('.clients-marquee');
+            var track = document.querySelector('.clients-marquee-track');
+            if (!wrap || !track) return;
+
+            var groups = track.querySelectorAll('.clients-marquee-group');
+            if (groups.length < 2) return;
+
+            wrap.classList.add('clients-marquee--js');
+            track.style.willChange = 'transform';
+
+            var loopW = 0;
+            function measure() {
+                var a = groups[0];
+                var b = groups[1];
+                loopW = b.offsetLeft - a.offsetLeft;
+                if (!loopW || loopW <= 0) {
+                    loopW = a.getBoundingClientRect().width;
+                }
+            }
+            measure();
+
+            var ro = new ResizeObserver(function () { measure(); });
+            ro.observe(track);
+            groups.forEach(function (g) { ro.observe(g); });
+
+            groups[0].querySelectorAll('img').forEach(function (img) {
+                if (!img.complete) img.addEventListener('load', measure, { once: true });
+            });
+
+            var position = 0;
+            var dragging = false;
+            var dragStartX = 0;
+            var dragStartPos = 0;
+            var autoPausedUntil = 0;
+            var AUTO_RESUME_MS = 2800;
+            var lastTs = 0;
+
+            function wrapPos(p) {
+                var w = loopW;
+                if (!w || w <= 0) return Math.max(0, p);
+                p = p % w;
+                if (p < 0) p += w;
+                return p;
+            }
+
+            function autoSpeed() {
+                return loopW > 0 ? loopW / 55 : 48;
+            }
+
+            function tick(ts) {
+                if (!lastTs) lastTs = ts;
+                var dt = Math.min(0.064, (ts - lastTs) / 1000);
+                lastTs = ts;
+
+                if (!dragging && performance.now() >= autoPausedUntil) {
+                    position = wrapPos(position + autoSpeed() * dt);
+                }
+                track.style.transform = 'translate3d(' + (-position) + 'px,0,0)';
+                requestAnimationFrame(tick);
+            }
+
+            function onPointerDown(e) {
+                if (!e.isPrimary) return;
+                if (e.pointerType === 'mouse' && e.button !== 0) return;
+                dragging = true;
+                dragStartX = e.clientX;
+                dragStartPos = position;
+                try { wrap.setPointerCapture(e.pointerId); } catch (_) {}
+            }
+
+            function onPointerMove(e) {
+                if (!dragging || !e.isPrimary) return;
+                var dx = e.clientX - dragStartX;
+                position = wrapPos(dragStartPos - dx);
+            }
+
+            function endDrag(e) {
+                if (!dragging) return;
+                dragging = false;
+                try {
+                    if (e && e.pointerId != null) wrap.releasePointerCapture(e.pointerId);
+                } catch (_) {}
+                autoPausedUntil = performance.now() + AUTO_RESUME_MS;
+            }
+
+            wrap.addEventListener('pointerdown', onPointerDown);
+            wrap.addEventListener('pointermove', onPointerMove);
+            wrap.addEventListener('pointerup', endDrag);
+            wrap.addEventListener('pointercancel', endDrag);
+
+            wrap.addEventListener('wheel', function (e) {
+                if (Math.abs(e.deltaX) < Math.abs(e.deltaY)) return;
+                if (Math.abs(e.deltaX) < 1) return;
+                e.preventDefault();
+                position = wrapPos(position + e.deltaX * 0.45);
+                autoPausedUntil = performance.now() + AUTO_RESUME_MS;
+            }, { passive: false });
+
+            requestAnimationFrame(tick);
+        }
+
+        function start() {
             duplicateMarqueeGroup();
+            requestAnimationFrame(function () {
+                requestAnimationFrame(setupInteractiveMarquee);
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', start);
+        } else {
+            start();
         }
     })();
     </script>

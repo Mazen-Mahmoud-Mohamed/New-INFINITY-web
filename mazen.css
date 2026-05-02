@@ -7309,6 +7309,22 @@ footer h2 {
     will-change: transform;
 }
 
+/* JS-driven marquee: drag + auto-scroll (see index.html) */
+.clients-marquee--js {
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+}
+
+.clients-marquee--js:active {
+    cursor: grabbing;
+}
+
+.clients-marquee--js .clients-marquee-track {
+    animation: none !important;
+}
+
 /* Pause marquee only on devices with real hover (avoids sticky "paused" on touch) */
 @media (hover: hover) and (pointer: fine) {
     .clients-marquee:hover .clients-marquee-track {

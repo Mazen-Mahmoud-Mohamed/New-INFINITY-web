@@ -90,6 +90,24 @@
             transition: border-color .2s ease, box-shadow .2s ease;
             box-sizing: border-box;
         }
+        /* Inventory numeric inputs: compact but readable (fits ~5 digits on phones) */
+        #products-table input[type="number"] {
+            width: 82px;
+            min-width: 74px;
+            max-width: 92px;
+            padding: .42rem .3rem;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+        }
+        #products-table input[type="number"]::-webkit-outer-spin-button,
+        #products-table input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        #products-table input[type="number"] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
         .dash-table input:focus,
         .dash-table select:focus,
         .user-create input:focus,
@@ -200,6 +218,13 @@
             .dash-actions .dash-btn { flex: 1; text-align: center; justify-content: center; }
             .order-action { flex-direction: column; align-items: stretch; min-width: 130px; }
             .dash-search { min-width: 100%; width: 100%; }
+            #products-table input[type="number"] {
+                width: 76px;
+                min-width: 70px;
+                max-width: 86px;
+                padding-left: .28rem;
+                padding-right: .28rem;
+            }
             .dash-toast {
                 right: max(0.55rem, env(safe-area-inset-right));
                 left: max(0.55rem, env(safe-area-inset-left));
@@ -212,6 +237,165 @@
         @media (min-width: 681px) and (max-width: 1024px) {
             .dash-card { overflow-x: auto; }
             .dash-table { min-width: 980px; }
+        }
+        /* Inventory, User Management, Customers, Orders: card rows on phones & tablets */
+        @media (max-width: 1024px) {
+            #inventory-section .dash-card,
+            #users-section .dash-card,
+            #customers-section .dash-card,
+            #orders-section .dash-card {
+                overflow-x: visible;
+            }
+            #products-table.dash-table,
+            #users-table.dash-table,
+            #customers-table.dash-table,
+            #orders-table.dash-table {
+                min-width: 0 !important;
+                width: 100%;
+                border-collapse: separate;
+                border-spacing: 0;
+            }
+            #products-table thead,
+            #users-table thead,
+            #customers-table thead,
+            #orders-table thead {
+                display: none;
+            }
+            #users-table tbody,
+            #users-table tr,
+            #users-table td,
+            #customers-table tbody,
+            #customers-table tr,
+            #customers-table td,
+            #orders-table tbody,
+            #orders-table tr,
+            #orders-table td {
+                display: block;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            /* Inventory cards: use horizontal space (product + image row, 3-col numbers) */
+            #products-table tbody {
+                display: block;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            #products-table tr {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+                gap: 0.45rem 0.5rem;
+                align-items: start;
+                box-sizing: border-box;
+            }
+            #products-table td {
+                display: block;
+                width: auto;
+                min-width: 0;
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+            #products-table td[data-label="Product"] {
+                grid-column: 1 / 3;
+            }
+            #products-table td[data-label="Image"] {
+                grid-column: 3;
+                grid-row: 1;
+                justify-self: end;
+                align-self: start;
+            }
+            #products-table td[data-label="Image"] .inventory-thumb {
+                width: 52px;
+                height: 52px;
+            }
+            #products-table td[data-label="Price"] {
+                grid-column: 1;
+            }
+            #products-table td[data-label="Install"] {
+                grid-column: 2;
+            }
+            #products-table td[data-label="Stock"] {
+                grid-column: 3;
+            }
+            #products-table td[data-label="Active"] {
+                grid-column: 1 / -1;
+            }
+            #products-table td[data-label="Update"] {
+                grid-column: 1 / -1;
+            }
+            #products-table td[data-label="Price"] input[type="number"],
+            #products-table td[data-label="Install"] input[type="number"],
+            #products-table td[data-label="Stock"] input[type="number"] {
+                width: 100%;
+                min-width: 0;
+                max-width: none;
+            }
+            #products-table tr,
+            #users-table tr,
+            #customers-table tr,
+            #orders-table tr {
+                border: 1px solid #e2e8f0;
+                border-radius: 12px;
+                margin-bottom: 0.75rem;
+                padding: 0.65rem 0.75rem;
+                background: #f8fafc;
+            }
+            #products-table td,
+            #users-table td,
+            #customers-table td,
+            #orders-table td {
+                border: none;
+                padding: 0.45rem 0;
+                text-align: left;
+            }
+            #products-table td::before,
+            #users-table td::before,
+            #customers-table td::before,
+            #orders-table td::before {
+                content: attr(data-label);
+                display: block;
+                font-size: 0.72rem;
+                font-weight: 700;
+                letter-spacing: 0.02em;
+                text-transform: uppercase;
+                color: #64748b;
+                margin-bottom: 0.2rem;
+            }
+            #users-table td[data-label="Action"] {
+                padding-top: 0.65rem;
+                margin-top: 0.35rem;
+                border-top: 1px solid #e2e8f0;
+            }
+            #users-table td[data-label="Action"]::before {
+                margin-bottom: 0.45rem;
+            }
+            #users-table td[data-label="Action"] button {
+                width: 100%;
+            }
+            #orders-table td[data-label="Actions"] {
+                padding-top: 0.65rem;
+                margin-top: 0.35rem;
+                border-top: 1px solid #e2e8f0;
+            }
+            #orders-table td[data-label="Actions"] .order-action {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 0.45rem;
+                min-width: 0;
+            }
+            #orders-table td[data-label="Actions"] .order-action button,
+            #orders-table td[data-label="Actions"] .order-action select {
+                width: 100%;
+            }
+            #products-table td[data-label="Update"] {
+                padding-top: 0.65rem;
+                margin-top: 0.35rem;
+                border-top: 1px solid #e2e8f0;
+            }
+            #products-table td[data-label="Update"] .save-status {
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+            }
         }
     </style>
 </head>
@@ -371,13 +555,13 @@
             visible.forEach(p => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${p.name}<br><small class="muted">${p.productId}</small></td>
-                    <td><img class="inventory-thumb" src="${p.image || 'assets/images/infinity-logo.png'}" alt="${p.name}"></td>
-                    <td><input type="number" min="0" value="${p.price || 0}" id="price-${p.productId}" ${!canEditInventory() ? 'disabled' : ''}></td>
-                    <td><input type="number" min="0" value="${p.installation || 0}" id="installation-${p.productId}" ${!canEditInventory() ? 'disabled' : ''}></td>
-                    <td><input type="number" min="0" value="${p.stock}" id="stock-${p.productId}" ${!canEditInventory() ? 'disabled' : ''}></td>
-                    <td>${p.active ? 'Yes' : 'No'}</td>
-                    <td><span class="save-status idle" id="save-status-${p.productId}">idle</span></td>
+                    <td data-label="Product">${p.name}<br><small class="muted">${p.productId}</small></td>
+                    <td data-label="Image"><img class="inventory-thumb" src="${p.image || 'assets/images/infinity-logo.png'}" alt="${p.name}"></td>
+                    <td data-label="Price"><input type="number" min="0" value="${p.price || 0}" id="price-${p.productId}" ${!canEditInventory() ? 'disabled' : ''}></td>
+                    <td data-label="Install"><input type="number" min="0" value="${p.installation || 0}" id="installation-${p.productId}" ${!canEditInventory() ? 'disabled' : ''}></td>
+                    <td data-label="Stock"><input type="number" min="0" value="${p.stock}" id="stock-${p.productId}" ${!canEditInventory() ? 'disabled' : ''}></td>
+                    <td data-label="Active">${p.active ? 'Yes' : 'No'}</td>
+                    <td data-label="Update"><span class="save-status idle" id="save-status-${p.productId}">idle</span></td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -526,11 +710,11 @@
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${o.transactionId}<br><small class="muted">${new Date(o.createdAt).toLocaleString()}</small></td>
-                    <td>${o.customerName || '-'}<br><small class="muted">${o.customerEmail || '-'}</small></td>
-                    <td>${o.customerPhone || '-'}<br><small class="muted">${o.customerGender || '-'} | Age: ${o.customerAge || '-'}</small></td>
-                    <td>${o.customerState || '-'}<br><small class="muted">${o.customerCompanyName || '-'} / ${o.customerCompanyLocation || '-'}</small></td>
-                    <td>
+                    <td data-label="Order">${o.transactionId}<br><small class="muted">${new Date(o.createdAt).toLocaleString()}</small></td>
+                    <td data-label="Customer">${o.customerName || '-'}<br><small class="muted">${o.customerEmail || '-'}</small></td>
+                    <td data-label="Contact">${o.customerPhone || '-'}<br><small class="muted">${o.customerGender || '-'} | Age: ${o.customerAge || '-'}</small></td>
+                    <td data-label="Location">${o.customerState || '-'}<br><small class="muted">${o.customerCompanyName || '-'} / ${o.customerCompanyLocation || '-'}</small></td>
+                    <td data-label="Items / Amount">
                         <div class="order-items-list">${itemsHtml}</div>
                         <div class="order-summary-box">
                             <div><strong>Amount:</strong> EGP ${Number(o.amount || 0).toFixed(2)} ${o.currency || ''}</div>
@@ -539,8 +723,8 @@
                             <div><strong>Billing Address:</strong> ${o.billingAddress || '-'}</div>
                         </div>
                     </td>
-                    <td><span class="status-chip ${statusClass}">${o.status}</span></td>
-                    <td>
+                    <td data-label="Status"><span class="status-chip ${statusClass}">${o.status}</span></td>
+                    <td data-label="Actions">
                         <div class="order-action">
                             <select id="order-status-${o._id}" ${disabled}>
                                 <option ${o.status === 'pending' ? 'selected' : ''}>pending</option>
@@ -605,12 +789,12 @@
             visible.forEach((c) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${c.name || '-'}</td>
-                    <td>${c.email || '-'}</td>
-                    <td>${c.phone || '-'}</td>
-                    <td>${c.gender || '-'} | Age: ${c.age ?? '-'}</td>
-                    <td>${c.state || '-'}<br><small class="muted">${c.companyName || '-'} / ${c.companyLocation || '-'}</small></td>
-                    <td><small class="muted">${c.createdAt ? new Date(c.createdAt).toLocaleString() : '-'}</small></td>
+                    <td data-label="Name">${c.name || '-'}</td>
+                    <td data-label="Email">${c.email || '-'}</td>
+                    <td data-label="Phone">${c.phone || '-'}</td>
+                    <td data-label="Profile">${c.gender || '-'} | Age: ${c.age ?? '-'}</td>
+                    <td data-label="Location / Company">${c.state || '-'}<br><small class="muted">${c.companyName || '-'} / ${c.companyLocation || '-'}</small></td>
+                    <td data-label="Created"><small class="muted">${c.createdAt ? new Date(c.createdAt).toLocaleString() : '-'}</small></td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -630,10 +814,10 @@
                 const canDelete = canDeleteUserRole(u.role) && String(u._id) !== String(currentUserId);
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${u.name || '-'}</td>
-                    <td>${u.email}</td>
-                    <td>${u.role}</td>
-                    <td>
+                    <td data-label="Name">${u.name || '-'}</td>
+                    <td data-label="Email">${u.email}</td>
+                    <td data-label="Role">${u.role}</td>
+                    <td data-label="Action">
                         <button ${canDelete ? '' : 'disabled'} onclick="deleteUser('${u._id}')">Delete</button>
                     </td>
                 `;
