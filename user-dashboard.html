@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { background: #f4f7fb; }
-        .my-wrap { max-width: 1120px; margin: 6.2rem auto 1.2rem; padding: 0 1rem; }
+        .my-wrap { max-width: 1120px; margin: 9.2rem auto 1.2rem; padding: 0 1rem; }
         .my-head, .my-card {
             background: #fff;
             border-radius: 14px;
@@ -20,14 +20,17 @@
         .my-head { margin-bottom: 1rem; }
         .my-title { margin: 0; color: #0891b2; }
         .my-sub { margin: .25rem 0 0; color: #64748b; }
-        .tools { margin-top: .75rem; display: flex; gap: .55rem; flex-wrap: wrap; }
+        .tools { margin-top: .75rem; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .75rem; align-items: center; }
         .tools input, .tools select {
+            box-sizing: border-box;
             border: 1px solid #cbd5e1;
             border-radius: 10px;
             padding: .5rem .65rem;
             background: #fff;
-            min-width: 180px;
+            width: 100%;
+            min-width: 0;
         }
+        .tools select { min-width: 160px; }
         .orders-grid { display: grid; gap: .8rem; }
         .order-box {
             border: 1px solid #e2e8f0;
@@ -97,10 +100,10 @@
             text-align: center;
         }
         @media (max-width: 900px) {
-            .my-wrap { margin-top: 5.8rem; }
+            .my-wrap { margin-top: 7rem; }
         }
         @media (max-width: 680px) {
-            .my-wrap { padding: 0 max(0.6rem, env(safe-area-inset-left)) 0 max(0.6rem, env(safe-area-inset-right)); margin-top: 5.5rem; }
+            .my-wrap { padding: 0 max(0.6rem, env(safe-area-inset-left)) 0 max(0.6rem, env(safe-area-inset-right)); margin-top: 6.5rem; }
             .tools { display: grid; grid-template-columns: 1fr; }
             .tools input, .tools select { min-width: 0; width: 100%; min-height: 44px; font-size: 16px; }
             .order-top { flex-direction: column; align-items: stretch; gap: 0.5rem; }
