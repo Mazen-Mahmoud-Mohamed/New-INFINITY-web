@@ -2352,15 +2352,53 @@ footer h2 {
     /* Gold color for star */
 }
 
-.client-logo.featured img {
-    max-width: 80%;
+.client-logo.featured {
+    cursor: pointer;
+    overflow: visible;
+    position: relative;
+}
+
+.featured-media {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+.featured-media img,
+.featured-media video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
     filter: none;
     opacity: 1;
 }
 
-.client-logo.featured:hover {
+.client-logo.featured:hover,
+.client-logo.featured:focus-within {
     transform: translateY(-5px) scale(1.02);
     box-shadow: 0 15px 30px rgba(230, 0, 0, 0.1);
+}
+
+.client-logo.featured img {
+    display: block;
+}
+
+.client-logo.featured video {
+    display: none;
+}
+
+.client-logo.featured:hover video,
+.client-logo.featured:focus-within video {
+    display: block;
+}
+
+.client-logo.featured:hover img,
+.client-logo.featured:focus-within img {
+    display: none;
 }
 
 /* Regular Client Logo Styles */
@@ -3999,15 +4037,44 @@ footer h2 {
     /* Gold color for star */
 }
 
-.client-logo.featured img {
-    max-width: 80%;
-    filter: none;
-    opacity: 1;
+.client-logo.featured {
+    cursor: pointer;
+    overflow: hidden;
+    position: relative;
 }
 
-.client-logo.featured:hover {
+.client-logo.featured img {
+    width: 100%;
+    height: auto;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.client-logo.featured video {
+    position: absolute;
+    inset: 0;
+    display: none;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0;
+}
+
+.client-logo.featured:hover,
+.client-logo.featured:focus-within {
     transform: translateY(-5px) scale(1.02);
     box-shadow: 0 15px 30px rgba(230, 0, 0, 0.1);
+}
+
+.client-logo.featured:hover video,
+.client-logo.featured:focus-within video {
+    display: block;
+}
+
+.client-logo.featured:hover img,
+.client-logo.featured:focus-within img {
+    display: none;
 }
 
 /* Regular Client Logo Styles */
@@ -5646,15 +5713,47 @@ footer h2 {
     /* Gold color for star */
 }
 
-.client-logo.featured img {
-    max-width: 80%;
+.client-logo.featured img,
+.client-logo.featured video {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
     filter: none;
     opacity: 1;
 }
 
-.client-logo.featured:hover {
+.client-logo.featured:hover,
+.client-logo.featured:focus-within {
     transform: translateY(-5px) scale(1.02);
     box-shadow: 0 15px 30px rgba(230, 0, 0, 0.1);
+}
+
+.client-logo.featured {
+    cursor: pointer;
+}
+
+.client-logo.featured img {
+    display: block;
+}
+
+.client-logo.featured video {
+    display: none;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 12px;
+}
+
+.client-logo.featured:hover video,
+.client-logo.featured:focus-within video {
+    display: block;
+}
+
+.client-logo.featured:hover img,
+.client-logo.featured:focus-within img {
+    display: none;
 }
 
 /* Regular Client Logo Styles */
@@ -8138,4 +8237,58 @@ nav {
     .team-page .value-card h3 {
         font-size: 0.9rem;
     }
+}
+/* Featured client final override */
+.clients .client-logo.featured {
+    padding: 0;
+    overflow: visible;
+    position: relative;
+    aspect-ratio: 16 / 9;
+}
+
+.clients .client-logo.featured .featured-media {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: inherit;
+    background: #ffffff;
+}
+
+.clients .client-logo.featured .featured-media img {
+    position: absolute;
+    inset: 0;
+    width: auto;
+    height: auto;
+    max-width: 80%;
+    max-height: 80%;
+    margin: auto;
+    object-fit: contain;
+    display: block;
+    z-index: 0;
+}
+
+.clients .client-logo.featured .featured-media video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none;
+    z-index: 1;
+}
+
+.clients .client-logo.featured:hover .featured-media video,
+.clients .client-logo.featured:focus-within .featured-media video {
+    display: block;
+}
+
+.clients .client-logo.featured:hover .featured-media img,
+.clients .client-logo.featured:focus-within .featured-media img {
+    display: none;
+}
+
+.featured-badge {
+    z-index: 10;
 }
