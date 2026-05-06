@@ -6,7 +6,8 @@
     <title>Dashboard - INFINITY</title>
     <link rel="icon" href="assets/images/infinity-logo1.png" type="image/png">
     <link rel="apple-touch-icon" href="assets/images/infinity-logo1.png">
-    <link rel="stylesheet" href="mazen.css">
+    <link rel="stylesheet" href="mazen.css?v=20260507-1">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { background: #f4f7fb; }
         .dashboard-wrap { max-width: 1280px; margin: 1.5rem auto; padding: 0 1rem; }
@@ -18,6 +19,105 @@
         .dash-btn.primary { background: #0891b2; color: #fff; }
         .dash-btn.ghost { background: #e2e8f0; color: #0f172a; }
         .dash-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+        .analytics-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .75rem; margin-bottom: .9rem; }
+        .kpi-card { background: linear-gradient(135deg, #ffffff, #f8fbff); border: 1px solid #e2e8f0; border-radius: 12px; padding: .85rem .9rem; box-shadow: 0 4px 12px rgba(2, 6, 23, .05); }
+        .kpi-label { margin: 0; color: #64748b; font-size: .78rem; font-weight: 600; text-transform: uppercase; letter-spacing: .02em; }
+        .kpi-value { margin: .28rem 0 0; color: #0f172a; font-size: 1.25rem; font-weight: 800; line-height: 1.2; }
+        .analytics-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem; }
+        .analytics-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: .8rem; box-shadow: 0 4px 14px rgba(2, 6, 23, .05); }
+        .analytics-card h4 { margin: 0 0 .6rem; color: #0f172a; font-size: .96rem; }
+        .analytics-card canvas { width: 100% !important; height: 300px !important; }
+        .analytics-split { display: grid; grid-template-columns: 1.15fr .85fr; gap: .75rem; align-items: stretch; }
+        .analytics-mini { border: 1px solid #e2e8f0; border-radius: 10px; padding: .45rem; background: #fff; }
+        .analytics-mini h5 { margin: 0 0 .35rem; font-size: .82rem; color: #475569; }
+        .analytics-mini canvas { height: 250px !important; }
+        .analytics-card--customers canvas { height: 420px !important; }
+        .customers-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: .6rem;
+            margin-bottom: .45rem;
+            flex-wrap: wrap;
+        }
+        .customers-subtitle {
+            margin: 0;
+            color: #64748b;
+            font-size: .82rem;
+            font-weight: 600;
+        }
+        .analytics-controls { display: flex; gap: .55rem; align-items: center; flex-wrap: wrap; }
+        .analytics-controls .dash-search { min-width: 0; width: auto; }
+        .analytics-controls label { color: #64748b; font-size: .82rem; font-weight: 600; }
+        .analytics-insights {
+            margin-top: .7rem;
+            font-size: .84rem;
+            color: #334155;
+            display: grid;
+            gap: .55rem;
+        }
+        .customers-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: .5rem;
+        }
+        .metric-chip {
+            border: 1px solid #dbe7f3;
+            border-radius: 10px;
+            padding: .5rem .55rem;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+            box-shadow: 0 2px 8px rgba(15, 23, 42, .04);
+        }
+        .metric-chip .metric-label {
+            margin: 0;
+            color: #64748b;
+            font-size: .74rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .02em;
+        }
+        .metric-chip .metric-value {
+            margin: .2rem 0 0;
+            color: #0f172a;
+            font-size: .9rem;
+            font-weight: 800;
+            line-height: 1.25;
+        }
+        .customers-ranking {
+            border: 1px solid #dbe7f3;
+            border-radius: 10px;
+            background: #fbfdff;
+            padding: .55rem .65rem;
+            display: grid;
+            gap: .35rem;
+        }
+        .customers-ranking h5 {
+            margin: 0 0 .2rem;
+            color: #0f172a;
+            font-size: .83rem;
+        }
+        .customers-ranking-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .6rem;
+            padding: .32rem .38rem;
+            border-radius: 8px;
+            background: #fff;
+            border: 1px solid #edf2f7;
+        }
+        .customers-ranking-item .name {
+            color: #0f172a;
+            font-weight: 700;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .customers-ranking-item .amount {
+            color: #0f766e;
+            font-weight: 800;
+            white-space: nowrap;
+        }
         .dash-card { background: #fff; border-radius: 14px; box-shadow: 0 6px 18px rgba(0,0,0,.08); padding: 1rem; }
         .dash-card h3 { margin-top: 0; color: #0f172a; }
         .dash-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
@@ -208,18 +308,64 @@
         @media (max-width: 680px) {
             .dashboard-wrap { padding: 0 .55rem; margin: 1rem auto; }
             .dash-card {
-                padding: .75rem;
+                padding: .72rem;
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
+                border-radius: 12px;
             }
             .dash-table { min-width: 920px; }
             .dash-table th, .dash-table td { padding: .5rem .45rem; }
             .user-create { grid-template-columns: 1fr; }
-            .dash-topbar { flex-direction: column; align-items: stretch; }
+            .dash-topbar {
+                flex-direction: column;
+                align-items: stretch;
+                padding: .82rem .85rem;
+                border-radius: 12px;
+            }
+            .dash-title { font-size: 1.08rem; }
+            .dash-user { font-size: .86rem; }
             .dash-actions { width: 100%; display: flex; flex-wrap: wrap; gap: .6rem; }
             .dash-actions .dash-btn { flex: 1 1 100%; text-align: center; justify-content: center; }
-            .dash-tabs { justify-content: stretch; }
-            .dash-tabs .dash-tab { flex: 1 1 calc(50% - .3rem); min-width: 130px; }
+            .dash-tabs {
+                display: flex;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                gap: .45rem;
+                padding-bottom: .15rem;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: thin;
+            }
+            .dash-tabs .dash-tab {
+                flex: 0 0 auto;
+                min-width: 122px;
+                padding: .62rem .82rem;
+                font-size: .83rem;
+                border-radius: 9px;
+            }
+            .analytics-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .analytics-grid { grid-template-columns: 1fr; }
+            .analytics-card { padding: .65rem; border-radius: 11px; }
+            .analytics-card h4 { font-size: .88rem; margin-bottom: .48rem; }
+            .analytics-card canvas { height: 235px !important; }
+            .analytics-split { grid-template-columns: 1fr; }
+            .analytics-mini { padding: .45rem; }
+            .analytics-mini h5 { font-size: .78rem; }
+            .analytics-mini canvas { height: 205px !important; }
+            .analytics-card--customers canvas { height: 285px !important; }
+            .customers-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .customers-head { align-items: flex-start; }
+            .customers-subtitle { font-size: .75rem; }
+            .metric-chip { padding: .45rem .48rem; }
+            .metric-chip .metric-label { font-size: .68rem; }
+            .metric-chip .metric-value { font-size: .8rem; }
+            .customers-ranking { padding: .45rem .5rem; }
+            .customers-ranking-item { padding: .3rem .35rem; gap: .4rem; }
+            .customers-ranking-item .name { max-width: 60%; font-size: .8rem; }
+            .customers-ranking-item .amount { font-size: .79rem; }
+            .analytics-controls { width: 100%; }
+            .analytics-controls label { width: 100%; }
+            .analytics-controls select,
+            .analytics-controls input { width: 100% !important; min-width: 0 !important; }
             .section-head { flex-direction: column; align-items: stretch; gap: .75rem; }
             .section-tools { display: flex; flex-direction: column; align-items: stretch; gap: .6rem; width: 100%; }
             .section-tools input,
@@ -426,6 +572,7 @@
             <button class="dash-tab active" data-section="inventory-section">Inventory</button>
             <button class="dash-tab" data-section="orders-section">Orders</button>
             <button class="dash-tab" data-section="customers-section">Customers</button>
+            <button class="dash-tab" data-section="analytics-section">Analytics</button>
             <button class="dash-tab" data-section="users-section">User Management</button>
         </div>
 
@@ -485,6 +632,84 @@
             </div>
         </div>
 
+        <div id="analytics-section" class="dash-section">
+            <div class="dash-card">
+                <div class="section-head">
+                    <h3>Business Analytics</h3>
+                    <div class="analytics-controls">
+                        <label>
+                            Range
+                            <select id="analytics-range">
+                                <option value="7">Last 7 Days</option>
+                                <option value="30">Last 30 Days</option>
+                                <option value="90">Last 90 Days</option>
+                                <option value="all">All Time</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </label>
+                        <label id="analytics-from-wrap" style="display:none;">
+                            From
+                            <input id="analytics-from" type="date">
+                        </label>
+                        <label id="analytics-to-wrap" style="display:none;">
+                            To
+                            <input id="analytics-to" type="date">
+                        </label>
+                    </div>
+                </div>
+                <div class="analytics-kpis">
+                    <div class="kpi-card"><p class="kpi-label">Total Revenue</p><p class="kpi-value" id="kpi-revenue">EGP 0.00</p></div>
+                    <div class="kpi-card"><p class="kpi-label">Orders</p><p class="kpi-value" id="kpi-orders">0</p></div>
+                    <div class="kpi-card"><p class="kpi-label">Avg. Order</p><p class="kpi-value" id="kpi-avg-order">EGP 0.00</p></div>
+                    <div class="kpi-card"><p class="kpi-label">Customers</p><p class="kpi-value" id="kpi-customers">0</p></div>
+                </div>
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <h4>Top Selling Items (Qty)</h4>
+                        <canvas id="chart-top-items"></canvas>
+                    </div>
+                    <div class="analytics-card">
+                        <h4>Order Status Distribution</h4>
+                        <div class="analytics-split">
+                            <div class="analytics-mini">
+                                <h5>Grid Analysis</h5>
+                                <canvas id="chart-status-grid"></canvas>
+                            </div>
+                            <div class="analytics-mini">
+                                <h5>Donut Analysis</h5>
+                                <canvas id="chart-status-donut"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="analytics-card">
+                        <h4 id="analytics-revenue-title">Revenue</h4>
+                        <canvas id="chart-revenue"></canvas>
+                    </div>
+                    <div class="analytics-card">
+                        <h4>Payment Methods</h4>
+                        <div class="analytics-split">
+                            <div class="analytics-mini">
+                                <h5>Grid Analysis</h5>
+                                <canvas id="chart-payment-grid"></canvas>
+                            </div>
+                            <div class="analytics-mini">
+                                <h5>Donut Analysis</h5>
+                                <canvas id="chart-payment-donut"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="analytics-card analytics-card--customers" style="grid-column: 1 / -1;">
+                        <div class="customers-head">
+                        <h4>Top Customers by Spend (X: Customer, Y: EGP)</h4>
+                            <p class="customers-subtitle">Customer spend comparison by value (EGP)</p>
+                        </div>
+                        <canvas id="chart-customers"></canvas>
+                        <div id="top-customers-insights" class="analytics-insights"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div id="users-section" class="dash-section">
         <div class="dash-card" style="margin-top:1rem;">
             <h3>User Management</h3>
@@ -518,6 +743,7 @@
         let allCustomers = [];
         let allUsers = [];
         let toastTimer;
+        const analyticsCharts = {};
 
         function canEditInventory() { return ['employee','manager','primary'].includes(currentRole); }
         function canEditOrders() { return ['employee','manager','primary'].includes(currentRole); }
@@ -550,6 +776,7 @@
             const data = await res.json();
             allProducts = Array.isArray(data.products) ? data.products : [];
             renderProducts();
+            renderAnalytics();
         }
 
         function renderProducts() {
@@ -593,6 +820,286 @@
             toastTimer = setTimeout(() => {
                 toast.classList.remove('show');
             }, 2600);
+        }
+
+        function destroyChart(id) {
+            if (analyticsCharts[id]) {
+                analyticsCharts[id].destroy();
+                delete analyticsCharts[id];
+            }
+        }
+
+        function fmtEGP(v) { return `EGP ${Number(v || 0).toFixed(2)}`; }
+
+        function getOrderAmount(order) {
+            const direct = Number(order?.amount);
+            if (Number.isFinite(direct) && direct > 0) return direct;
+            const items = Array.isArray(order?.orderItems) ? order.orderItems : [];
+            return items.reduce((sum, it) => {
+                const qty = Number(it?.quantity || 0);
+                const price = Number(it?.price || 0);
+                const install = Number(it?.installation || 0);
+                return sum + (price + install) * qty;
+            }, 0);
+        }
+
+        function getAnalyticsRange() {
+            const range = (document.getElementById('analytics-range')?.value || '7').trim();
+            const fromVal = document.getElementById('analytics-from')?.value;
+            const toVal = document.getElementById('analytics-to')?.value;
+            if (range === 'custom' && fromVal && toVal) {
+                const from = new Date(fromVal);
+                const to = new Date(toVal);
+                from.setHours(0, 0, 0, 0);
+                to.setHours(23, 59, 59, 999);
+                return { mode: 'custom', from, to };
+            }
+            if (range === 'all') return { mode: 'all' };
+            const days = Math.max(1, Number(range) || 7);
+            const from = new Date();
+            from.setHours(0, 0, 0, 0);
+            from.setDate(from.getDate() - (days - 1));
+            return { mode: 'days', days, from };
+        }
+
+        function renderAnalytics() {
+            const chartAvailable = typeof Chart !== 'undefined';
+            const isPhone = window.matchMedia('(max-width: 680px)').matches;
+            const range = getAnalyticsRange();
+            const revenueTitle = document.getElementById('analytics-revenue-title');
+            if (revenueTitle) {
+                revenueTitle.textContent = range.mode === 'all'
+                    ? 'Revenue (All Time)'
+                    : range.mode === 'custom'
+                        ? `Revenue (${range.from.toLocaleDateString()} - ${range.to.toLocaleDateString()})`
+                        : `Revenue (Last ${range.days} Days)`;
+            }
+
+            const orders = (Array.isArray(allOrders) ? allOrders : []).filter((o) => {
+                if (!o.createdAt) return range.mode === 'all';
+                const t = new Date(o.createdAt);
+                if (range.mode === 'all') return true;
+                if (range.mode === 'custom') return t >= range.from && t <= range.to;
+                return t >= range.from;
+            });
+            const customers = Array.isArray(allCustomers) ? allCustomers : [];
+            const totalRevenue = orders.reduce((s, o) => s + getOrderAmount(o), 0);
+            const orderCount = orders.length;
+            const avgOrder = orderCount ? totalRevenue / orderCount : 0;
+            const uniqueCustomers = new Set(orders.map((o) => (o.customerEmail || o.customerPhone || o.customerName || '').trim()).filter(Boolean));
+            const customerCount = Math.max(customers.length, uniqueCustomers.size);
+
+            const kpiRevenue = document.getElementById('kpi-revenue');
+            const kpiOrders = document.getElementById('kpi-orders');
+            const kpiAvg = document.getElementById('kpi-avg-order');
+            const kpiCustomers = document.getElementById('kpi-customers');
+            if (kpiRevenue) kpiRevenue.textContent = fmtEGP(totalRevenue);
+            if (kpiOrders) kpiOrders.textContent = String(orderCount);
+            if (kpiAvg) kpiAvg.textContent = fmtEGP(avgOrder);
+            if (kpiCustomers) kpiCustomers.textContent = String(customerCount);
+            if (!chartAvailable) return;
+
+            const itemQty = {};
+            orders.forEach((o) => (Array.isArray(o.orderItems) ? o.orderItems : []).forEach((it) => {
+                const key = it?.name || it?.id || 'Unknown';
+                itemQty[key] = (itemQty[key] || 0) + Number(it?.quantity || 0);
+            }));
+            const topItems = Object.entries(itemQty).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+            const statusMap = {};
+            orders.forEach((o) => {
+                const st = String(o.status || 'unknown').toLowerCase();
+                statusMap[st] = (statusMap[st] || 0) + 1;
+            });
+
+            const payMap = {};
+            orders.forEach((o) => {
+                const p = String(o.paymentMethod || 'unknown').toLowerCase();
+                payMap[p] = (payMap[p] || 0) + 1;
+            });
+
+            const revenueLabels = [];
+            const revenueData = [];
+            if (range.mode === 'all') {
+                const monthMap = {};
+                orders.forEach((o) => {
+                    if (!o.createdAt) return;
+                    const d = new Date(o.createdAt);
+                    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                    monthMap[key] = (monthMap[key] || 0) + getOrderAmount(o);
+                });
+                Object.keys(monthMap).sort().forEach((k) => {
+                    const [yy, mm] = k.split('-');
+                    revenueLabels.push(`${mm}/${yy}`);
+                    revenueData.push(monthMap[k]);
+                });
+            } else {
+                const dayMap = {};
+                const start = new Date(range.mode === 'custom' ? range.from : range.from);
+                const end = new Date(range.mode === 'custom' ? range.to : new Date());
+                start.setHours(0, 0, 0, 0);
+                end.setHours(0, 0, 0, 0);
+                for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                    dayMap[d.toISOString().slice(0, 10)] = 0;
+                }
+                orders.forEach((o) => {
+                    if (!o.createdAt) return;
+                    const key = new Date(o.createdAt).toISOString().slice(0, 10);
+                    if (Object.prototype.hasOwnProperty.call(dayMap, key)) dayMap[key] += getOrderAmount(o);
+                });
+                Object.keys(dayMap).forEach((k) => {
+                    revenueLabels.push(new Date(k).toLocaleDateString());
+                    revenueData.push(dayMap[k]);
+                });
+            }
+
+            const customerSpend = {};
+            orders.forEach((o) => {
+                const key = o.customerName || o.customerEmail || o.customerPhone || 'Unknown';
+                customerSpend[key] = (customerSpend[key] || 0) + getOrderAmount(o);
+            });
+            const topCustomers = Object.entries(customerSpend).sort((a, b) => b[1] - a[1]).slice(0, 8);
+            const insights = document.getElementById('top-customers-insights');
+            if (insights) {
+                if (!topCustomers.length) {
+                    insights.innerHTML = '<span class="muted">No customer spend data in selected range.</span>';
+                } else {
+                    const spends = topCustomers.map((x) => Number(x[1] || 0)).sort((a, b) => a - b);
+                    const top1 = topCustomers[0];
+                    const top3Total = topCustomers.slice(0, 3).reduce((s, x) => s + Number(x[1] || 0), 0);
+                    const shownTotal = topCustomers.reduce((s, x) => s + Number(x[1] || 0), 0);
+                    const avgSpend = shownTotal / topCustomers.length;
+                    const mid = Math.floor(spends.length / 2);
+                    const medianSpend = spends.length % 2 ? spends[mid] : (spends[mid - 1] + spends[mid]) / 2;
+                    const top1Share = shownTotal > 0 ? (Number(top1[1]) / shownTotal) * 100 : 0;
+                    const top3Share = shownTotal > 0 ? (top3Total / shownTotal) * 100 : 0;
+                    insights.innerHTML = [
+                        '<div class="customers-metrics">',
+                        `<div class="metric-chip"><p class="metric-label">Top Customer</p><p class="metric-value">${top1[0]} (${top1Share.toFixed(1)}%)</p></div>`,
+                        `<div class="metric-chip"><p class="metric-label">Top 3 Concentration</p><p class="metric-value">${top3Share.toFixed(1)}% of shown spend</p></div>`,
+                        `<div class="metric-chip"><p class="metric-label">Average | Median</p><p class="metric-value">${fmtEGP(avgSpend)} | ${fmtEGP(medianSpend)}</p></div>`,
+                        '</div>',
+                        '<div class="customers-ranking">',
+                        '<h5>Top 5 Customers</h5>',
+                        ...topCustomers.slice(0, 5).map((x, i) => `<div class="customers-ranking-item"><span class="name">#${i + 1} ${x[0]}</span><span class="amount">${fmtEGP(x[1])}</span></div>`),
+                        '</div>'
+                    ].join('');
+                }
+            }
+
+            const commonOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { boxWidth: 12 } } } };
+            ['top-items', 'status-grid', 'status-donut', 'revenue', 'payment-grid', 'payment-donut', 'customers'].forEach(destroyChart);
+
+            const topItemsCtx = document.getElementById('chart-top-items')?.getContext('2d');
+            if (topItemsCtx) analyticsCharts['top-items'] = new Chart(topItemsCtx, {
+                type: 'bar',
+                data: {
+                    labels: (topItems.length ? topItems : [['No data', 0]]).map((x) => x[0]),
+                    datasets: [{ label: 'Qty', data: (topItems.length ? topItems : [['No data', 0]]).map((x) => x[1]), backgroundColor: '#0891b2' }]
+                },
+                options: { ...commonOpts, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+            });
+
+            const statusGridCtx = document.getElementById('chart-status-grid')?.getContext('2d');
+            if (statusGridCtx) analyticsCharts['status-grid'] = new Chart(statusGridCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(statusMap).length ? Object.keys(statusMap) : ['No data'],
+                    datasets: [{ data: Object.keys(statusMap).length ? Object.values(statusMap) : [1], backgroundColor: ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#64748b', '#06b6d4'] }]
+                },
+                options: { ...commonOpts, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, x: { grid: { color: 'rgba(148,163,184,0.12)' } } } }
+            });
+            const statusDonutCtx = document.getElementById('chart-status-donut')?.getContext('2d');
+            if (statusDonutCtx) analyticsCharts['status-donut'] = new Chart(statusDonutCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(statusMap).length ? Object.keys(statusMap) : ['No data'],
+                    datasets: [{ data: Object.keys(statusMap).length ? Object.values(statusMap) : [1], backgroundColor: ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#64748b', '#06b6d4'] }]
+                },
+                options: { ...commonOpts, cutout: '50%', scales: { x: { display: false }, y: { display: false } } }
+            });
+
+            const revenueCtx = document.getElementById('chart-revenue')?.getContext('2d');
+            if (revenueCtx) analyticsCharts['revenue'] = new Chart(revenueCtx, {
+                type: 'line',
+                data: {
+                    labels: revenueLabels.length ? revenueLabels : ['No data'],
+                    datasets: [{ label: 'EGP', data: revenueData.length ? revenueData : [0], borderColor: '#0ea5e9', backgroundColor: 'rgba(14,165,233,.18)', fill: true, tension: .35 }]
+                },
+                options: commonOpts
+            });
+
+            const paymentGridCtx = document.getElementById('chart-payment-grid')?.getContext('2d');
+            if (paymentGridCtx) analyticsCharts['payment-grid'] = new Chart(paymentGridCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(payMap).length ? Object.keys(payMap) : ['No data'],
+                    datasets: [{ data: Object.keys(payMap).length ? Object.values(payMap) : [1], backgroundColor: ['#0891b2', '#14b8a6', '#8b5cf6', '#f97316', '#64748b'] }]
+                },
+                options: { ...commonOpts, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, x: { grid: { color: 'rgba(148,163,184,0.12)' } } } }
+            });
+            const paymentDonutCtx = document.getElementById('chart-payment-donut')?.getContext('2d');
+            if (paymentDonutCtx) analyticsCharts['payment-donut'] = new Chart(paymentDonutCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(payMap).length ? Object.keys(payMap) : ['No data'],
+                    datasets: [{ data: Object.keys(payMap).length ? Object.values(payMap) : [1], backgroundColor: ['#0891b2', '#14b8a6', '#8b5cf6', '#f97316', '#64748b'] }]
+                },
+                options: { ...commonOpts, cutout: '50%', scales: { x: { display: false }, y: { display: false } } }
+            });
+
+            const customersCtx = document.getElementById('chart-customers')?.getContext('2d');
+            if (customersCtx) analyticsCharts['customers'] = new Chart(customersCtx, {
+                type: 'bar',
+                data: {
+                    labels: (topCustomers.length ? topCustomers : [['No data', 0]]).map((x) => x[0]),
+                    datasets: [{
+                        label: 'Spend (EGP)',
+                        data: (topCustomers.length ? topCustomers : [['No data', 0]]).map((x) => Number((x[1] || 0).toFixed(2))),
+                        backgroundColor: '#14b8a6',
+                        borderRadius: 6,
+                        yAxisID: 'y'
+                    }]
+                },
+                options: {
+                    ...commonOpts,
+                    devicePixelRatio: Math.max(window.devicePixelRatio || 1, 2),
+                    interaction: { mode: 'index', intersect: false, axis: 'x' },
+                    plugins: {
+                        legend: { display: true, labels: { usePointStyle: true, pointStyle: 'rectRounded' } },
+                        tooltip: {
+                            displayColors: false,
+                            padding: 10,
+                            caretPadding: 8,
+                            titleMarginBottom: 6,
+                            titleFont: { size: 12, weight: '700' },
+                            bodyFont: { size: 12, weight: '600' },
+                            callbacks: {
+                                title: (items) => items?.[0]?.label || 'Customer',
+                                label: (ctx) => ['Spend', `EGP ${Number(ctx.parsed.y || 0).toFixed(2)}`]
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'EGP Spend' },
+                            ticks: { callback: (v) => Number(v).toLocaleString() },
+                            grid: { color: 'rgba(148,163,184,0.22)' }
+                        },
+                        x: {
+                            ticks: {
+                                autoSkip: isPhone,
+                                maxTicksLimit: isPhone ? 5 : 10,
+                                maxRotation: isPhone ? 18 : 30,
+                                minRotation: isPhone ? 8 : 15,
+                                font: { size: isPhone ? 10 : 11, weight: '600' }
+                            },
+                            grid: { color: 'rgba(148,163,184,0.12)' }
+                        }
+                    }
+                }
+            });
         }
 
         async function updateStock(productId) {
@@ -677,6 +1184,7 @@
             const data = await res.json();
             allOrders = Array.isArray(data.orders) ? data.orders : [];
             renderOrders();
+            renderAnalytics();
         }
 
         function renderOrders() {
@@ -781,6 +1289,7 @@
             const data = await res.json();
             allCustomers = Array.isArray(data.customers) ? data.customers : [];
             renderCustomers();
+            renderAnalytics();
         }
 
         function renderCustomers() {
@@ -870,6 +1379,16 @@
         document.getElementById('orders-search').addEventListener('input', renderOrders);
         document.getElementById('customers-search').addEventListener('input', renderCustomers);
         document.getElementById('users-search').addEventListener('input', renderUsers);
+        document.getElementById('analytics-range')?.addEventListener('change', (e) => {
+            const custom = e.target.value === 'custom';
+            const fw = document.getElementById('analytics-from-wrap');
+            const tw = document.getElementById('analytics-to-wrap');
+            if (fw) fw.style.display = custom ? 'block' : 'none';
+            if (tw) tw.style.display = custom ? 'block' : 'none';
+            renderAnalytics();
+        });
+        document.getElementById('analytics-from')?.addEventListener('change', renderAnalytics);
+        document.getElementById('analytics-to')?.addEventListener('change', renderAnalytics);
         document.getElementById('save-all-inventory-btn').addEventListener('click', saveAllInventory);
         document.getElementById('create-user-btn').addEventListener('click', createUser);
         document.getElementById('dash-logout-btn').addEventListener('click', async () => {
@@ -882,6 +1401,7 @@
                 document.querySelectorAll('.dash-section').forEach((s) => s.classList.remove('active'));
                 btn.classList.add('active');
                 document.getElementById(btn.dataset.section).classList.add('active');
+                if (btn.dataset.section === 'analytics-section') setTimeout(renderAnalytics, 0);
             });
         });
 
@@ -901,6 +1421,7 @@
             }
 
             await Promise.all([loadProducts(), loadOrders(), loadCustomers(), loadUsers()]);
+            renderAnalytics();
         })();
     </script>
 </body>

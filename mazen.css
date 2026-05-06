@@ -139,6 +139,36 @@ nav .container {
     object-fit: contain;
 }
 
+.logo .nav-logo-svg {
+    width: 160px;
+    height: auto;
+    min-width: 160px;
+    max-width: 160px;
+    display: block;
+    overflow: visible;
+}
+
+/* Normalize SVG logo text shape across pages/devices */
+.logo .nav-logo-svg text:first-of-type {
+    font-family: 'Poppins', Arial, sans-serif !important;
+    font-weight: 800 !important;
+    letter-spacing: 4px !important;
+}
+
+.logo .nav-logo-svg text:last-of-type {
+    font-family: 'Poppins', Arial, sans-serif !important;
+    letter-spacing: 0.6px !important;
+}
+
+/* Keep logo area visually identical across desktop pages */
+@media (min-width: 993px) {
+    nav .logo {
+        flex: 0 0 290px;
+        min-width: 290px;
+        max-width: 290px;
+    }
+}
+
 .logo-container {
     display: flex;
     flex-direction: column;
@@ -224,6 +254,14 @@ nav ul li a:hover {
     .logo {
         min-width: 160px;
     }
+
+    .logo-text {
+        font-size: clamp(1.3rem, 2.4vw, 1.45rem);
+    }
+
+    .logo-subtext {
+        font-size: clamp(0.64rem, 1.1vw, 0.7rem);
+    }
 }
 
 @media (max-width: 768px) {
@@ -260,6 +298,22 @@ nav ul li a:hover {
 
     .logo-container {
         align-items: center;
+        min-width: 0;
+    }
+
+    .logo .nav-logo-svg {
+        width: 148px;
+        min-width: 148px;
+        max-width: 148px;
+    }
+
+    .logo-text {
+        font-size: clamp(1.12rem, 4vw, 1.3rem);
+        letter-spacing: 0.6px;
+    }
+
+    .logo-subtext {
+        font-size: clamp(0.58rem, 2.3vw, 0.66rem);
     }
 }
 
@@ -7612,6 +7666,12 @@ footer h2 {
 
     .logo-text {
         font-size: clamp(1.05rem, 5vw, 1.35rem);
+    }
+
+    .logo .nav-logo-svg {
+        width: 136px;
+        min-width: 136px;
+        max-width: 136px;
     }
 
     .logo-subtext {
