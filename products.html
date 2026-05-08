@@ -6,7 +6,7 @@
     <title>Our Products - INFINITY Total-Com Solutions</title>
     <link rel="icon" href="assets/images/infinity-logo1.png" type="image/png">
     <link rel="apple-touch-icon" href="assets/images/infinity-logo1.png">
-    <link rel="stylesheet" href="mazen.css?v=20260508-3">
+    <link rel="stylesheet" href="mazen.css?v=20260508-6">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -631,6 +631,10 @@
             body.products-page .products-hero .hero-content h1 {
                 font-size: clamp(1.45rem, 5vw, 1.85rem);
             }
+            body.products-page .product-categories .container {
+                padding-left: 0.35rem;
+                padding-right: 0.35rem;
+            }
             body.products-page .products-wrapper {
                 grid-template-columns: 1fr;
                 gap: 1rem;
@@ -657,15 +661,20 @@
                 font-size: 1.05rem;
             }
             body.products-page .category-filters {
-                flex-wrap: nowrap;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
                 gap: 0.45rem;
-                padding-bottom: 0.35rem;
-                scrollbar-width: thin;
+                padding: 0 0.2rem 0.4rem;
+                overflow: visible;
             }
             body.products-page .category-btn {
-                flex: 0 0 auto;
+                width: 100%;
+                min-width: 0;
+                white-space: nowrap;
+                text-align: center;
+                justify-content: center;
+                padding: 0.62rem 0.55rem;
+                font-size: 0.92rem;
             }
         }
         @media (min-width: 480px) and (max-width: 768px) {
@@ -774,7 +783,6 @@
                 <button class="category-btn" data-category="gps">GPS Devices</button>
                 <button class="category-btn" data-category="cctv">CCTV Systems</button>
                 <button class="category-btn" data-category="sensors">Sensors</button>
-                <button class="category-btn" data-category="accessories">Accessories</button>
             </div>
         </div>
     </section>
@@ -809,7 +817,7 @@
                 </div>
 
                 <!-- Cut Off Engine -->
-                <div class="product-card" data-category="accessories" data-product-id="cut-off">
+                <div class="product-card" data-category="sensors" data-product-id="cut-off">
                     <img src="assets/products/cut-off-engine.png" alt="Cut Off Engine">
                     <div class="product-info">
                         <h3>Cut Off Engine</h3>
@@ -857,7 +865,7 @@
                 </div>
 
                 <!-- Driver ID Button -->
-                <div class="product-card" data-category="accessories" data-product-id="driver-button">
+                <div class="product-card" data-category="sensors" data-product-id="driver-button">
                     <img src="assets/products/driver-button.png" alt="Driver ID Button">
                     <div class="product-info">
                         <h3>Driver ID Button</h3>

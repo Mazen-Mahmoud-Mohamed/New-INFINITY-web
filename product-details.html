@@ -6,7 +6,7 @@
     <title>Product Details - INFINITY</title>
     <link rel="icon" href="assets/images/infinity-logo1.png" type="image/png">
     <link rel="apple-touch-icon" href="assets/images/infinity-logo1.png">
-    <link rel="stylesheet" href="mazen.css?v=20260508-8">
+    <link rel="stylesheet" href="mazen.css?v=20260508-15">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -158,53 +158,66 @@
             align-items: center;
         }
         .details-specs {
-            padding: 1.05rem 1.15rem 1.15rem;
+            padding: 1.15rem 1.2rem 1.2rem;
             margin-top: 0;
             flex: 1;
+            background: #fff;
+            border: 1px solid #dbe7f3;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
         }
         .details-specs h2 {
-            margin: 0 0 0.55rem;
+            margin: 0 0 .7rem;
             color: #0f172a;
-            font-size: 1.02rem;
+            font-size: 1.08rem;
             font-weight: 800;
-            letter-spacing: -0.02em;
+            letter-spacing: -0.01em;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: .55rem;
         }
-        .specs-list {
+        .specs-paper {
             display: grid;
-            gap: 0.9rem;
-            grid-template-columns: 1fr;
+            gap: .95rem;
         }
-        @media (min-width: 860px) {
-            .specs-list {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-        }
-        .spec-item {
+        .spec-section {
             border: 1px solid #e2e8f0;
             border-radius: 12px;
-            padding: 0.82rem 0.9rem;
-            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-            border-left: 3px solid rgba(8, 145, 178, 0.45);
-            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
-            min-height: 126px;
+            padding: .75rem .85rem;
+            background: #fff;
         }
-        .spec-en {
+        .spec-section h3 {
+            margin: 0 0 .55rem;
+            font-size: .95rem;
+            color: #0f172a;
+        }
+        .spec-list {
+            list-style: none;
             margin: 0;
-            color: #1e293b;
-            font-size: 0.88rem;
-            font-weight: 600;
-            line-height: 1.45;
+            padding: 0;
+            display: grid;
+            gap: .45rem;
         }
-        .spec-ar {
-            margin: 0.28rem 0 0;
-            padding-top: 0.28rem;
-            border-top: 1px solid rgba(226, 232, 240, 0.9);
-            color: #475569;
+        .spec-line {
+            border-bottom: 1px dashed #e2e8f0;
+            padding-bottom: .45rem;
+        }
+        .spec-line:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .spec-line .ar {
+            margin: 0;
+            color: #1f2937;
             font-family: 'Cairo', sans-serif;
-            font-size: 0.86rem;
+            font-size: .9rem;
             direction: rtl;
             text-align: right;
             line-height: 1.5;
+        }
+        .spec-line .en {
+            margin: .18rem 0 0;
+            color: #64748b;
+            font-size: .82rem;
+            line-height: 1.45;
         }
         .theme-toast {
             position: fixed;
@@ -440,12 +453,11 @@
                 border-right: none;
                 border-bottom: 1px solid #dbe7f3;
             }
-            .details-wrap { margin-top: 5.3rem; }
+            .details-wrap { margin-top: 7.3rem; }
             .details-head .details-media img { max-height: 200px; }
             .details-head .details-summary { padding: 0.95rem 1rem; }
-            .details-specs { padding: 0.92rem 0.9rem 1rem; }
-            .specs-list { gap: 0.65rem; }
-            .spec-item { min-height: 0; }
+            .details-specs { padding: 1rem .85rem 1rem; }
+            .spec-section { padding: .68rem .72rem; }
         }
     </style>
 </head>
@@ -504,7 +516,7 @@
         </section>
         <section class="details-specs">
             <h2>Specifications</h2>
-            <div id="specs-list" class="specs-list"></div>
+            <div id="specs-list" class="specs-paper"></div>
         </section>
     </main>
 
@@ -548,7 +560,7 @@
     <div id="theme-toast" class="theme-toast" role="status" aria-live="polite"></div>
     <script src="script.js?v=20260429-3"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        (function () {
         const PRODUCT_DATA = {
             'fmb120': {
                 name: 'GPS Tracker FMB120',
@@ -620,16 +632,50 @@
         const fallbackImage = 'assets/images/infinity-logo.png';
 
         const imageEl = document.getElementById('product-image');
-        const specsList = document.getElementById('specs-list');
+        const specsList = document.getElementById('specs-list') || document.querySelector('.specs-paper');
+        const specsHost = document.querySelector('.details-specs');
+
+        function sectionizeSpecs(base) {
+            const specs = Array.isArray(base.specs) ? base.specs : [];
+            if (id !== 'fmb120') {
+                return [{ title: '1. المواصفات الفنية', items: specs }];
+            }
+            return [
+                { title: '1. الخصائص العامة', items: specs.slice(0, 6) },
+                { title: '2. الميزات الفنية', items: specs.slice(6, 11) },
+                { title: '3. الخدمات التي يوفرها الجهاز', items: specs.slice(11) }
+            ];
+        }
 
         function renderSpecs() {
-            const base = PRODUCT_DATA[id] || PRODUCT_DATA.fmb120;
-            specsList.innerHTML = (base.specs || []).map((s) => `
-            <div class="spec-item">
-                <p class="spec-en">${s.en}</p>
-                <p class="spec-ar">${s.ar}</p>
-            </div>
-        `).join('');
+            const target = specsList || specsHost;
+            if (!target) return;
+            // Smoke marker: if you ever see nothing here, script didn't run.
+            target.innerHTML = '<div class="muted" style="padding:.6rem 0;">Loading specifications…</div>';
+            try {
+                const base = PRODUCT_DATA[id] || PRODUCT_DATA.fmb120;
+                const sections = sectionizeSpecs(base)
+                    .map((sec) => ({ ...sec, items: (sec.items || []).filter(Boolean) }))
+                    .filter((sec) => (sec.items || []).length);
+
+                const html = sections.map((section) => `
+<div class="spec-section">
+  <h3>${section.title}</h3>
+  <ul class="spec-list">
+    ${(section.items || []).map((s) => `
+    <li class="spec-line">
+      <p class="ar">&bull; ${s.ar || ''}</p>
+      <p class="en">${s.en || ''}</p>
+    </li>`).join('')}
+  </ul>
+</div>
+`).join('');
+
+                target.innerHTML = html || '<div class="muted">No specifications available.</div>';
+            } catch (e) {
+                const target = specsList || specsHost;
+                if (target) target.innerHTML = '<div class="muted">Failed to load specifications.</div>';
+            }
         }
 
         function applyProductToPage() {
@@ -662,6 +708,18 @@
         }
 
         applyProductToPage();
+        // Ensure render happens even if anything updates after initial paint.
+        setTimeout(renderSpecs, 0);
+
+        // When navigating away/back, browsers may restore from bfcache and skip running scripts.
+        // Re-render on pageshow so Specifications never appears empty.
+        window.addEventListener('pageshow', () => {
+            try {
+                applyProductToPage();
+                renderSpecs();
+                updateCart();
+            } catch (_e) { /* ignore */ }
+        });
 
         let cart = [];
         let isLoggedIn = false;
@@ -934,7 +992,7 @@
 
         loadCartFromAccount();
         loadStockStatuses();
-        });
+        })();
     </script>
 </body>
 </html>
