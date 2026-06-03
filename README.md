@@ -5,8 +5,10 @@
 Full-stack web application for INFINITY Total-Com Solutions, built with **Node.js**, **Express**, **MongoDB**, and a responsive HTML/CSS frontend. It supports:
 
 - Customer storefront (catalog, cart, checkout, order history)
-- Staff dashboard (inventory, orders, customers, analytics, user management)
+- Multi-method checkout with **payment receipt upload** (Bank Transfer & InstaPay)
+- Staff dashboard (inventory, orders with receipt review, customers, analytics, user management)
 - Role-based access for customers, technical staff, employees, managers, and primary admin
+- Public **Our Team** page with leadership and company values
 - MongoDB-backed users, products, carts, orders, and sessions
 
 > Payment processor implementation details are intentionally excluded from this README.
@@ -76,9 +78,49 @@ Default products (`fmb120`, `cut-off`, `door-sensor`, `driver-button`) are seede
 - Stock reserved when orders are created
 - **`user-dashboard.html`** — Customer order history, filters, PDF invoices
 - **`order-success.html`** — Post-checkout confirmation
-- **`payment.html`** — Checkout flow (general; no processor specifics in docs)
+- **`payment.html`** — Checkout with multiple payment methods (see below)
 
-### 6. Staff Dashboard (`dashboard.html`)
+### 6. Checkout & Payment (`payment.html`)
+
+Customers choose a payment method, review the order summary (optional 14% VAT), and submit.
+
+| Method | Flow |
+|--------|------|
+| **Visa Card** | Card form → `POST /api/process-payment` (mock processor in dev) |
+| **Bank Transfer** | Copy CIB account details → pay → **upload receipt image** → submit order |
+| **InstaPay** | Copy InstaPay number → pay → **upload receipt image** → submit order |
+| **Cash on Delivery** | Submit order (status `pending`; pay on delivery) |
+
+**Payment receipt upload (Bank Transfer & InstaPay):**
+
+- Drag-and-drop or tap-to-upload zone with image preview
+- Client-side compression before upload (JPEG, max ~1400px)
+- **Required** before order submission for these methods
+- Saved on the server at `assets/orders/receipts/{orderId}.jpg` (or png/webp)
+- Stored on the order as `paymentReceiptImage` (path)
+
+**Payment page UI:**
+
+- Two-column desktop layout (methods left, details + summary right)
+- Step pills for bank/InstaPay (copy → pay → upload receipt)
+- Copy-to-clipboard buttons for account fields
+- Sticky order summary, gradient submit button, inline success/error messages
+
+### 7. Order Data Model
+
+| Field | Description |
+|-------|-------------|
+| `userId` | Customer who placed the order |
+| `transactionId` | Unique reference (`manual_*` or card transaction id) |
+| `amount` / `currency` | Order total (EGP) |
+| `orderItems` | Line items from cart |
+| `paymentMethod` | `visa`, `bank`, `instapay`, or `cash` |
+| `paymentReceiptImage` | Relative path to uploaded receipt (bank / instapay only) |
+| `status` | `pending`, `processing`, `completed`, `cancelled`, `failed` |
+| `vatApplied` | Whether 14% VAT was included |
+| Customer profile fields | Name, email, phone, company, billing address (visa), etc. |
+
+### 8. Staff Dashboard (`dashboard.html`)
 
 Tabbed interface for staff operations:
 
@@ -86,7 +128,7 @@ Tabbed interface for staff operations:
 |-----|-------------|--------------|
 | **Inventory** | technical, employee, manager, primary | View all products (including inactive). Edit price, install, stock inline. **Save All**. **Edit** opens full product modal. |
 | **Add Product** | manager, primary | Create products with image upload/path, descriptions, categorized spec sections |
-| **Orders** | all staff roles | List, filter, update status, export PDF |
+| **Orders** | all staff roles | List, search, filter by status, update status, export PDF, **view payment receipt** thumbnail |
 | **Customers** | all staff roles | Customer profiles and contact info |
 | **Analytics** | **manager, primary only** | Business analytics: KPIs, charts (revenue, top items, status, payment methods, top customers), date range |
 | **User Management** | all staff roles | List users; create (manager/primary); delete with role rules |
@@ -101,13 +143,18 @@ Tabbed interface for staff operations:
 
 - Inline stock/price/install edits, **Edit** modal, **Save All** (no add/delete product)
 
+**Orders — payment receipts:**
+
+- For bank transfer and InstaPay orders, staff see a **Payment receipt** block with thumbnail and link to open full size
+- Helps verify customer payments before marking orders `processing` or `completed`
+
 **UI/UX on dashboard:**
 
 - Custom confirm/alert dialogs (no browser `confirm()` popups)
 - Toast notifications for save/delete feedback
 - Mobile-friendly tables and analytics layout
 
-### 7. Business Analytics
+### 9. Business Analytics
 
 Available only to **manager** and **primary** roles:
 
@@ -115,7 +162,18 @@ Available only to **manager** and **primary** roles:
 - Charts: top selling items, order status (bar + donut), revenue over time, payment methods, top customers
 - Range: last 7 / 30 / 90 days, all time, or custom dates
 
-### 8. General UI/UX
+### 10. Our Team Page (`team.html`)
+
+Public page showcasing INFINITY leadership and values:
+
+- **Hero** with company intro and quick stats
+- **Leadership** section with team member cards (photo, role, bio, skill tags)
+- **Our Team Values** — six value cards (Creativity, Team Work, Collaboration, Compassion, Passion, Happiness)
+- **Contact CTA** linking to home contact section
+- Responsive layout: team cards stack on mobile; values show **2 per row** on phones (matching home page style)
+- Team photos: `assets/images/team/{slug}.jpg` with SVG placeholder fallback
+
+### 11. General UI/UX
 
 - Responsive layout (`mazen.css`), mobile nav, lazy-loaded images
 - Scroll reveal animations on marketing pages (modals excluded)
@@ -134,9 +192,9 @@ Available only to **manager** and **primary** roles:
 | `complete-profile.html` | Finish profile after registration |
 | `user-dashboard.html` | Customer order history |
 | `dashboard.html` | Staff dashboard |
-| `payment.html` | Checkout |
+| `payment.html` | Checkout (Visa, Bank Transfer, InstaPay, COD + receipt upload) |
 | `order-success.html` | Order confirmation |
-| `team.html` | Team page |
+| `team.html` | Our Team (leadership & values) |
 | `terms.html` | Terms of service |
 | `privacy.html` | Privacy policy |
 | `delete-account.html` | Account deletion info |
@@ -172,8 +230,8 @@ OAuth: `/auth/google`, `/auth/facebook` (+ callbacks) when configured.
 
 | Method | Path | Access | Description |
 |--------|------|--------|-------------|
-| POST | `/api/orders` | Auth | Create order |
-| POST | `/api/process-payment` | Auth | Process payment (checkout) |
+| POST | `/api/orders` | Auth | Create order (bank / instapay / cash). Body: `paymentMethod`, `amount`, `currency`, `orderItems`, `vatApplied`, **`paymentReceiptData`** (base64 image, required for `bank` and `instapay`) |
+| POST | `/api/process-payment` | Auth | Process Visa card payment (checkout) |
 | GET | `/api/orders/me` | Auth | My orders |
 | GET | `/api/orders/:id` | Auth | Order details |
 | GET | `/api/orders/:id/pdf` | Auth | Order PDF |
@@ -188,7 +246,7 @@ OAuth: `/auth/google`, `/auth/facebook` (+ callbacks) when configured.
 | POST | `/api/dashboard/products` | manager, primary | Create product |
 | PATCH | `/api/dashboard/products/:productId/stock` | employee, manager, primary | Update stock, price, names, specs, image, active, etc. |
 | DELETE | `/api/dashboard/products/:productId` | manager, primary | `?permanent=1` removes from DB; without it, soft-hides (`active: false`). Dashboard delete uses permanent by default |
-| GET | `/api/dashboard/orders` | staff | Orders list |
+| GET | `/api/dashboard/orders` | staff | Orders list (includes `paymentReceiptImage` when set) |
 | PATCH | `/api/dashboard/orders/:id/status` | employee, manager, primary | Update status |
 | GET | `/api/dashboard/orders/:id/pdf` | staff | Order PDF |
 | GET | `/api/dashboard/customers` | staff | Customers |
@@ -217,17 +275,19 @@ OAuth: `/auth/google`, `/auth/facebook` (+ callbacks) when configured.
 2. Open a product for full specifications
 3. Add to cart (sign in to persist cart)
 4. Complete profile if prompted
-5. Checkout via **`payment.html`**
-6. View orders on **`user-dashboard.html`**
+5. Go to **`payment.html`**, select a payment method
+6. For **Bank Transfer** or **InstaPay**: copy details, complete payment, **upload your receipt screenshot**, then submit
+7. View orders on **`user-dashboard.html`**
 
 ### As Staff / Admin
 
 1. Sign in with a staff email (see `.env` role lists)
 2. Open **`http://localhost:3000/dashboard.html`**
 3. Use **Inventory** to edit or (manager/primary) add/delete products
-4. Use **Orders** / **Customers** for operations
-5. **Manager / primary:** use **Analytics** for business reports
-6. **Manager / primary:** use **User Management** to add staff accounts
+4. Use **Orders** to review orders, **open payment receipts** for bank/InstaPay, and update status
+5. Use **Customers** for customer profiles
+6. **Manager / primary:** use **Analytics** for business reports
+7. **Manager / primary:** use **User Management** to add staff accounts
 
 ### Adding a Product (Manager / Primary)
 
@@ -236,6 +296,17 @@ OAuth: `/auth/google`, `/auth/facebook` (+ callbacks) when configured.
 3. Upload an image or set path `assets/products/your-file.png`
 4. Add **Specification sections** with a title and English / Arabic lines
 5. Submit — product appears on **Our Products** when **Active** is Yes
+
+### Updating Team Photos
+
+Place portrait images in:
+
+```text
+assets/images/team/mohamed-zidan.jpg
+assets/images/team/mazen-mahmoud.jpg
+```
+
+Refresh **`team.html`** after adding files. SVG placeholders show if JPG is missing.
 
 ---
 
@@ -246,7 +317,8 @@ OAuth: `/auth/google`, `/auth/facebook` (+ callbacks) when configured.
 - **Mongoose** models: User, Product, Cart, Order, Session (MongoStore)
 - **Passport** + **bcrypt** for OAuth and passwords
 - **PDFKit** for order PDFs
-- Product images saved to `assets/products/` when uploaded as base64 from the dashboard
+- Product images → `assets/products/` (base64 upload from dashboard)
+- Payment receipts → `assets/orders/receipts/` (base64 upload from checkout)
 
 ---
 
@@ -299,15 +371,19 @@ http://localhost:3000/
 
 | Path | Role |
 |------|------|
-| `server.js` | API, auth, models, product CRUD, orders |
-| `dashboard.html` | Staff dashboard (inventory, analytics, users) |
+| `server.js` | API, auth, models, product CRUD, orders, receipt storage |
+| `dashboard.html` | Staff dashboard (inventory, orders, analytics, users) |
 | `products.html` | Storefront catalog + cart |
 | `product-details.html` | Product specs page |
+| `payment.html` | Checkout + receipt upload |
+| `team.html` | Our Team page |
 | `auth.html` | Login / register |
 | `user-dashboard.html` | Customer orders |
 | `script.js` | Shared frontend helpers, animations |
 | `mazen.css` | Global styles |
 | `assets/products/` | Product images |
+| `assets/images/team/` | Team member photos |
+| `assets/orders/receipts/` | Uploaded payment receipts |
 | `package.json` | Dependencies and `npm start` |
 
 ---
@@ -330,6 +406,9 @@ http://localhost:3000/
 | Edit modal empty | Hard refresh (`Ctrl+F5`) — fade-in animation conflict was fixed |
 | Product hidden after Active = No | Expected on website; still visible in staff Inventory |
 | Analytics tab missing | Only **manager** and **primary** see Business Analytics |
+| “Receipt required” on checkout | Select Bank Transfer or InstaPay and upload an image before Submit |
+| Receipt not visible in dashboard | Confirm order used bank/instapay; check `assets/orders/receipts/` on server |
+| Team photo not showing | Add `assets/images/team/{name}.jpg` and hard refresh |
 
 ---
 
