@@ -1002,7 +1002,7 @@
             <button class="dash-tab" data-section="add-product-section" id="add-product-tab" style="display:none;">Add Product</button>
             <button class="dash-tab" data-section="orders-section">Orders</button>
             <button class="dash-tab" data-section="customers-section">Customers</button>
-            <button class="dash-tab" data-section="analytics-section">Analytics</button>
+            <button class="dash-tab" data-section="analytics-section" id="analytics-tab" style="display:none;">Analytics</button>
             <button class="dash-tab" data-section="users-section">User Management</button>
         </div>
 
@@ -1345,6 +1345,7 @@
         const analyticsCharts = {};
 
         function canEditInventory() { return ['employee','manager','primary'].includes(currentRole); }
+        function canViewAnalytics() { return ['manager','primary'].includes(currentRole); }
         function canAddProducts() { return ['manager','primary'].includes(currentRole); }
         function canEditOrders() { return ['employee','manager','primary'].includes(currentRole); }
         function canManageUsers() { return ['employee','manager','primary'].includes(currentRole); }
@@ -1625,7 +1626,21 @@
             return { mode: 'days', days, from };
         }
 
+        function applyAnalyticsAccess() {
+            const tab = document.getElementById('analytics-tab');
+            const section = document.getElementById('analytics-section');
+            const allowed = canViewAnalytics();
+            if (tab) tab.style.display = allowed ? '' : 'none';
+            if (!allowed && section?.classList.contains('active')) {
+                section.classList.remove('active');
+                document.getElementById('inventory-section')?.classList.add('active');
+                document.querySelector('.dash-tab[data-section="inventory-section"]')?.classList.add('active');
+                document.getElementById('analytics-tab')?.classList.remove('active');
+            }
+        }
+
         function renderAnalytics() {
+            if (!canViewAnalytics()) return;
             const chartAvailable = typeof Chart !== 'undefined';
             const isPhone = window.matchMedia('(max-width: 680px)').matches;
             const range = getAnalyticsRange();
@@ -2630,6 +2645,7 @@
         });
         document.querySelectorAll('.dash-tab').forEach((btn) => {
             btn.addEventListener('click', () => {
+                if (btn.dataset.section === 'analytics-section' && !canViewAnalytics()) return;
                 document.querySelectorAll('.dash-tab').forEach((b) => b.classList.remove('active'));
                 document.querySelectorAll('.dash-section').forEach((s) => s.classList.remove('active'));
                 btn.classList.add('active');
@@ -2654,6 +2670,7 @@
             } else {
                 document.getElementById('spec-sections-list')?.closest('.spec-sections-builder')?.remove();
             }
+            applyAnalyticsAccess();
             document.getElementById('save-all-inventory-btn').disabled = !canEditInventory();
             if (currentRole === 'technical') {
                 document.getElementById('user-mgmt-note').textContent = 'Technical role: view-only access.';
