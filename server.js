@@ -235,6 +235,7 @@ const OrderSchema = new mongoose.Schema({
     billingAddress: { type: String },
     orderItems: { type: Array, default: [] },
     paymentMethod: { type: String, default: "visa" },
+    paymentReceiptImage: { type: String, default: "" },
     status: { type: String, default: "completed" },
     vatApplied: { type: Boolean, default: false }
 }, { timestamps: true });
@@ -390,6 +391,27 @@ function normalizeSpecSections(rawSections, rawSpecs, descriptionEn = "", descri
         return [{ title: "1. المواصفات الفنية", items: flatSpecs }];
     }
     return [];
+}
+
+function savePaymentReceipt(orderId, imageData) {
+    if (typeof imageData !== "string" || !imageData.startsWith("data:image/")) {
+        throw new Error("Invalid payment receipt image format");
+    }
+    const match = imageData.match(/^data:image\/(\w+);base64,(.+)$/);
+    if (!match) throw new Error("Invalid payment receipt image format");
+    let ext = String(match[1] || "png").toLowerCase();
+    if (ext === "jpeg") ext = "jpg";
+    if (!["png", "jpg", "webp", "gif"].includes(ext)) ext = "jpg";
+    const safeId = String(orderId || "").replace(/[^a-fA-F0-9]/g, "") || Date.now().toString();
+    const rel = `assets/orders/receipts/${safeId}.${ext}`;
+    const abs = path.join(__dirname, rel);
+    try {
+        fs.mkdirSync(path.dirname(abs), { recursive: true });
+        fs.writeFileSync(abs, Buffer.from(match[2], "base64"));
+    } catch (err) {
+        throw new Error(`Could not save payment receipt: ${err.message}`);
+    }
+    return rel;
 }
 
 function saveProductImage(productId, imagePath, imageData) {
@@ -701,9 +723,14 @@ app.post("/api/process-payment", requireAuth, async (req, res) => {
 // Non-card orders (bank transfer / instapay / cash)
 app.post("/api/orders", requireAuth, async (req, res) => {
     try {
-        const { paymentMethod, amount, currency, orderItems, vatApplied } = req.body || {};
+        const { paymentMethod, amount, currency, orderItems, vatApplied, paymentReceiptData } = req.body || {};
         if (!paymentMethod || typeof amount !== "number" || !currency) {
             return res.status(400).json({ error: "Missing order information" });
+        }
+        const method = String(paymentMethod).toLowerCase();
+        const needsReceipt = method === "bank" || method === "instapay";
+        if (needsReceipt && !paymentReceiptData) {
+            return res.status(400).json({ error: "Payment receipt image is required for this payment method" });
         }
         await reserveStock(orderItems);
 
@@ -722,15 +749,21 @@ app.post("/api/orders", requireAuth, async (req, res) => {
             customerCompanyName: user?.companyName || null,
             customerCompanyLocation: user?.companyLocation || null,
             orderItems: Array.isArray(orderItems) ? orderItems : [],
-            paymentMethod,
+            paymentMethod: method,
             status: "pending",
             vatApplied: !!vatApplied
         });
 
+        if (needsReceipt) {
+            const receiptPath = savePaymentReceipt(String(order._id), paymentReceiptData);
+            order.paymentReceiptImage = receiptPath;
+            await order.save();
+        }
+
         res.json({ success: true, orderId: order._id });
     } catch (error) {
         console.error("Create order error:", error);
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({ error: error?.message || "Internal server error" });
     }
 });
 

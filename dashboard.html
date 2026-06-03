@@ -485,6 +485,56 @@
         .order-item { display: flex; align-items: center; gap: .5rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: .35rem .45rem; }
         .order-item img { width: 36px; height: 36px; object-fit: cover; border-radius: 8px; border: 1px solid #dbe3ee; background: #fff; }
         .order-item .item-meta { font-size: .8rem; color: #334155; line-height: 1.25; }
+        .order-receipt-box {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #f0fdfa, #f8fafc);
+            border: 1px solid #99f6e4;
+        }
+        .order-receipt-box .receipt-label {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #0f766e;
+        }
+        .order-receipt-box .receipt-label i {
+            font-size: 0.9rem;
+        }
+        .order-receipt-thumb-wrap {
+            display: inline-block;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 2px 8px rgba(15, 61, 82, 0.08);
+        }
+        .order-receipt-thumb {
+            display: block;
+            width: 120px;
+            height: 90px;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .order-receipt-thumb-wrap:hover .order-receipt-thumb {
+            transform: scale(1.03);
+        }
+        .order-receipt-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            margin-top: 0.45rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #0891b2;
+            text-decoration: none;
+        }
+        .order-receipt-link:hover {
+            text-decoration: underline;
+        }
         .order-summary-box { margin-top: .35rem; font-size: .8rem; color: #334155; display: grid; gap: .15rem; }
         .order-action {
             display: flex;
@@ -2368,6 +2418,17 @@
                     `).join('')
                     : '<span class="muted">No items</span>';
 
+                const receiptPath = String(o.paymentReceiptImage || '').trim();
+                const receiptHtml = receiptPath
+                    ? `<div class="order-receipt-box">
+                            <span class="receipt-label"><i class="fas fa-receipt"></i> Payment receipt</span>
+                            <a class="order-receipt-thumb-wrap" href="${receiptPath}" target="_blank" rel="noopener noreferrer">
+                                <img class="order-receipt-thumb" src="${receiptPath}" alt="Payment receipt">
+                            </a>
+                            <br><a class="order-receipt-link" href="${receiptPath}" target="_blank" rel="noopener noreferrer"><i class="fas fa-external-link-alt"></i> Open full size</a>
+                       </div>`
+                    : '';
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td data-label="Order">${o.transactionId}<br><small class="muted">${new Date(o.createdAt).toLocaleString()}</small></td>
@@ -2381,6 +2442,7 @@
                             <div><strong>Payment:</strong> ${o.paymentMethod || '-'}</div>
                             <div><strong>VAT:</strong> ${o.vatApplied ? 'Applied' : 'No'}</div>
                             <div><strong>Billing Address:</strong> ${o.billingAddress || '-'}</div>
+                            ${receiptHtml}
                         </div>
                     </td>
                     <td data-label="Status"><span class="status-chip ${statusClass}">${o.status}</span></td>

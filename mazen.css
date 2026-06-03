@@ -8289,53 +8289,8 @@ nav {
         line-height: 1.2;
     }
 
-    .team-page .values-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 0.6rem;
-        margin: 1rem auto 0;
-    }
-
-    .team-page .value-card {
-        min-height: 108px;
-        padding: 0.75rem 0.5rem;
-        border-radius: 12px;
-        gap: 0.42rem;
-    }
-
-    .team-page .value-card i {
-        font-size: 1.55rem;
-        margin-bottom: 0;
-        display: inline-block;
-        animation: homeValueIconFloat 3.6s ease-in-out infinite;
-    }
-
-    .team-page .value-card h3 {
-        font-size: 0.95rem;
-        line-height: 1.2;
-        margin: 0;
-    }
-
     .team-page footer {
         padding-top: clamp(2.1rem, 7vw, 2.8rem);
-    }
-}
-
-@media (max-width: 420px) {
-    .team-page .values-grid {
-        gap: 0.5rem;
-    }
-
-    .team-page .value-card {
-        min-height: 100px;
-        padding: 0.65rem 0.45rem;
-    }
-
-    .team-page .value-card i {
-        font-size: 1.4rem;
-    }
-
-    .team-page .value-card h3 {
-        font-size: 0.9rem;
     }
 }
 
@@ -8838,9 +8793,66 @@ nav {
     }
 
     .team-page .team-values .values-grid {
-        grid-template-columns: 1fr;
-        max-width: 400px;
-        margin-inline: auto;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.6rem;
+        max-width: none;
+        margin-inline: 0;
+    }
+
+    .team-page .team-values .value-card {
+        align-items: center;
+        text-align: center;
+        justify-content: center;
+        min-height: 116px;
+        padding: 0.8rem 0.55rem;
+        border-radius: 12px;
+        gap: 0.45rem;
+    }
+
+    .team-page .team-values .value-card-icon {
+        width: 2.5rem;
+        height: 2.5rem;
+        margin-bottom: 0.35rem;
+        border-radius: 10px;
+    }
+
+    .team-page .team-values .value-card-icon i {
+        font-size: 1.2rem;
+        animation: homeValueIconFloat 3.6s ease-in-out infinite;
+    }
+
+    .team-page .team-values .value-card h3 {
+        font-size: 0.95rem;
+        line-height: 1.2;
+        margin: 0;
+    }
+
+    .team-page .team-values .value-card p {
+        display: none;
+    }
+}
+
+@media (max-width: 420px) {
+    .team-page .team-values .values-grid {
+        gap: 0.5rem;
+    }
+
+    .team-page .team-values .value-card {
+        min-height: 100px;
+        padding: 0.65rem 0.45rem;
+    }
+
+    .team-page .team-values .value-card-icon {
+        width: 2.25rem;
+        height: 2.25rem;
+    }
+
+    .team-page .team-values .value-card-icon i {
+        font-size: 1.05rem;
+    }
+
+    .team-page .team-values .value-card h3 {
+        font-size: 0.88rem;
     }
 }
 
