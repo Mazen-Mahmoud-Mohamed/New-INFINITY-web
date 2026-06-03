@@ -355,16 +355,22 @@
             });
 
             var position = 0;
+            var velocity = 0;
             var dragging = false;
+            var coasting = false;
             var dragStartX = 0;
             var dragStartPos = 0;
             var autoPausedUntil = 0;
-            var AUTO_RESUME_MS = 2800;
+            var AUTO_RESUME_MS = 3200;
             var lastTs = 0;
+            var moveSamples = [];
             var logos = Array.prototype.slice.call(track.querySelectorAll('.client-logo'));
             var lastSpots = [];
             var lastSpotAt = 0;
             var SPOT_EVERY_MS = 140;
+            var COAST_FRICTION = 0.988;
+            var MIN_COAST_SPEED = 18;
+            var MAX_COAST_SPEED = 1400;
 
             function wrapPos(p) {
                 var w = loopW;
@@ -376,6 +382,49 @@
 
             function autoSpeed() {
                 return loopW > 0 ? loopW / 55 : 48;
+            }
+
+            function maxCoastSpeed() {
+                return Math.min(MAX_COAST_SPEED, loopW > 0 ? loopW * 1.1 : MAX_COAST_SPEED);
+            }
+
+            function recordMoveSample(x) {
+                var now = performance.now();
+                moveSamples.push({ x: x, t: now });
+                while (moveSamples.length > 8) moveSamples.shift();
+                while (moveSamples.length > 2 && now - moveSamples[0].t > 160) moveSamples.shift();
+            }
+
+            function releaseVelocity() {
+                var now = performance.now();
+                var recent = moveSamples.filter(function (s) { return now - s.t <= 140; });
+                if (recent.length < 2) recent = moveSamples.slice(-2);
+                if (recent.length < 2) return 0;
+                var a = recent[0];
+                var b = recent[recent.length - 1];
+                var dt = (b.t - a.t) / 1000;
+                if (dt < 0.006) return 0;
+                return -(b.x - a.x) / dt;
+            }
+
+            function startCoast(speed) {
+                var cap = maxCoastSpeed();
+                velocity = Math.max(-cap, Math.min(cap, speed));
+                if (Math.abs(velocity) < MIN_COAST_SPEED) {
+                    velocity = 0;
+                    coasting = false;
+                    wrap.classList.remove('is-coasting');
+                    return;
+                }
+                coasting = true;
+                wrap.classList.add('is-coasting');
+                autoPausedUntil = Math.max(autoPausedUntil, performance.now() + AUTO_RESUME_MS);
+            }
+
+            function stopCoast() {
+                coasting = false;
+                velocity = 0;
+                wrap.classList.remove('is-coasting');
             }
 
             function updateSpotlight(now) {
@@ -396,11 +445,9 @@
                 scored.sort(function (a, b) { return a.d - b.d; });
                 var next = scored.slice(0, spotCount).map(function (x) { return x.el; });
 
-                // remove old
                 for (var j = 0; j < lastSpots.length; j++) {
                     if (next.indexOf(lastSpots[j]) === -1) lastSpots[j].classList.remove('is-spotlight');
                 }
-                // add new
                 for (var k = 0; k < next.length; k++) {
                     next[k].classList.add('is-spotlight');
                 }
@@ -409,14 +456,25 @@
 
             function tick(ts) {
                 if (!lastTs) lastTs = ts;
-                var dt = Math.min(0.064, (ts - lastTs) / 1000);
+                var dt = Math.min(0.05, (ts - lastTs) / 1000);
                 lastTs = ts;
+                var now = performance.now();
 
-                if (!dragging && performance.now() >= autoPausedUntil) {
+                if (coasting && !dragging) {
+                    position = wrapPos(position + velocity * dt);
+                    var decay = Math.pow(COAST_FRICTION, dt * 60);
+                    velocity *= decay;
+                    if (Math.abs(velocity) < MIN_COAST_SPEED) {
+                        stopCoast();
+                    } else {
+                        autoPausedUntil = Math.max(autoPausedUntil, now + AUTO_RESUME_MS);
+                    }
+                } else if (!dragging && now >= autoPausedUntil) {
                     position = wrapPos(position + autoSpeed() * dt);
                 }
+
                 track.style.transform = 'translate3d(' + (-position) + 'px,0,0)';
-                updateSpotlight(performance.now());
+                updateSpotlight(now);
                 requestAnimationFrame(tick);
             }
 
@@ -424,17 +482,21 @@
                 if (!e.isPrimary) return;
                 if (e.pointerType === 'mouse' && e.button !== 0) return;
                 if (e.cancelable) e.preventDefault();
+                stopCoast();
                 wrap.classList.add('is-dragging');
                 dragging = true;
                 dragStartX = e.clientX;
                 dragStartPos = position;
+                moveSamples = [{ x: e.clientX, t: performance.now() }];
                 try { wrap.setPointerCapture(e.pointerId); } catch (_) {}
             }
 
             function onPointerMove(e) {
                 if (!dragging || !e.isPrimary) return;
+                if (e.cancelable) e.preventDefault();
                 var dx = e.clientX - dragStartX;
                 position = wrapPos(dragStartPos - dx);
+                recordMoveSample(e.clientX);
             }
 
             function endDrag(e) {
@@ -444,21 +506,28 @@
                 try {
                     if (e && e.pointerId != null) wrap.releasePointerCapture(e.pointerId);
                 } catch (_) {}
-                autoPausedUntil = performance.now() + AUTO_RESUME_MS;
+                startCoast(releaseVelocity());
+                if (!coasting) {
+                    autoPausedUntil = performance.now() + AUTO_RESUME_MS;
+                }
             }
 
             wrap.addEventListener('pointerdown', onPointerDown);
             wrap.addEventListener('pointermove', onPointerMove);
             wrap.addEventListener('pointerup', endDrag);
             wrap.addEventListener('pointercancel', endDrag);
+            wrap.addEventListener('lostpointercapture', endDrag);
             wrap.addEventListener('dragstart', function (e) { e.preventDefault(); });
 
             wrap.addEventListener('wheel', function (e) {
                 if (Math.abs(e.deltaX) < Math.abs(e.deltaY)) return;
                 if (Math.abs(e.deltaX) < 1) return;
                 e.preventDefault();
-                position = wrapPos(position + e.deltaX * 0.45);
-                autoPausedUntil = performance.now() + AUTO_RESUME_MS;
+                stopCoast();
+                var impulse = e.deltaX * (e.deltaMode === 1 ? 28 : 1) * 2.2;
+                position = wrapPos(position + impulse * 0.35);
+                startCoast(impulse * 4);
+                autoPausedUntil = Math.max(autoPausedUntil, performance.now() + AUTO_RESUME_MS);
             }, { passive: false });
 
             requestAnimationFrame(tick);

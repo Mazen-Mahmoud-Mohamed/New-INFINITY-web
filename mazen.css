@@ -7930,6 +7930,22 @@ footer h2 {
     transform: scale(1.04);
 }
 
+.clients-marquee--js.is-coasting {
+    cursor: grabbing;
+}
+
+.clients-marquee--js.is-coasting .clients-marquee-track {
+    transition: none;
+}
+
+.clients-marquee--js.is-coasting .client-logo {
+    transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+}
+
+.clients-marquee--js.is-coasting .client-logo.is-spotlight {
+    transform: translateY(-4px) scale(1.04);
+}
+
 .clients-marquee .client-logo:hover {
     transform: translateY(-4px);
     z-index: 1;
