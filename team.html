@@ -6,12 +6,11 @@
     <title>Our Team - INFINITY Total-Com Solutions</title>
     <link rel="icon" href="assets/images/infinity-logo1.png" type="image/png">
     <link rel="apple-touch-icon" href="assets/images/infinity-logo1.png">
-    <link rel="stylesheet" href="mazen.css?v=20260506-1">
+    <link rel="stylesheet" href="mazen.css?v=20260603-4">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="team-page">
-    <!-- Navigation -->
     <nav>
         <div class="container">
             <a href="index.html" class="logo">
@@ -52,70 +51,152 @@
         </div>
     </nav>
 
-    <!-- Team Hero Section -->
-    <section class="hero team-hero">
-        <div class="hero-content">
-            <h1>Our Team</h1>
-            <p class="hero-text">Meet the dedicated professionals behind our success</p>
+    <section class="hero team-hero" aria-labelledby="team-hero-title">
+        <div class="team-hero-decor" aria-hidden="true">
+            <span class="team-hero-orb team-hero-orb--1"></span>
+            <span class="team-hero-orb team-hero-orb--2"></span>
+        </div>
+        <div class="hero-content team-hero-content">
+            <span class="team-hero-eyebrow"><i class="fas fa-users" aria-hidden="true"></i> People behind INFINITY</span>
+            <h1 id="team-hero-title">Our Team</h1>
+            <p class="hero-text">Leaders and engineers delivering fleet technology, security systems, and the digital platform powering our store and operations.</p>
+            <div class="team-hero-stats">
+                <div class="team-hero-stat">
+                    <span class="team-hero-stat-value">2+</span>
+                    <span class="team-hero-stat-label">Core specialists</span>
+                </div>
+                <div class="team-hero-stat">
+                    <span class="team-hero-stat-value">GPS</span>
+                    <span class="team-hero-stat-label">Fleet &amp; tracking</span>
+                </div>
+                <div class="team-hero-stat">
+                    <span class="team-hero-stat-value">Web</span>
+                    <span class="team-hero-stat-label">Built in-house</span>
+                </div>
+            </div>
         </div>
     </section>
 
-    <!-- Team Section -->
-    <section class="team-section">
+    <section class="team-section" aria-labelledby="team-section-title">
         <div class="container">
+            <header class="team-intro">
+                <span class="team-section-label">Meet the team</span>
+                <h2 id="team-section-title">Leadership</h2>
+                <p>Experienced professionals united to serve our clients across Egypt.</p>
+            </header>
+
             <div class="team-grid">
-                <div class="team-member">
-                    <img src="team-member1.jpg" alt="Team Member" class="member-image">
+                <article class="team-member">
+                    <div class="member-photo-wrap">
+                        <img
+                            src="assets/images/team/mohamed-zidan.jpg"
+                            alt="Portrait of Mohamed Zidan"
+                            class="member-image"
+                            width="400"
+                            height="480"
+                            loading="lazy"
+                            onerror="this.onerror=null;this.src='assets/images/team/mohamed-zidan.svg';">
+                        <div class="member-photo-shade" aria-hidden="true"></div>
+                    </div>
                     <div class="member-info">
-                        <h3>Mohamed Zidan</h3>
-                        <span class="position">Managing Director</span>
-                        <p class="bio">Leading our team in providing innovative GPS tracking and fleet management solutions.</p>
-                        <div class="skills">
-                            <span class="skill-tag">GPS Systems</span>
-                            <span class="skill-tag">Fleet Management</span>
-                            <span class="skill-tag">CCTV Systems</span>
+                        <div class="member-head">
+                            <h3>Mohamed Zidan</h3>
+                            <p class="position">
+                                <i class="fas fa-briefcase" aria-hidden="true"></i>
+                                <span>Managing Director</span>
+                            </p>
+                        </div>
+                        <p class="bio">Leads INFINITY in delivering GPS tracking, fleet management, and security solutions for businesses across Egypt.</p>
+                        <div class="skills" aria-label="Areas of expertise">
+                            <span class="skill-tag"><i class="fas fa-satellite-dish" aria-hidden="true"></i> GPS Systems</span>
+                            <span class="skill-tag"><i class="fas fa-truck" aria-hidden="true"></i> Fleet Management</span>
+                            <span class="skill-tag"><i class="fas fa-video" aria-hidden="true"></i> CCTV Systems</span>
                         </div>
                     </div>
-                </div>
-                <!-- Add more team members as needed -->
+                </article>
+
+                <article class="team-member team-member--featured">
+                    <span class="member-featured-badge"><i class="fas fa-code" aria-hidden="true"></i> Platform builder</span>
+                    <div class="member-photo-wrap">
+                        <img
+                            src="assets/images/team/mazen-mahmoud.jpg"
+                            alt="Portrait of Mazen Mahmoud Mohamed"
+                            class="member-image"
+                            width="400"
+                            height="480"
+                            loading="lazy"
+                            onerror="this.onerror=null;this.src='assets/images/team/mazen-mahmoud.svg';">
+                        <div class="member-photo-shade" aria-hidden="true"></div>
+                    </div>
+                    <div class="member-info">
+                        <div class="member-head">
+                            <h3>Mazen Mahmoud Mohamed</h3>
+                            <p class="position">
+                                <i class="fas fa-microchip" aria-hidden="true"></i>
+                                <span>Communication &amp; Computer Engineer</span>
+                            </p>
+                        </div>
+                        <p class="bio">Designed and built this website and its online store, staff dashboard, and customer portal — connecting our catalog, orders, and team tools in one platform.</p>
+                        <div class="skills" aria-label="Areas of expertise">
+                            <span class="skill-tag"><i class="fas fa-laptop-code" aria-hidden="true"></i> Web Development</span>
+                            <span class="skill-tag"><i class="fas fa-layer-group" aria-hidden="true"></i> Full-Stack</span>
+                            <span class="skill-tag"><i class="fas fa-server" aria-hidden="true"></i> Node.js</span>
+                            <span class="skill-tag"><i class="fas fa-broadcast-tower" aria-hidden="true"></i> Communication Systems</span>
+                            <span class="skill-tag"><i class="fas fa-cogs" aria-hidden="true"></i> Computer Engineering</span>
+                        </div>
+                    </div>
+                </article>
+            </div>
+
+            <div class="team-cta">
+                <p>Want to work with our team or explore our solutions?</p>
+                <a href="index.html#contact" class="btn team-cta-btn"><i class="fas fa-envelope" aria-hidden="true"></i> Get in touch</a>
             </div>
         </div>
     </section>
 
-    <!-- Values Section -->
-    <section class="values-section">
+    <section class="values-section team-values" aria-labelledby="team-values-title">
         <div class="container">
-            <h2>Our Team Values</h2>
+            <header class="team-values-header">
+                <span class="team-section-label">What drives us</span>
+                <h2 id="team-values-title">Our Team Values</h2>
+                <p>Principles that shape how we build products, support clients, and grow together.</p>
+            </header>
             <div class="values-grid">
                 <div class="value-card">
-                    <i class="fas fa-lightbulb"></i>
+                    <span class="value-card-icon" aria-hidden="true"><i class="fas fa-lightbulb"></i></span>
                     <h3>Creativity</h3>
+                    <p>Innovative thinking for every fleet and tech challenge.</p>
                 </div>
                 <div class="value-card">
-                    <i class="fas fa-users"></i>
+                    <span class="value-card-icon" aria-hidden="true"><i class="fas fa-users"></i></span>
                     <h3>Team Work</h3>
+                    <p>Shared goals and clear communication across roles.</p>
                 </div>
                 <div class="value-card">
-                    <i class="fas fa-handshake"></i>
+                    <span class="value-card-icon" aria-hidden="true"><i class="fas fa-handshake"></i></span>
                     <h3>Collaboration</h3>
+                    <p>Partnership with clients from planning to delivery.</p>
                 </div>
                 <div class="value-card">
-                    <i class="fas fa-heart"></i>
+                    <span class="value-card-icon" aria-hidden="true"><i class="fas fa-heart"></i></span>
                     <h3>Compassion</h3>
+                    <p>Support that respects people and their time.</p>
                 </div>
                 <div class="value-card">
-                    <i class="fas fa-fire"></i>
+                    <span class="value-card-icon" aria-hidden="true"><i class="fas fa-fire"></i></span>
                     <h3>Passion</h3>
+                    <p>Energy and care in every installation and line of code.</p>
                 </div>
                 <div class="value-card">
-                    <i class="fas fa-smile"></i>
+                    <span class="value-card-icon" aria-hidden="true"><i class="fas fa-smile"></i></span>
                     <h3>Happiness</h3>
+                    <p>Positive outcomes for our team and customers.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Footer -->
     <footer id="contact">
         <div class="container">
             <h2>Contact Us</h2>
@@ -141,4 +222,4 @@
 
     <script src="script.js?v=20260429-3"></script>
 </body>
-</html> 
+</html>
