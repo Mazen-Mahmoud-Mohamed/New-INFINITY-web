@@ -228,13 +228,22 @@
             window.location.href = "/auth.html";
         });
 
+        function syncPasswordToggle(btn, input) {
+            const hidden = input.type === "password";
+            btn.innerHTML = hidden
+                ? '<i class="fas fa-eye-slash"></i>'
+                : '<i class="fas fa-eye"></i>';
+            btn.setAttribute("aria-label", hidden ? "Show password" : "Hide password");
+        }
+
         document.querySelectorAll(".toggle-password").forEach((btn) => {
+            const target = document.getElementById(btn.getAttribute("data-target"));
+            if (!target) return;
+            syncPasswordToggle(btn, target);
             btn.addEventListener("click", () => {
-                const target = document.getElementById(btn.getAttribute("data-target"));
-                if (!target) return;
                 const hidden = target.type === "password";
                 target.type = hidden ? "text" : "password";
-                btn.innerHTML = hidden ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
+                syncPasswordToggle(btn, target);
             });
         });
 

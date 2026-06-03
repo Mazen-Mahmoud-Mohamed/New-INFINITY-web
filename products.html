@@ -947,11 +947,10 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const categoryBtns = document.querySelectorAll('.category-btn');
-            const productCards = document.querySelectorAll('.product-card');
+            const productsWrapper = document.querySelector('.products-wrapper');
             const cartIcon = document.querySelector('.cart-icon');
             const cartSidebar = document.querySelector('.cart-sidebar');
             const closeCart = document.querySelector('.close-cart');
-            const addToCartBtns = document.querySelectorAll('.add-to-cart-btn');
             const cartItems = document.querySelector('.cart-items');
             const subtotalAmount = document.querySelector('.subtotal-amount');
             const installationAmount = document.querySelector('.installation-amount');
@@ -964,6 +963,54 @@
             let toastTimer;
             /** True if user changed cart after page init — avoids race where late /api/cart GET wipes the count */
             let cartUserMutated = false;
+
+            function escapeHtml(value) {
+                return String(value ?? '')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/"/g, '&quot;');
+            }
+
+            function formatMoneyEGP(value) {
+                return Number(value || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+
+            function createProductCardElement(p) {
+                const card = document.createElement('div');
+                const price = Number(p.price || 0);
+                const install = Number(p.installation || 0);
+                card.className = 'product-card';
+                card.dataset.category = p.category || 'gps';
+                card.dataset.productId = p.productId;
+                card.innerHTML = `
+                    <img src="${escapeHtml(p.image || fallbackCartImage)}" alt="${escapeHtml(p.name || '')}">
+                    <div class="product-info">
+                        <h3>${escapeHtml(p.name || '')}</h3>
+                        <h3 class="arabic-title">${escapeHtml(p.nameAr || '')}</h3>
+                        <p class="product-card-hint"><i class="fas fa-arrow-right"></i> View specifications</p>
+                        <p class="product-description">${escapeHtml(p.descriptionEn || p.name || '')}</p>
+                        <p class="product-description-ar">${escapeHtml(p.descriptionAr || p.nameAr || '')}</p>
+                        <div class="product-price">
+                            <span class="price">EGP ${formatMoneyEGP(price)}</span>
+                            <div class="installation-price"><span>Installation: EGP ${formatMoneyEGP(install)}</span></div>
+                            <button class="add-to-cart-btn" data-id="${escapeHtml(p.productId)}" data-name="${escapeHtml(p.name || '')}" data-name-ar="${escapeHtml(p.nameAr || '')}" data-price="${price}" data-installation="${install}">Add to Cart</button>
+                        </div>
+                    </div>
+                `;
+                return card;
+            }
+
+            function renderDynamicProducts(products) {
+                if (!productsWrapper) return;
+                const existingIds = new Set(
+                    [...productsWrapper.querySelectorAll('.product-card')].map((c) => c.dataset.productId)
+                );
+                products.forEach((p) => {
+                    if (!p?.productId || existingIds.has(p.productId)) return;
+                    productsWrapper.appendChild(createProductCardElement(p));
+                    existingIds.add(p.productId);
+                });
+            }
 
             function showThemeToast(message, isError = false, variant = '') {
                 const toast = document.getElementById('theme-toast');
@@ -1000,12 +1047,7 @@
                 }));
             }
 
-            async function loadStockStatuses() {
-                try {
-                    const res = await fetch('/api/products/public');
-                    if (!res.ok) return;
-                    const data = await res.json();
-                    const products = Array.isArray(data.products) ? data.products : [];
+            function applyStockFromProducts(products) {
                     productStockMap = {};
                     products.forEach((p) => {
                         productStockMap[p.productId] = Number(p.stock || 0);
@@ -1039,13 +1081,20 @@
                             }
                             if (addBtn) {
                                 addBtn.dataset.name = p.name || addBtn.dataset.name;
+                                if (p.nameAr) addBtn.dataset.nameAr = p.nameAr;
                                 addBtn.dataset.price = String(p.price ?? addBtn.dataset.price);
                                 addBtn.dataset.installation = String(p.installation ?? addBtn.dataset.installation);
                             }
+                            const arTitle = card?.querySelector('.arabic-title');
+                            if (arTitle && p.nameAr) arTitle.textContent = p.nameAr;
+                            const descEn = card?.querySelector('.product-description');
+                            const descAr = card?.querySelector('.product-description-ar');
+                            if (descEn && p.descriptionEn) descEn.textContent = p.descriptionEn;
+                            if (descAr && p.descriptionAr) descAr.textContent = p.descriptionAr;
                         }
                     });
 
-                    addToCartBtns.forEach((btn) => {
+                    document.querySelectorAll('.add-to-cart-btn').forEach((btn) => {
                         const id = btn.dataset.id;
                         const stock = productStockMap[id];
                         const card = btn.closest('.product-card');
@@ -1069,8 +1118,34 @@
                             btn.textContent = 'Add to Cart';
                         }
                     });
+            }
+
+            function hideInactiveCatalogCards(activeProducts) {
+                const activeIds = new Set((activeProducts || []).map((p) => p.productId));
+                document.querySelectorAll('.products-wrapper .product-card').forEach((card) => {
+                    const pid = card.dataset.productId;
+                    if (!pid) return;
+                    if (!activeIds.has(pid)) {
+                        card.style.display = 'none';
+                        card.dataset.inactive = '1';
+                    } else {
+                        card.style.display = '';
+                        delete card.dataset.inactive;
+                    }
+                });
+            }
+
+            async function loadCatalogAndStock() {
+                try {
+                    const res = await fetch('/api/products/public');
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    const products = Array.isArray(data.products) ? data.products : [];
+                    renderDynamicProducts(products);
+                    hideInactiveCatalogCards(products);
+                    applyStockFromProducts(products);
                 } catch (e) {
-                    // keep old behavior on API failure
+                    // keep static catalog on API failure
                 }
             }
 
@@ -1169,7 +1244,8 @@
                 const searchTerm = this.value.toLowerCase();
                 const activeCategory = document.querySelector('.category-btn.active').dataset.category;
 
-                productCards.forEach(card => {
+                document.querySelectorAll('.product-card').forEach(card => {
+                    if (card.dataset.inactive === '1') return;
                     const productName = card.querySelector('h3').textContent.toLowerCase();
                     const productNameAr = card.querySelector('.arabic-title').textContent.toLowerCase();
                     const productDesc = card.querySelector('.product-description').textContent.toLowerCase();
@@ -1227,14 +1303,14 @@
                 });
             });
 
-            // Product card click -> dedicated product details page
-            productCards.forEach((card) => {
-                card.addEventListener('click', (e) => {
-                    if (e.target.closest('.add-to-cart-btn')) return;
-                    const productId = card.dataset.productId;
-                    if (!productId) return;
-                    window.location.href = `product-details.html?id=${encodeURIComponent(productId)}`;
-                });
+            // Product card click -> dedicated product details page (includes dynamically added cards)
+            productsWrapper?.addEventListener('click', (e) => {
+                if (e.target.closest('.add-to-cart-btn')) return;
+                const card = e.target.closest('.product-card');
+                if (!card) return;
+                const productId = card.dataset.productId;
+                if (!productId) return;
+                window.location.href = `product-details.html?id=${encodeURIComponent(productId)}`;
             });
 
             // Cart functionality (toggle + stopPropagation so global handlers do not steal taps)
@@ -1321,48 +1397,50 @@
                 totalAmount.textContent = `EGP ${(subtotal + installation).toFixed(2)}`;
             }
 
-            addToCartBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const id = btn.dataset.id;
-                    const name = btn.dataset.name;
-                    const nameAr = btn.dataset.nameAr || getProductArabicNameById(id);
-                    const price = parseFloat(btn.dataset.price);
-                    const installation = parseFloat(btn.dataset.installation) || 0;
-                    const image = getProductImageById(id);
-                    const availableStock = Number(productStockMap[id] ?? Infinity);
-                    const currentQtyInCart = cart.find(item => item.id === id)?.quantity || 0;
+            productsWrapper?.addEventListener('click', (e) => {
+                const btn = e.target.closest('.add-to-cart-btn');
+                if (!btn || btn.disabled) return;
+                e.stopPropagation();
 
-                    if (currentQtyInCart >= availableStock) {
-                        showThemeToast('No more quantity available for this product.', false, 'warning');
-                        return;
-                    }
+                const id = btn.dataset.id;
+                const name = btn.dataset.name;
+                const nameAr = btn.dataset.nameAr || getProductArabicNameById(id);
+                const price = parseFloat(btn.dataset.price);
+                const installation = parseFloat(btn.dataset.installation) || 0;
+                const image = getProductImageById(id);
+                const availableStock = Number(productStockMap[id] ?? Infinity);
+                const currentQtyInCart = cart.find(item => item.id === id)?.quantity || 0;
 
-                    const existingItem = cart.find(item => item.id === id);
-                    if (existingItem) {
-                        existingItem.quantity++;
-                    } else {
-                        cart.push({
-                            id,
-                            name,
-                            nameAr,
-                            price,
-                            installation,
-                            image,
-                            quantity: 1
-                        });
-                    }
+                if (currentQtyInCart >= availableStock) {
+                    showThemeToast('No more quantity available for this product.', false, 'warning');
+                    return;
+                }
 
-                    cartUserMutated = true;
-                    updateCart();
-                    persistCart(true);
-                    btn.classList.add('added');
-                    btn.textContent = 'Added to Cart';
-                    
-                    setTimeout(() => {
-                        btn.classList.remove('added');
-                        btn.textContent = 'Add to Cart';
-                    }, 2000);
-                });
+                const existingItem = cart.find(item => item.id === id);
+                if (existingItem) {
+                    existingItem.quantity++;
+                } else {
+                    cart.push({
+                        id,
+                        name,
+                        nameAr,
+                        price,
+                        installation,
+                        image,
+                        quantity: 1
+                    });
+                }
+
+                cartUserMutated = true;
+                updateCart();
+                persistCart(true);
+                btn.classList.add('added');
+                btn.textContent = 'Added to Cart';
+
+                setTimeout(() => {
+                    btn.classList.remove('added');
+                    if (!btn.disabled) btn.textContent = 'Add to Cart';
+                }, 2000);
             });
 
             cartItems.addEventListener('change', (e) => {
@@ -1430,7 +1508,7 @@
 
             // Load cart from account (or localStorage fallback)
             loadCartFromAccount();
-            loadStockStatuses();
+            loadCatalogAndStock();
 
         });
     </script>

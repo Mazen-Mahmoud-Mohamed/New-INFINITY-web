@@ -7,6 +7,7 @@
     <link rel="icon" href="assets/images/infinity-logo1.png" type="image/png">
     <link rel="apple-touch-icon" href="assets/images/infinity-logo1.png">
     <link rel="stylesheet" href="mazen.css?v=20260507-1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { background: #f4f7fb; }
@@ -131,6 +132,325 @@
         .muted { color: #64748b; font-size: .85rem; }
         .user-create { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: .55rem; margin-bottom: .8rem; }
         .user-create input, .user-create select { padding: .5rem; border: 1px solid #cbd5e1; border-radius: 8px; }
+        .product-create-form {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: .65rem;
+        }
+        .product-create-form .full { grid-column: 1 / -1; }
+        .product-create-form label {
+            display: grid;
+            gap: .28rem;
+            color: #334155;
+            font-size: .84rem;
+            font-weight: 600;
+        }
+        .product-create-form input,
+        .product-create-form select,
+        .product-create-form textarea {
+            width: 100%;
+            padding: .5rem .55rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: .9rem;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        .product-create-form textarea { min-height: 72px; resize: vertical; }
+        .product-create-actions {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            gap: .65rem;
+            flex-wrap: wrap;
+        }
+        .product-image-preview {
+            width: 88px;
+            height: 88px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+        .product-create-hint { margin: 0; color: #64748b; font-size: .82rem; }
+        .spec-sections-builder { display: grid; gap: .65rem; }
+        .spec-builder-head { display: flex; justify-content: space-between; align-items: center; gap: .5rem; flex-wrap: wrap; }
+        .spec-builder-head h4 { margin: 0; color: #0f172a; font-size: .95rem; }
+        .spec-section-block {
+            border: 1px solid #dbe3ee;
+            border-radius: 10px;
+            padding: .65rem;
+            background: #f8fbff;
+            display: grid;
+            gap: .45rem;
+        }
+        .spec-section-block .block-actions { display: flex; justify-content: flex-end; }
+        .dash-btn.danger { background: #dc2626; color: #fff; }
+        .dash-btn.danger.ghost { background: #fee2e2; color: #991b1b; }
+        .inventory-action-btn { font-size: .78rem; padding: .35rem .55rem; margin: .12rem .18rem .12rem 0; }
+        .inventory-actions { display: flex; flex-wrap: wrap; gap: .2rem; }
+        .inventory-row-inactive { background: #fffbeb; }
+        .inventory-row-inactive td { opacity: .92; }
+        .inventory-hidden-badge {
+            display: inline-block;
+            margin-top: .2rem;
+            padding: .12rem .45rem;
+            border-radius: 999px;
+            background: #fef3c7;
+            color: #92400e;
+            font-size: .72rem;
+            font-weight: 700;
+        }
+        .active-chip {
+            display: inline-block;
+            padding: .18rem .5rem;
+            border-radius: 999px;
+            font-size: .78rem;
+            font-weight: 700;
+        }
+        .active-chip.yes { background: #dcfce7; color: #166534; }
+        .active-chip.no { background: #fee2e2; color: #991b1b; }
+        .product-edit-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: .75rem;
+        }
+        .product-edit-modal.open { display: flex; }
+        .product-edit-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, .5);
+            backdrop-filter: blur(2px);
+        }
+        .product-edit-dialog {
+            position: relative;
+            z-index: 1;
+            width: min(860px, 100%);
+            height: min(92vh, 900px);
+            max-height: 92vh;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 24px 60px rgba(2, 6, 23, .28);
+            overflow: hidden;
+        }
+        .product-edit-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: .5rem;
+            padding: 1rem 1.15rem .85rem;
+            border-bottom: 1px solid #e2e8f0;
+            flex-shrink: 0;
+            background: #fff;
+        }
+        .product-edit-head h3 { margin: 0; color: #0891b2; font-size: 1.2rem; }
+        .product-edit-head p { margin: .2rem 0 0; color: #64748b; font-size: .82rem; }
+        .product-edit-close {
+            border: none;
+            background: #e2e8f0;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.25rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        .product-edit-close:hover { background: #cbd5e1; }
+        .edit-product-form {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+        }
+        .edit-form-body {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 1rem 1.15rem;
+            display: grid;
+            gap: 1rem;
+            align-content: start;
+            -webkit-overflow-scrolling: touch;
+        }
+        .product-edit-modal .edit-form-section,
+        .product-edit-modal section {
+            opacity: 1 !important;
+            transform: none !important;
+            visibility: visible !important;
+        }
+        .edit-form-section {
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: .85rem .9rem;
+            background: #fafbfc;
+        }
+        .edit-form-section h4 {
+            margin: 0 0 .65rem;
+            font-size: .92rem;
+            color: #0f172a;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+        }
+        .edit-form-section h4 i { color: #0891b2; font-size: .88rem; }
+        .edit-form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: .6rem;
+        }
+        .edit-form-grid .full { grid-column: 1 / -1; }
+        .edit-form-grid label {
+            display: grid;
+            gap: .28rem;
+            font-size: .8rem;
+            font-weight: 600;
+            color: #475569;
+        }
+        .edit-form-grid input,
+        .edit-form-grid select,
+        .edit-form-grid textarea {
+            width: 100%;
+            padding: .5rem .55rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: .9rem;
+            box-sizing: border-box;
+            font-family: inherit;
+            background: #fff;
+        }
+        .edit-form-grid input:focus,
+        .edit-form-grid select:focus,
+        .edit-form-grid textarea:focus {
+            outline: none;
+            border-color: #0891b2;
+            box-shadow: 0 0 0 3px rgba(8, 145, 178, .12);
+        }
+        .edit-form-grid input[readonly] { background: #f1f5f9; color: #64748b; }
+        .edit-form-grid textarea { min-height: 72px; resize: vertical; }
+        .edit-form-hint {
+            margin: .35rem 0 0;
+            font-size: .78rem;
+            color: #64748b;
+            line-height: 1.4;
+        }
+        .edit-image-panel {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: .85rem;
+            align-items: start;
+        }
+        .edit-image-preview-box {
+            width: 120px;
+            height: 120px;
+            border-radius: 12px;
+            border: 1px solid #dbe3ee;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .edit-image-preview-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .edit-image-fields { display: grid; gap: .55rem; }
+        .edit-form-footer {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: .55rem;
+            flex-wrap: wrap;
+            padding: .85rem 1.15rem;
+            border-top: 1px solid #e2e8f0;
+            background: #f8fafc;
+            flex-shrink: 0;
+        }
+        #edit-product-status { flex: 1; text-align: left; min-width: 120px; }
+        .spec-section-block {
+            border: 1px solid #dbe7f3;
+            border-radius: 10px;
+            padding: .7rem;
+            background: #fff;
+            margin-bottom: .55rem;
+        }
+        .spec-section-block:last-child { margin-bottom: 0; }
+        .spec-section-top {
+            display: flex;
+            gap: .45rem;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            margin-bottom: .55rem;
+        }
+        .spec-section-top label { flex: 1; min-width: 180px; margin: 0; }
+        .spec-lines-list { display: grid; gap: .45rem; }
+        .spec-line-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: .35rem;
+            align-items: start;
+            padding: .45rem;
+            border-radius: 8px;
+            background: #f8fbff;
+            border: 1px solid #e8f0f7;
+        }
+        .spec-line-fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: .4rem;
+        }
+        .spec-line-fields label {
+            display: grid;
+            gap: .2rem;
+            margin: 0;
+            font-size: .72rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: .02em;
+        }
+        .spec-line-fields input {
+            font-size: .86rem;
+            padding: .42rem .5rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 7px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .spec-line-remove {
+            border: none;
+            background: #fee2e2;
+            color: #b91c1c;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            line-height: 1;
+            margin-top: 1.1rem;
+        }
+        .spec-section-actions {
+            display: flex;
+            gap: .4rem;
+            flex-wrap: wrap;
+            margin-top: .5rem;
+        }
+        .spec-section-actions .dash-btn { font-size: .78rem; padding: .38rem .6rem; }
+        @media (max-width: 680px) {
+            .edit-form-grid, .spec-line-fields { grid-template-columns: 1fr; }
+            .edit-image-panel { grid-template-columns: 1fr; }
+            .edit-image-preview-box { width: 100%; max-width: 160px; }
+        }
         .section-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem; }
         .section-head select {
             padding: .45rem .65rem;
@@ -304,7 +624,115 @@
         }
         .dash-toast.success { background: linear-gradient(135deg, #0f766e, #0891b2); }
         .dash-toast.error { background: linear-gradient(135deg, #b91c1c, #ef4444); }
-        @media (max-width: 1050px) { .user-create { grid-template-columns: 1fr 1fr; } }
+        .dash-dialog {
+            position: fixed;
+            inset: 0;
+            z-index: 1400;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .dash-dialog.open { display: flex; }
+        .dash-dialog-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, .5);
+            backdrop-filter: blur(3px);
+            animation: dashDialogFadeIn .2s ease;
+        }
+        .dash-dialog-panel {
+            position: relative;
+            width: min(420px, 100%);
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 24px 60px rgba(2, 6, 23, .28);
+            padding: 1.25rem 1.35rem 1.15rem;
+            animation: dashDialogPopIn .22s ease;
+        }
+        @keyframes dashDialogFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes dashDialogPopIn {
+            from { opacity: 0; transform: translateY(10px) scale(.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .dash-dialog-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            margin: 0 auto .75rem;
+        }
+        .dash-dialog-icon.danger {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        .dash-dialog-icon.info {
+            background: #e0f2fe;
+            color: #0891b2;
+        }
+        .dash-dialog-icon.warning {
+            background: #fef3c7;
+            color: #d97706;
+        }
+        .dash-dialog-title {
+            margin: 0 0 .45rem;
+            text-align: center;
+            color: #0f172a;
+            font-size: 1.12rem;
+            font-weight: 800;
+            line-height: 1.3;
+        }
+        .dash-dialog-message {
+            margin: 0;
+            text-align: center;
+            color: #334155;
+            font-size: .94rem;
+            line-height: 1.5;
+        }
+        .dash-dialog-detail {
+            margin: .55rem 0 0;
+            text-align: center;
+            color: #64748b;
+            font-size: .86rem;
+            line-height: 1.45;
+        }
+        .dash-dialog-product {
+            display: inline-block;
+            margin-top: .35rem;
+            padding: .2rem .5rem;
+            border-radius: 8px;
+            background: #f1f5f9;
+            color: #0f172a;
+            font-weight: 700;
+            font-size: .84rem;
+        }
+        .dash-dialog-actions {
+            display: flex;
+            gap: .55rem;
+            margin-top: 1.1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .dash-dialog-actions .dash-btn {
+            min-width: 108px;
+            padding: .58rem 1rem;
+        }
+        .dash-dialog-actions .dash-btn.danger {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+        }
+        .dash-dialog-actions .dash-btn.danger:hover {
+            filter: brightness(1.05);
+        }
+        @media (max-width: 1050px) {
+            .user-create { grid-template-columns: 1fr 1fr; }
+            .product-create-form { grid-template-columns: 1fr; }
+        }
         @media (max-width: 680px) {
             .dashboard-wrap { padding: 0 .55rem; margin: 1rem auto; }
             .dash-card {
@@ -316,6 +744,7 @@
             .dash-table { min-width: 920px; }
             .dash-table th, .dash-table td { padding: .5rem .45rem; }
             .user-create { grid-template-columns: 1fr; }
+            .product-create-form { grid-template-columns: 1fr; }
             .dash-topbar {
                 flex-direction: column;
                 align-items: stretch;
@@ -570,6 +999,7 @@
 
         <div class="dash-tabs">
             <button class="dash-tab active" data-section="inventory-section">Inventory</button>
+            <button class="dash-tab" data-section="add-product-section" id="add-product-tab" style="display:none;">Add Product</button>
             <button class="dash-tab" data-section="orders-section">Orders</button>
             <button class="dash-tab" data-section="customers-section">Customers</button>
             <button class="dash-tab" data-section="analytics-section">Analytics</button>
@@ -586,9 +1016,72 @@
                     </div>
                 </div>
                 <table class="dash-table" id="products-table">
-                    <thead><tr><th>Product</th><th>Image</th><th>Price</th><th>Install</th><th>Stock</th><th>Active</th><th>Update</th></tr></thead>
+                    <thead><tr><th>Product</th><th>Image</th><th>Price</th><th>Install</th><th>Stock</th><th>Active</th><th>Actions</th></tr></thead>
                     <tbody></tbody>
                 </table>
+            </div>
+        </div>
+
+        <div id="add-product-section" class="dash-section">
+            <div class="dash-card">
+                <div class="section-head">
+                    <h3>Add New Product</h3>
+                </div>
+                <p class="product-create-hint">New products appear on the Our Products page and can be ordered by customers. Image: upload a file or enter a path like <code>assets/products/item.png</code>.</p>
+                <form id="add-product-form" class="product-create-form">
+                    <label>Product ID (optional)
+                        <input id="new-product-id" placeholder="auto-generated from name">
+                    </label>
+                    <label>Category
+                        <select id="new-product-category" required>
+                            <option value="gps">GPS Devices</option>
+                            <option value="cctv">CCTV Systems</option>
+                            <option value="sensors">Sensors</option>
+                        </select>
+                    </label>
+                    <label>Name (English) *
+                        <input id="new-product-name" required placeholder="GPS Tracker Pro">
+                    </label>
+                    <label>Name (Arabic)
+                        <input id="new-product-name-ar" placeholder="جهاز تتبع">
+                    </label>
+                    <label>Price (EGP) *
+                        <input id="new-product-price" type="number" min="0" step="0.01" required>
+                    </label>
+                    <label>Installation (EGP)
+                        <input id="new-product-installation" type="number" min="0" step="0.01" value="0">
+                    </label>
+                    <label>Stock *
+                        <input id="new-product-stock" type="number" min="0" step="1" value="0" required>
+                    </label>
+                    <label>Image path (optional if uploading)
+                        <input id="new-product-image-path" placeholder="assets/products/my-item.png">
+                    </label>
+                    <label class="full">Upload image
+                        <input id="new-product-image-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+                    </label>
+                    <div class="full" id="new-product-image-preview-wrap" style="display:none;">
+                        <img id="new-product-image-preview" class="product-image-preview" alt="Preview">
+                    </div>
+                    <label class="full">Description (English)
+                        <textarea id="new-product-desc-en" placeholder="Short product description for the catalog"></textarea>
+                    </label>
+                    <label class="full">Description (Arabic)
+                        <textarea id="new-product-desc-ar" placeholder="وصف المنتج بالعربية"></textarea>
+                    </label>
+                    <div class="full spec-sections-builder">
+                        <div class="spec-builder-head">
+                            <h4>Specification Sections</h4>
+                            <button type="button" class="dash-btn ghost" id="add-spec-section-btn">+ Add Section</button>
+                        </div>
+                        <p class="product-create-hint">Each section has a title and separate English / Arabic fields per specification line.</p>
+                        <div id="spec-sections-list"></div>
+                    </div>
+                    <div class="product-create-actions">
+                        <button type="submit" class="dash-btn primary" id="create-product-btn">Add Product</button>
+                        <span id="add-product-status" class="muted"></span>
+                    </div>
+                </form>
             </div>
         </div>
 
@@ -735,6 +1228,112 @@
     </div>
     <div id="dash-toast" class="dash-toast" role="status" aria-live="polite"></div>
 
+    <div id="dash-dialog" class="dash-dialog" aria-hidden="true">
+        <div class="dash-dialog-backdrop" id="dash-dialog-backdrop"></div>
+        <div class="dash-dialog-panel" role="alertdialog" aria-modal="true" aria-labelledby="dash-dialog-title" aria-describedby="dash-dialog-message">
+            <div class="dash-dialog-icon danger" id="dash-dialog-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <h3 class="dash-dialog-title" id="dash-dialog-title">Confirm</h3>
+            <p class="dash-dialog-message" id="dash-dialog-message"></p>
+            <p class="dash-dialog-detail" id="dash-dialog-detail"></p>
+            <div class="dash-dialog-actions" id="dash-dialog-actions"></div>
+        </div>
+    </div>
+
+    <div id="edit-product-modal" class="product-edit-modal" aria-hidden="true">
+        <div class="product-edit-backdrop" id="edit-product-backdrop"></div>
+        <div class="product-edit-dialog" role="dialog" aria-labelledby="edit-product-title">
+            <div class="product-edit-head">
+                <div>
+                    <h3 id="edit-product-title">Edit Product</h3>
+                    <p id="edit-product-subtitle">Update catalog, pricing, and specifications</p>
+                </div>
+                <button type="button" class="product-edit-close" id="edit-product-close" aria-label="Close">×</button>
+            </div>
+            <form id="edit-product-form" class="edit-product-form">
+                <input type="hidden" id="edit-product-id-hidden">
+                <div class="edit-form-body">
+                    <div class="edit-form-section">
+                        <h4><i class="fas fa-box"></i> Product details</h4>
+                        <div class="edit-form-grid">
+                            <label class="full">Product ID
+                                <input id="edit-product-id-display" readonly>
+                            </label>
+                            <label>Name (English) *
+                                <input id="edit-product-name" required placeholder="GPS Tracker FMB120">
+                            </label>
+                            <label>Name (Arabic)
+                                <input id="edit-product-name-ar" placeholder="جهاز تتبع" dir="rtl">
+                            </label>
+                            <label>Category
+                                <select id="edit-product-category">
+                                    <option value="gps">GPS Devices</option>
+                                    <option value="cctv">CCTV Systems</option>
+                                    <option value="sensors">Sensors</option>
+                                </select>
+                            </label>
+                            <label>Visible on website
+                                <select id="edit-product-active">
+                                    <option value="true">Yes — on Our Products page</option>
+                                    <option value="false">No — hidden from customers</option>
+                                </select>
+                            </label>
+                            <p class="edit-form-hint full">“No” only hides the product on the website. It remains in Staff Inventory.</p>
+                            <label>Price (EGP) *
+                                <input id="edit-product-price" type="number" min="0" step="0.01" required>
+                            </label>
+                            <label>Installation (EGP)
+                                <input id="edit-product-installation" type="number" min="0" step="0.01">
+                            </label>
+                            <label>Stock *
+                                <input id="edit-product-stock" type="number" min="0" step="1" required>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="edit-form-section">
+                        <h4><i class="fas fa-image"></i> Product image</h4>
+                        <div class="edit-image-panel">
+                            <div class="edit-image-preview-box" id="edit-product-image-preview-wrap">
+                                <img id="edit-product-image-preview" src="assets/images/infinity-logo.png" alt="Product preview">
+                            </div>
+                            <div class="edit-image-fields">
+                                <label>Image path
+                                    <input id="edit-product-image-path" placeholder="assets/products/item.png">
+                                </label>
+                                <label>Upload new image (optional)
+                                    <input id="edit-product-image-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="edit-form-section">
+                        <h4><i class="fas fa-align-left"></i> Catalog description</h4>
+                        <div class="edit-form-grid">
+                            <label class="full">Short description (English)
+                                <textarea id="edit-product-desc-en" placeholder="Shown on the product card"></textarea>
+                            </label>
+                            <label class="full">Short description (Arabic)
+                                <textarea id="edit-product-desc-ar" placeholder="يظهر على بطاقة المنتج" dir="rtl"></textarea>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="edit-form-section">
+                        <div class="spec-builder-head">
+                            <h4 style="margin:0;"><i class="fas fa-list-check"></i> Specifications</h4>
+                            <button type="button" class="dash-btn ghost" id="edit-add-spec-section-btn">+ Add section</button>
+                        </div>
+                        <p class="edit-form-hint" style="margin:.45rem 0 .65rem;">Group specs under titled sections (e.g. 1. الخصائص العامة). Add one English and Arabic line per bullet.</p>
+                        <div id="edit-spec-sections-list"></div>
+                    </div>
+                </div>
+                <div class="edit-form-footer">
+                    <span id="edit-product-status" class="muted"></span>
+                    <button type="button" class="dash-btn ghost" id="edit-product-cancel-btn">Cancel</button>
+                    <button type="submit" class="dash-btn primary" id="save-edit-product-btn">Save changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         let currentRole = "customer";
         let currentUserId = "";
@@ -746,6 +1345,7 @@
         const analyticsCharts = {};
 
         function canEditInventory() { return ['employee','manager','primary'].includes(currentRole); }
+        function canAddProducts() { return ['manager','primary'].includes(currentRole); }
         function canEditOrders() { return ['employee','manager','primary'].includes(currentRole); }
         function canManageUsers() { return ['employee','manager','primary'].includes(currentRole); }
         function canDeleteUserRole(targetRole) {
@@ -764,7 +1364,11 @@
             currentUserId = data?.user?.id || '';
             document.getElementById('dash-user').textContent = `Logged in as ${data?.user?.name || ''} (${currentRole})`;
             if (!['technical','employee','manager','primary'].includes(currentRole)) {
-                alert('You are not allowed to access dashboard');
+                await dashAlert({
+                    title: 'Access denied',
+                    message: 'You are not allowed to access the staff dashboard.',
+                    variant: 'warning'
+                });
                 window.location.href = '/index.html';
                 return false;
             }
@@ -789,19 +1393,76 @@
                 return hay.includes(keyword);
             });
 
+            if (!visible.length) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td colspan="7" class="muted" style="text-align:center;padding:1rem;">No products found.</td>';
+                tbody.appendChild(tr);
+                return;
+            }
+
             visible.forEach(p => {
                 const tr = document.createElement('tr');
+                if (p.active === false) tr.classList.add('inventory-row-inactive');
+                const safeName = String(p.name || '').replace(/"/g, '&quot;');
+                const hiddenBadge = p.active === false
+                    ? '<span class="inventory-hidden-badge">Hidden from website</span>'
+                    : '';
+                const activeChip = p.active !== false
+                    ? '<span class="active-chip yes">Yes</span>'
+                    : '<span class="active-chip no">No</span>';
+                let actions = '<span class="muted">—</span>';
+                if (canEditInventory() || canAddProducts()) {
+                    const editBtn = canEditInventory()
+                        ? `<button type="button" class="dash-btn ghost inventory-action-btn" data-edit-product="${p.productId}">Edit</button>`
+                        : '';
+                    const deleteBtn = canAddProducts()
+                        ? `<button type="button" class="dash-btn danger ghost inventory-action-btn" data-delete-product="${p.productId}" data-delete-name="${safeName}">Delete</button>`
+                        : '';
+                    actions = `<div class="inventory-actions">${editBtn}${deleteBtn}</div>`;
+                }
                 tr.innerHTML = `
-                    <td data-label="Product">${p.name}<br><small class="muted">${p.productId}</small></td>
+                    <td data-label="Product">${p.name}<br><small class="muted">${p.productId}</small>${hiddenBadge}</td>
                     <td data-label="Image"><img class="inventory-thumb" src="${p.image || 'assets/images/infinity-logo.png'}" alt="${p.name}"></td>
                     <td data-label="Price"><input type="number" min="0" value="${p.price || 0}" id="price-${p.productId}" ${!canEditInventory() ? 'disabled' : ''}></td>
                     <td data-label="Install"><input type="number" min="0" value="${p.installation || 0}" id="installation-${p.productId}" ${!canEditInventory() ? 'disabled' : ''}></td>
                     <td data-label="Stock"><input type="number" min="0" value="${p.stock}" id="stock-${p.productId}" ${!canEditInventory() ? 'disabled' : ''}></td>
-                    <td data-label="Active">${p.active ? 'Yes' : 'No'}</td>
-                    <td data-label="Update"><span class="save-status idle" id="save-status-${p.productId}">idle</span></td>
+                    <td data-label="Active">${activeChip}</td>
+                    <td data-label="Actions">${actions}</td>
                 `;
                 tbody.appendChild(tr);
             });
+        }
+
+        async function deleteProduct(productId, productName, permanent = true) {
+            if (!canAddProducts()) return;
+            const confirmed = await dashConfirm({
+                title: 'Delete product?',
+                message: 'You are about to delete',
+                productLabel: `${productName} (${productId})`,
+                detail: permanent
+                    ? 'This will remove it completely from inventory and the website. This action cannot be undone.'
+                    : 'This will hide it from the website but keep it in the database.',
+                confirmText: 'Delete',
+                cancelText: 'Cancel',
+                variant: 'danger'
+            });
+            if (!confirmed) return;
+
+            showToast(permanent ? 'Deleting…' : 'Hiding…', 'success');
+            try {
+                const url = `/api/dashboard/products/${encodeURIComponent(productId)}${permanent ? '?permanent=1' : ''}`;
+                const res = await fetch(url, { method: 'DELETE', credentials: 'include' });
+                const { data, raw } = await parseApiResponse(res);
+                if (!res.ok) {
+                    const msg = apiErrorMessage(res, data, raw);
+                    showToast(msg, 'error');
+                    return;
+                }
+                showToast(data.message || (permanent ? 'Product deleted.' : 'Product hidden.'), 'success');
+                await loadProducts();
+            } catch (err) {
+                showToast(err?.message || 'Failed to delete product.', 'error');
+            }
         }
 
         function setProductSaveStatus(productId, state) {
@@ -820,6 +1481,108 @@
             toastTimer = setTimeout(() => {
                 toast.classList.remove('show');
             }, 2600);
+        }
+
+        let dashDialogResolver = null;
+
+        function closeDashDialog(result = false) {
+            const dialog = document.getElementById('dash-dialog');
+            if (dialog) {
+                dialog.classList.remove('open');
+                dialog.setAttribute('aria-hidden', 'true');
+            }
+            document.body.style.overflow = document.getElementById('edit-product-modal')?.classList.contains('open') ? 'hidden' : '';
+            const resolve = dashDialogResolver;
+            dashDialogResolver = null;
+            if (typeof resolve === 'function') resolve(result);
+        }
+
+        function showDashDialog(options = {}) {
+            const {
+                mode = 'confirm',
+                title = 'Confirm',
+                message = '',
+                detail = '',
+                productLabel = '',
+                confirmText = 'Confirm',
+                cancelText = 'Cancel',
+                variant = 'danger'
+            } = options;
+
+            return new Promise((resolve) => {
+                const dialog = document.getElementById('dash-dialog');
+                const icon = document.getElementById('dash-dialog-icon');
+                const titleEl = document.getElementById('dash-dialog-title');
+                const messageEl = document.getElementById('dash-dialog-message');
+                const detailEl = document.getElementById('dash-dialog-detail');
+                const actionsEl = document.getElementById('dash-dialog-actions');
+                if (!dialog || !actionsEl) {
+                    resolve(mode === 'confirm' ? window.confirm(`${title}\n\n${message}`) : true);
+                    return;
+                }
+
+                dashDialogResolver = resolve;
+                const iconClass = variant === 'info' ? 'info' : (variant === 'warning' ? 'warning' : 'danger');
+                const iconName = variant === 'info' ? 'fa-circle-info' : (variant === 'warning' ? 'fa-triangle-exclamation' : 'fa-trash-can');
+                if (icon) {
+                    icon.className = `dash-dialog-icon ${iconClass}`;
+                    icon.innerHTML = `<i class="fas ${iconName}"></i>`;
+                }
+                if (titleEl) titleEl.textContent = title;
+                if (messageEl) {
+                    messageEl.innerHTML = productLabel
+                        ? `${message}<br><span class="dash-dialog-product">${productLabel}</span>`
+                        : message;
+                }
+                if (detailEl) {
+                    detailEl.textContent = detail || '';
+                    detailEl.style.display = detail ? 'block' : 'none';
+                }
+
+                actionsEl.innerHTML = '';
+                if (mode === 'alert') {
+                    const okBtn = document.createElement('button');
+                    okBtn.type = 'button';
+                    okBtn.className = 'dash-btn primary';
+                    okBtn.textContent = confirmText || 'OK';
+                    okBtn.addEventListener('click', () => closeDashDialog(true));
+                    actionsEl.appendChild(okBtn);
+                } else {
+                    const cancelBtn = document.createElement('button');
+                    cancelBtn.type = 'button';
+                    cancelBtn.className = 'dash-btn ghost';
+                    cancelBtn.textContent = cancelText;
+                    cancelBtn.addEventListener('click', () => closeDashDialog(false));
+
+                    const confirmBtn = document.createElement('button');
+                    confirmBtn.type = 'button';
+                    confirmBtn.className = variant === 'danger' ? 'dash-btn danger' : 'dash-btn primary';
+                    confirmBtn.textContent = confirmText;
+                    confirmBtn.addEventListener('click', () => closeDashDialog(true));
+
+                    actionsEl.appendChild(cancelBtn);
+                    actionsEl.appendChild(confirmBtn);
+                    setTimeout(() => confirmBtn.focus(), 30);
+                }
+
+                dialog.classList.add('open');
+                dialog.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+            });
+        }
+
+        function dashConfirm(options) {
+            return showDashDialog({ mode: 'confirm', ...options });
+        }
+
+        function dashAlert(options) {
+            return showDashDialog({
+                mode: 'alert',
+                variant: 'info',
+                confirmText: 'OK',
+                cancelText: '',
+                ...options
+            });
         }
 
         function destroyChart(id) {
@@ -1113,8 +1876,372 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ stock, price, installation })
             });
-            if (!res.ok) { alert('Failed to update stock'); return; }
+            if (!res.ok) { showToast('Failed to update stock.', 'error'); return; }
             await loadProducts();
+        }
+
+        let pendingProductImageData = "";
+        let pendingEditImageData = "";
+        let specSectionCounter = 0;
+
+        function productToSpecSections(product) {
+            if (Array.isArray(product?.specSections) && product.specSections.length) {
+                return product.specSections;
+            }
+            const flat = Array.isArray(product?.specs) ? product.specs.filter((s) => s && (s.en || s.ar)) : [];
+            if (flat.length) return [{ title: '1. المواصفات الفنية', items: flat }];
+            return [{ title: '1. المواصفات الفنية', items: [] }];
+        }
+
+        function fillSpecSectionsList(listEl, sections) {
+            if (!listEl) return;
+            listEl.innerHTML = '';
+            specSectionCounter = 0;
+            const rows = Array.isArray(sections) && sections.length ? sections : [{ title: '1. المواصفات الفنية', items: [] }];
+            rows.forEach((sec) => {
+                listEl.appendChild(createSpecSectionBlock(sec.title || '', sec.items || []));
+            });
+            if (!listEl.childElementCount) {
+                listEl.appendChild(createSpecSectionBlock('1. المواصفات الفنية', []));
+            }
+        }
+
+        function createSpecLineRow(en = '', ar = '') {
+            const row = document.createElement('div');
+            row.className = 'spec-line-row';
+            row.innerHTML = `
+                <div class="spec-line-fields">
+                    <label><span>English</span><input type="text" class="spec-line-en" placeholder="Manufacturer: Teltonika, Lithuania"></label>
+                    <label><span>العربية</span><input type="text" class="spec-line-ar" placeholder="بلد الصنع: ليتوانيا" dir="rtl"></label>
+                </div>
+                <button type="button" class="spec-line-remove" aria-label="Remove line" title="Remove line">×</button>
+            `;
+            row.querySelector('.spec-line-en').value = en;
+            row.querySelector('.spec-line-ar').value = ar;
+            row.querySelector('.spec-line-remove')?.addEventListener('click', () => {
+                const list = row.parentElement;
+                row.remove();
+                if (list && !list.querySelector('.spec-line-row')) {
+                    list.appendChild(createSpecLineRow());
+                }
+            });
+            return row;
+        }
+
+        function createSpecSectionBlock(title = '', items = []) {
+            specSectionCounter += 1;
+            const block = document.createElement('div');
+            block.className = 'spec-section-block';
+            block.dataset.sectionId = String(specSectionCounter);
+            block.innerHTML = `
+                <div class="spec-section-top">
+                    <label>Section title
+                        <input type="text" class="spec-section-title" placeholder="1. الخصائص العامة">
+                    </label>
+                    <button type="button" class="dash-btn danger ghost remove-spec-section-btn">Remove section</button>
+                </div>
+                <div class="spec-lines-list"></div>
+                <div class="spec-section-actions">
+                    <button type="button" class="dash-btn ghost add-spec-line-btn">+ Add line</button>
+                </div>
+            `;
+            block.querySelector('.spec-section-title').value = title;
+            const linesList = block.querySelector('.spec-lines-list');
+            const normalized = Array.isArray(items) && items.length ? items : [{ en: '', ar: '' }];
+            normalized.forEach((item) => {
+                linesList.appendChild(createSpecLineRow(item.en || '', item.ar || ''));
+            });
+            block.querySelector('.add-spec-line-btn')?.addEventListener('click', () => {
+                linesList.appendChild(createSpecLineRow());
+            });
+            block.querySelector('.remove-spec-section-btn')?.addEventListener('click', () => block.remove());
+            return block;
+        }
+
+        function initSpecSectionsBuilder() {
+            const list = document.getElementById('spec-sections-list');
+            if (!list || list.childElementCount) return;
+            list.appendChild(createSpecSectionBlock('1. الخصائص العامة', []));
+        }
+
+        function collectSpecSectionsFromList(listEl) {
+            if (!listEl) return [];
+            return [...listEl.querySelectorAll('.spec-section-block')].map((block) => {
+                const title = block.querySelector('.spec-section-title')?.value.trim() || '';
+                const items = [...block.querySelectorAll('.spec-line-row')].map((row) => ({
+                    en: row.querySelector('.spec-line-en')?.value.trim() || '',
+                    ar: row.querySelector('.spec-line-ar')?.value.trim() || ''
+                })).filter((item) => item.en || item.ar);
+                return { title, items };
+            }).filter((section) => section.title && section.items.length);
+        }
+
+        function collectSpecSectionsFromForm() {
+            return collectSpecSectionsFromList(document.getElementById('spec-sections-list'));
+        }
+
+        function openEditProductModal(productId) {
+            if (!canEditInventory()) return;
+            const product = allProducts.find((p) => p.productId === productId);
+            if (!product) {
+                showToast('Product not found.', 'error');
+                return;
+            }
+
+            pendingEditImageData = '';
+            document.getElementById('edit-product-id-hidden').value = product.productId;
+            document.getElementById('edit-product-id-display').value = product.productId;
+            document.getElementById('edit-product-category').value = product.category || 'gps';
+            document.getElementById('edit-product-active').value = product.active === false ? 'false' : 'true';
+            document.getElementById('edit-product-name').value = product.name || '';
+            document.getElementById('edit-product-name-ar').value = product.nameAr || '';
+            document.getElementById('edit-product-price').value = product.price ?? 0;
+            document.getElementById('edit-product-installation').value = product.installation ?? 0;
+            document.getElementById('edit-product-stock').value = product.stock ?? 0;
+            document.getElementById('edit-product-image-path').value = product.image || '';
+            document.getElementById('edit-product-desc-en').value = product.descriptionEn || '';
+            document.getElementById('edit-product-desc-ar').value = product.descriptionAr || '';
+            document.getElementById('edit-product-status').textContent = '';
+            const subtitle = document.getElementById('edit-product-subtitle');
+            if (subtitle) subtitle.textContent = `${product.name || product.productId} · ${product.productId}`;
+
+            const preview = document.getElementById('edit-product-image-preview');
+            if (preview) preview.src = product.image || 'assets/images/infinity-logo.png';
+
+            fillSpecSectionsList(document.getElementById('edit-spec-sections-list'), productToSpecSections(product));
+
+            const modal = document.getElementById('edit-product-modal');
+            if (modal) {
+                modal.querySelectorAll('section, .edit-form-section').forEach((el) => {
+                    el.classList.remove('fade-in', 'slide-in-left', 'slide-in-right', 'scale-in');
+                    el.classList.add('visible');
+                });
+                modal.classList.add('open');
+                modal.setAttribute('aria-hidden', 'false');
+            }
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeEditProductModal() {
+            const modal = document.getElementById('edit-product-modal');
+            if (modal) {
+                modal.classList.remove('open');
+                modal.setAttribute('aria-hidden', 'true');
+            }
+            document.body.style.overflow = document.getElementById('dash-dialog')?.classList.contains('open') ? 'hidden' : '';
+            pendingEditImageData = '';
+            const fileInput = document.getElementById('edit-product-image-file');
+            if (fileInput) fileInput.value = '';
+        }
+
+        async function saveEditProduct(e) {
+            e.preventDefault();
+            if (!canEditInventory()) return;
+
+            const productId = document.getElementById('edit-product-id-hidden').value;
+            const statusEl = document.getElementById('edit-product-status');
+            const btn = document.getElementById('save-edit-product-btn');
+            const name = document.getElementById('edit-product-name').value.trim();
+            const price = Number(document.getElementById('edit-product-price').value);
+            const installation = Number(document.getElementById('edit-product-installation').value || 0);
+            const stock = Number(document.getElementById('edit-product-stock').value);
+            const imagePath = document.getElementById('edit-product-image-path').value.trim();
+
+            if (!name) {
+                statusEl.textContent = 'English name is required.';
+                return;
+            }
+
+            const payload = {
+                name,
+                nameAr: document.getElementById('edit-product-name-ar').value.trim(),
+                category: document.getElementById('edit-product-category').value,
+                active: document.getElementById('edit-product-active').value === 'true',
+                price,
+                installation,
+                stock,
+                image: imagePath || undefined,
+                imageData: pendingEditImageData || undefined,
+                descriptionEn: document.getElementById('edit-product-desc-en').value.trim(),
+                descriptionAr: document.getElementById('edit-product-desc-ar').value.trim(),
+                specSections: collectSpecSectionsFromList(document.getElementById('edit-spec-sections-list'))
+            };
+
+            btn.disabled = true;
+            statusEl.textContent = 'Saving...';
+            try {
+                const res = await fetch(`/api/dashboard/products/${encodeURIComponent(productId)}/stock`, {
+                    method: 'PATCH',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const { data, raw } = await parseApiResponse(res);
+                if (!res.ok) {
+                    const msg = apiErrorMessage(res, data, raw);
+                    statusEl.textContent = msg;
+                    showToast(msg, 'error');
+                    return;
+                }
+                showToast(`"${data.product?.name || name}" saved.`, 'success');
+                closeEditProductModal();
+                await loadProducts();
+            } catch (err) {
+                const msg = err?.message || 'Failed to save product.';
+                statusEl.textContent = msg;
+                showToast(msg, 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function readImageFileAsDataUrl(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(String(reader.result || ""));
+                reader.onerror = () => reject(new Error("Failed to read image"));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function prepareProductImageFile(file) {
+            if (!file) return "";
+            if (file.size > 15 * 1024 * 1024) {
+                throw new Error("Image must be under 15 MB.");
+            }
+            if (file.size <= 900 * 1024) {
+                return readImageFileAsDataUrl(file);
+            }
+            const objectUrl = URL.createObjectURL(file);
+            try {
+                const img = await new Promise((resolve, reject) => {
+                    const el = new Image();
+                    el.onload = () => resolve(el);
+                    el.onerror = () => reject(new Error("Could not read image file."));
+                    el.src = objectUrl;
+                });
+                const maxSide = 1200;
+                let width = img.naturalWidth || img.width;
+                let height = img.naturalHeight || img.height;
+                if (width > maxSide || height > maxSide) {
+                    const ratio = Math.min(maxSide / width, maxSide / height);
+                    width = Math.round(width * ratio);
+                    height = Math.round(height * ratio);
+                }
+                const canvas = document.createElement("canvas");
+                canvas.width = width;
+                canvas.height = height;
+                canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+                let quality = 0.82;
+                let dataUrl = canvas.toDataURL("image/jpeg", quality);
+                const maxLen = 3.2 * 1024 * 1024;
+                while (dataUrl.length > maxLen && quality > 0.45) {
+                    quality -= 0.08;
+                    dataUrl = canvas.toDataURL("image/jpeg", quality);
+                }
+                if (dataUrl.length > maxLen) {
+                    throw new Error("Image is still too large. Use a smaller file or an image path.");
+                }
+                return dataUrl;
+            } finally {
+                URL.revokeObjectURL(objectUrl);
+            }
+        }
+
+        async function parseApiResponse(res) {
+            const raw = await res.text();
+            try {
+                return { data: JSON.parse(raw), raw };
+            } catch (_e) {
+                return { data: {}, raw };
+            }
+        }
+
+        function apiErrorMessage(res, data, raw) {
+            if (data?.error) return data.error;
+            if (res.status === 401) return "Session expired. Please sign in again.";
+            if (res.status === 403) return "Not authorized. Manager or primary admin role is required.";
+            if (res.status === 413) return "Image is too large. Use a smaller image or an image path.";
+            if (res.status === 404) {
+                return "API not found. Open http://localhost:3000/dashboard.html and restart with npm start.";
+            }
+            if (raw && raw.length < 180) return raw;
+            return `Request failed (HTTP ${res.status}).`;
+        }
+
+        async function createProduct(e) {
+            e.preventDefault();
+            if (!canAddProducts()) return;
+
+            const statusEl = document.getElementById('add-product-status');
+            const btn = document.getElementById('create-product-btn');
+            const name = document.getElementById('new-product-name').value.trim();
+            const price = Number(document.getElementById('new-product-price').value);
+            const installation = Number(document.getElementById('new-product-installation').value || 0);
+            const stock = Number(document.getElementById('new-product-stock').value);
+            const imagePath = document.getElementById('new-product-image-path').value.trim();
+            const specSections = collectSpecSectionsFromForm();
+
+            if (!name) {
+                statusEl.textContent = 'English name is required.';
+                return;
+            }
+            if (!imagePath && !pendingProductImageData) {
+                statusEl.textContent = 'Upload an image or provide an image path.';
+                return;
+            }
+
+            const payload = {
+                productId: document.getElementById('new-product-id').value.trim(),
+                name,
+                nameAr: document.getElementById('new-product-name-ar').value.trim(),
+                category: document.getElementById('new-product-category').value,
+                price,
+                installation,
+                stock,
+                image: imagePath,
+                imageData: pendingProductImageData || undefined,
+                descriptionEn: document.getElementById('new-product-desc-en').value.trim(),
+                descriptionAr: document.getElementById('new-product-desc-ar').value.trim(),
+                specSections: specSections.length ? specSections : undefined,
+                active: true
+            };
+
+            btn.disabled = true;
+            statusEl.textContent = 'Saving...';
+            try {
+                const res = await fetch('/api/dashboard/products', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const { data, raw } = await parseApiResponse(res);
+                if (!res.ok) {
+                    const msg = apiErrorMessage(res, data, raw);
+                    statusEl.textContent = msg;
+                    showToast(msg, 'error');
+                    return;
+                }
+                showToast(`Product "${data.product?.name || name}" added.`, 'success');
+                statusEl.textContent = `Added: ${data.product?.productId || ''}`;
+                document.getElementById('add-product-form').reset();
+                pendingProductImageData = "";
+                document.getElementById('new-product-image-preview-wrap').style.display = 'none';
+                const specList = document.getElementById('spec-sections-list');
+                if (specList) {
+                    specList.innerHTML = '';
+                    specSectionCounter = 0;
+                    initSpecSectionsBuilder();
+                }
+                await loadProducts();
+            } catch (err) {
+                const msg = err?.message || 'Network error. Use http://localhost:3000 after npm start.';
+                statusEl.textContent = msg;
+                showToast(msg, 'error');
+            } finally {
+                btn.disabled = false;
+            }
         }
 
         async function saveAllInventory() {
@@ -1273,7 +2400,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status })
             });
-            if (!res.ok) { alert('Failed to update order status'); return; }
+            if (!res.ok) { showToast('Failed to update order status.', 'error'); return; }
             await loadOrders();
         }
 
@@ -1357,7 +2484,7 @@
                 body: JSON.stringify({ name, email, password, role })
             });
             const data = await res.json();
-            if (!res.ok) { alert(data.error || 'Create user failed'); return; }
+            if (!res.ok) { showToast(data.error || 'Create user failed.', 'error'); return; }
             document.getElementById('new-user-name').value = '';
             document.getElementById('new-user-email').value = '';
             document.getElementById('new-user-password').value = '';
@@ -1365,12 +2492,26 @@
         }
 
         async function deleteUser(userId) {
+            const user = allUsers.find((u) => String(u._id) === String(userId));
+            const label = user ? `${user.name || user.email} (${user.role})` : userId;
+            const confirmed = await dashConfirm({
+                title: 'Delete user?',
+                message: 'You are about to remove',
+                productLabel: label,
+                detail: 'This staff account will be deleted permanently.',
+                confirmText: 'Delete user',
+                cancelText: 'Cancel',
+                variant: 'danger'
+            });
+            if (!confirmed) return;
+
             const res = await fetch(`/api/dashboard/users/${userId}`, {
                 method: 'DELETE',
                 credentials: 'include'
             });
             const data = await res.json();
-            if (!res.ok) { alert(data.error || 'Delete user failed'); return; }
+            if (!res.ok) { showToast(data.error || 'Delete user failed.', 'error'); return; }
+            showToast('User deleted.', 'success');
             await loadUsers();
         }
 
@@ -1390,6 +2531,98 @@
         document.getElementById('analytics-from')?.addEventListener('change', renderAnalytics);
         document.getElementById('analytics-to')?.addEventListener('change', renderAnalytics);
         document.getElementById('save-all-inventory-btn').addEventListener('click', saveAllInventory);
+        document.getElementById('add-product-form')?.addEventListener('submit', createProduct);
+        document.getElementById('add-spec-section-btn')?.addEventListener('click', () => {
+            const list = document.getElementById('spec-sections-list');
+            if (!list) return;
+            const n = list.querySelectorAll('.spec-section-block').length + 1;
+            list.appendChild(createSpecSectionBlock(`${n}. المواصفات الفنية`, []));
+        });
+        document.getElementById('products-table')?.addEventListener('click', (e) => {
+            const editBtn = e.target.closest('[data-edit-product]');
+            if (editBtn) {
+                openEditProductModal(editBtn.getAttribute('data-edit-product'));
+                return;
+            }
+            const btn = e.target.closest('[data-delete-product]');
+            if (!btn) return;
+            const productId = btn.getAttribute('data-delete-product');
+            const productName = btn.getAttribute('data-delete-name') || productId;
+            deleteProduct(productId, productName, true);
+        });
+        document.getElementById('dash-dialog-backdrop')?.addEventListener('click', () => closeDashDialog(false));
+        document.addEventListener('keydown', (e) => {
+            if (e.key !== 'Escape') return;
+            const editModal = document.getElementById('edit-product-modal');
+            if (editModal?.classList.contains('open')) {
+                e.preventDefault();
+                closeEditProductModal();
+                return;
+            }
+            const dialog = document.getElementById('dash-dialog');
+            if (dialog?.classList.contains('open')) {
+                e.preventDefault();
+                closeDashDialog(false);
+            }
+        });
+        document.getElementById('edit-product-form')?.addEventListener('submit', saveEditProduct);
+        document.getElementById('edit-product-close')?.addEventListener('click', closeEditProductModal);
+        document.getElementById('edit-product-cancel-btn')?.addEventListener('click', closeEditProductModal);
+        document.getElementById('edit-product-backdrop')?.addEventListener('click', closeEditProductModal);
+        document.getElementById('edit-add-spec-section-btn')?.addEventListener('click', () => {
+            const list = document.getElementById('edit-spec-sections-list');
+            if (!list) return;
+            const n = list.querySelectorAll('.spec-section-block').length + 1;
+            list.appendChild(createSpecSectionBlock(`${n}. المواصفات الفنية`, []));
+        });
+        document.getElementById('edit-product-image-file')?.addEventListener('change', async (e) => {
+            const file = e.target.files?.[0];
+            const preview = document.getElementById('edit-product-image-preview');
+            const statusEl = document.getElementById('edit-product-status');
+            if (!file) {
+                pendingEditImageData = '';
+                return;
+            }
+            try {
+                if (statusEl) statusEl.textContent = 'Preparing image...';
+                pendingEditImageData = await prepareProductImageFile(file);
+                if (preview) preview.src = pendingEditImageData;
+                if (statusEl) statusEl.textContent = '';
+                showToast('New image ready. Click Save changes.', 'success');
+            } catch (err) {
+                pendingEditImageData = '';
+                if (statusEl) statusEl.textContent = err?.message || 'Could not load image.';
+                showToast(err?.message || 'Could not load image.', 'error');
+            }
+        });
+        document.getElementById('edit-product-image-path')?.addEventListener('input', (e) => {
+            const preview = document.getElementById('edit-product-image-preview');
+            const path = e.target.value.trim();
+            if (preview && path) preview.src = path;
+        });
+        initSpecSectionsBuilder();
+        document.getElementById('new-product-image-file')?.addEventListener('change', async (e) => {
+            const file = e.target.files?.[0];
+            const wrap = document.getElementById('new-product-image-preview-wrap');
+            const preview = document.getElementById('new-product-image-preview');
+            const statusEl = document.getElementById('add-product-status');
+            if (!file) {
+                pendingProductImageData = "";
+                if (wrap) wrap.style.display = 'none';
+                return;
+            }
+            try {
+                if (statusEl) statusEl.textContent = 'Preparing image...';
+                pendingProductImageData = await prepareProductImageFile(file);
+                if (preview) preview.src = pendingProductImageData;
+                if (wrap) wrap.style.display = 'block';
+                if (statusEl) statusEl.textContent = 'Image ready.';
+            } catch (err) {
+                pendingProductImageData = "";
+                if (wrap) wrap.style.display = 'none';
+                if (statusEl) statusEl.textContent = err?.message || 'Could not load image.';
+            }
+        });
         document.getElementById('create-user-btn').addEventListener('click', createUser);
         document.getElementById('dash-logout-btn').addEventListener('click', async () => {
             await fetch('/api/logout', { method: 'POST', credentials: 'include' });
@@ -1414,6 +2647,12 @@
                 document.getElementById('user-mgmt-note').textContent = currentRole === 'employee'
                     ? 'Employee cannot create accounts.'
                     : 'Read-only role for user management.';
+            }
+            if (canAddProducts()) {
+                const addTab = document.getElementById('add-product-tab');
+                if (addTab) addTab.style.display = '';
+            } else {
+                document.getElementById('spec-sections-list')?.closest('.spec-sections-builder')?.remove();
             }
             document.getElementById('save-all-inventory-btn').disabled = !canEditInventory();
             if (currentRole === 'technical') {

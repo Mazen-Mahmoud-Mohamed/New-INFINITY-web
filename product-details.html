@@ -568,24 +568,39 @@
                 image: 'assets/products/fmb120.png',
                 price: 3475,
                 installation: 325,
-                specs: [
-                    { en: 'Manufacturer: Teltonika, Lithuania', ar: 'بلد الصنع: ليتوانيا شركة Teltonika' },
-                    { en: 'Tracking System: GPS/GSM', ar: 'نظام التتبع: GPS/GSM' },
-                    { en: 'Connectivity: GSM network support (2G/3G/4G)', ar: 'الاتصال: GSM يدعم شبكة (2G/3G/4G)' },
-                    { en: 'Battery backup works up to 12 hours if vehicle battery is disconnected', ar: 'البطارية: بطارية احتياطية تعمل حتى 12 ساعة في حالة فصل بطارية السيارة' },
-                    { en: 'Installation: Easy installation with no vehicle modifications required', ar: 'التركيب: سهل التركيب ولا يتطلب تعديلات في السيارة' },
-                    { en: 'Tracking: Real-time vehicle tracking via mobile app or computer', ar: 'التتبع: يمكن تتبع السيارة في الوقت الفعلي عبر التطبيق او الكمبيوتر' },
-                    { en: 'Current Location: High-precision real-time vehicle location tracking', ar: 'تحديد الموقع الحالي: يمكن تحديد موقع السيارة في الوقت الحالي بدقة عالية' },
-                    { en: 'Reporting: Provides reports on speed, stops, parking, and more', ar: 'إصدار التقارير: توفير تقارير عن السرعة، الوقوف، التوقفات وغيرها' },
-                    { en: 'Fleet Management: Efficient vehicle fleet management support', ar: 'إدارة الأساطيل: يدعم إدارة أساطيل المركبات بفعالية' },
-                    { en: 'Security Alerts: Sends notifications for tampering or battery disconnection', ar: 'تنبيهات الأمان: ترسل تنبيهات في حالة العبث او فصل البطارية' },
-                    { en: 'Route History: Can retrieve vehicle route history for any past period', ar: 'استعادة خط السير: يمكن استعادة خط سير السيارة لأي فترة زمنية سابقة' },
-                    { en: 'Distance Report: Shows total kilometers traveled by the vehicle', ar: 'تقرير المسافة المقطوعة: تظهير عدد الكيلومترات التي يقطعها السيارة' },
-                    { en: 'Fuel Consumption Report: Provides reports on fuel consumption', ar: 'تقرير استهلاك الوقود: يوفر تقارير عن استهلاك الوقود' },
-                    { en: 'Speed Report: Shows overspeeding incidents with location and time', ar: 'تقرير السرعة الزائدة: تظهير السرعة الزائدة وأماكنها ووقتها' },
-                    { en: 'Geofencing: Ability to set geographic zones and receive alerts', ar: 'تحديد المناطق الجغرافية: إمكانية تحديد منطقة جغرافية معينة وإرسال تنبيه' },
-                    { en: 'Remote Engine Cut-off: Ability to remotely stop the vehicle engine via mobile', ar: 'إيقاف المحرك عن بعد: إمكانية إيقاف محرك السيارة عن بعد عبر الموبايل' },
-                    { en: 'Microphone: Sensitive microphone for in-vehicle listening (not currently available)', ar: 'الميكروفون: مايك حساس للاستماع داخل السيارة (لا يوجد في الوقت الحالي)' }
+                specSections: [
+                    {
+                        title: '1. الخصائص العامة',
+                        items: [
+                            { en: 'Manufacturer: Teltonika, Lithuania', ar: 'بلد الصنع: ليتوانيا شركة Teltonika' },
+                            { en: 'Tracking System: GPS/GSM', ar: 'نظام التتبع: GPS/GSM' },
+                            { en: 'Connectivity: GSM network support (2G/3G/4G)', ar: 'الاتصال: GSM يدعم شبكة (2G/3G/4G)' },
+                            { en: 'Battery backup works up to 12 hours if vehicle battery is disconnected', ar: 'البطارية: بطارية احتياطية تعمل حتى 12 ساعة في حالة فصل بطارية السيارة' },
+                            { en: 'Installation: Easy installation with no vehicle modifications required', ar: 'التركيب: سهل التركيب ولا يتطلب تعديلات في السيارة' },
+                            { en: 'Tracking: Real-time vehicle tracking via mobile app or computer', ar: 'التتبع: يمكن تتبع السيارة في الوقت الفعلي عبر التطبيق او الكمبيوتر' }
+                        ]
+                    },
+                    {
+                        title: '2. الميزات الفنية',
+                        items: [
+                            { en: 'Current Location: High-precision real-time vehicle location tracking', ar: 'تحديد الموقع الحالي: يمكن تحديد موقع السيارة في الوقت الحالي بدقة عالية' },
+                            { en: 'Reporting: Provides reports on speed, stops, parking, and more', ar: 'إصدار التقارير: توفير تقارير عن السرعة، الوقوف، التوقفات وغيرها' },
+                            { en: 'Fleet Management: Efficient vehicle fleet management support', ar: 'إدارة الأساطيل: يدعم إدارة أساطيل المركبات بفعالية' },
+                            { en: 'Security Alerts: Sends notifications for tampering or battery disconnection', ar: 'تنبيهات الأمان: ترسل تنبيهات في حالة العبث او فصل البطارية' },
+                            { en: 'Route History: Can retrieve vehicle route history for any past period', ar: 'استعادة خط السير: يمكن استعادة خط سير السيارة لأي فترة زمنية سابقة' }
+                        ]
+                    },
+                    {
+                        title: '3. الخدمات التي يوفرها الجهاز',
+                        items: [
+                            { en: 'Distance Report: Shows total kilometers traveled by the vehicle', ar: 'تقرير المسافة المقطوعة: تظهير عدد الكيلومترات التي يقطعها السيارة' },
+                            { en: 'Fuel Consumption Report: Provides reports on fuel consumption', ar: 'تقرير استهلاك الوقود: يوفر تقارير عن استهلاك الوقود' },
+                            { en: 'Speed Report: Shows overspeeding incidents with location and time', ar: 'تقرير السرعة الزائدة: تظهير السرعة الزائدة وأماكنها ووقتها' },
+                            { en: 'Geofencing: Ability to set geographic zones and receive alerts', ar: 'تحديد المناطق الجغرافية: إمكانية تحديد منطقة جغرافية معينة وإرسال تنبيه' },
+                            { en: 'Remote Engine Cut-off: Ability to remotely stop the vehicle engine via mobile', ar: 'إيقاف المحرك عن بعد: إمكانية إيقاف محرك السيارة عن بعد عبر الموبايل' },
+                            { en: 'Microphone: Sensitive microphone for in-vehicle listening (not currently available)', ar: 'الميكروفون: مايك حساس للاستماع داخل السيارة (لا يوجد في الوقت الحالي)' }
+                        ]
+                    }
                 ]
             },
             'cut-off': {
@@ -626,25 +641,40 @@
             }
         };
 
+        const fallbackImage = 'assets/images/infinity-logo.png';
         const params = new URLSearchParams(window.location.search);
         const id = params.get('id') || 'fmb120';
-        let product = { ...(PRODUCT_DATA[id] || PRODUCT_DATA.fmb120) };
-        const fallbackImage = 'assets/images/infinity-logo.png';
+        let product = PRODUCT_DATA[id]
+            ? { ...PRODUCT_DATA[id] }
+            : { name: 'Product', arabicName: '', image: fallbackImage, price: 0, installation: 0, specs: [], specSections: [] };
 
         const imageEl = document.getElementById('product-image');
         const specsList = document.getElementById('specs-list') || document.querySelector('.specs-paper');
         const specsHost = document.querySelector('.details-specs');
 
         function sectionizeSpecs(base) {
-            const specs = Array.isArray(base.specs) ? base.specs : [];
-            if (id !== 'fmb120') {
+            const fromSections = Array.isArray(base.specSections)
+                ? base.specSections
+                    .map((sec) => ({
+                        title: sec?.title || '',
+                        items: (sec?.items || []).filter((s) => s && (s.en || s.ar))
+                    }))
+                    .filter((sec) => sec.title && sec.items.length)
+                : [];
+            if (fromSections.length) return fromSections;
+
+            const specs = Array.isArray(base.specs) ? base.specs.filter((s) => s && (s.en || s.ar)) : [];
+            if (id === 'fmb120' && specs.length > 6) {
+                return [
+                    { title: '1. الخصائص العامة', items: specs.slice(0, 6) },
+                    { title: '2. الميزات الفنية', items: specs.slice(6, 11) },
+                    { title: '3. الخدمات التي يوفرها الجهاز', items: specs.slice(11) }
+                ];
+            }
+            if (specs.length) {
                 return [{ title: '1. المواصفات الفنية', items: specs }];
             }
-            return [
-                { title: '1. الخصائص العامة', items: specs.slice(0, 6) },
-                { title: '2. الميزات الفنية', items: specs.slice(6, 11) },
-                { title: '3. الخدمات التي يوفرها الجهاز', items: specs.slice(11) }
-            ];
+            return [];
         }
 
         function renderSpecs() {
@@ -653,7 +683,7 @@
             // Smoke marker: if you ever see nothing here, script didn't run.
             target.innerHTML = '<div class="muted" style="padding:.6rem 0;">Loading specifications…</div>';
             try {
-                const base = PRODUCT_DATA[id] || PRODUCT_DATA.fmb120;
+                const base = product;
                 const sections = sectionizeSpecs(base)
                     .map((sec) => ({ ...sec, items: (sec.items || []).filter(Boolean) }))
                     .filter((sec) => (sec.items || []).length);
@@ -688,33 +718,80 @@
             renderSpecs();
         }
 
-        function mergeLiveProduct(p) {
-            if (!p || p.productId !== id) return;
-            product = {
-                ...product,
-                name: p.name || product.name,
-                arabicName: product.arabicName,
-                image: p.image || product.image,
-                price: typeof p.price === 'number' ? p.price : product.price,
-                installation: typeof p.installation === 'number' ? p.installation : product.installation
-            };
-            document.getElementById('product-name').textContent = product.name;
-            document.getElementById('product-price').textContent = `Price: EGP ${Number(product.price || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-            document.getElementById('product-install').textContent = `Installation: EGP ${Number(product.installation || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-            if (p.image) {
-                imageEl.src = p.image;
-                imageEl.alt = product.name;
+        function mapApiProductToView(p) {
+            const apiSections = Array.isArray(p.specSections)
+                ? p.specSections
+                    .map((sec) => ({
+                        title: sec?.title || '',
+                        items: (sec?.items || []).filter((s) => s && (s.en || s.ar))
+                    }))
+                    .filter((sec) => sec.title && sec.items.length)
+                : [];
+            const apiSpecs = Array.isArray(p.specs) ? p.specs.filter((s) => s && (s.en || s.ar)) : [];
+            const fallbackSpecs = [];
+            if (p.descriptionEn || p.descriptionAr) {
+                fallbackSpecs.push({ en: p.descriptionEn || '', ar: p.descriptionAr || p.descriptionEn || '' });
             }
+            const specSections = apiSections.length
+                ? apiSections
+                : (apiSpecs.length ? [{ title: '1. المواصفات الفنية', items: apiSpecs }] : (fallbackSpecs.length ? [{ title: '1. المواصفات الفنية', items: fallbackSpecs }] : []));
+            return {
+                name: p.name || 'Product',
+                arabicName: p.nameAr || '',
+                image: p.image || fallbackImage,
+                price: Number(p.price || 0),
+                installation: Number(p.installation || 0),
+                specs: specSections.flatMap((sec) => sec.items),
+                specSections
+            };
         }
 
-        applyProductToPage();
-        // Ensure render happens even if anything updates after initial paint.
-        setTimeout(renderSpecs, 0);
+        function mergeLiveProduct(p) {
+            if (!p || p.productId !== id) return;
+            const mapped = mapApiProductToView(p);
+            product = {
+                ...product,
+                ...mapped,
+                name: p.name || product.name,
+                arabicName: p.nameAr || product.arabicName,
+                image: p.image || product.image,
+                price: typeof p.price === 'number' ? p.price : product.price,
+                installation: typeof p.installation === 'number' ? p.installation : product.installation,
+                specSections: mapped.specSections.length ? mapped.specSections : product.specSections,
+                specs: mapped.specs.length ? mapped.specs : product.specs
+            };
+            PRODUCT_DATA[id] = { ...product };
+            applyProductToPage();
+        }
+
+        async function loadProductFromApi() {
+            try {
+                const res = await fetch(`/api/products/public/${encodeURIComponent(id)}`);
+                if (!res.ok) return;
+                const data = await res.json();
+                const p = data.product;
+                if (!p) return;
+                const mapped = mapApiProductToView(p);
+                if (!PRODUCT_DATA[id]) {
+                    product = mapped;
+                } else if (Array.isArray(p.specSections) && p.specSections.length) {
+                    product = { ...product, specSections: mapped.specSections, specs: mapped.specs };
+                }
+                PRODUCT_DATA[id] = { ...(PRODUCT_DATA[id] || {}), ...product };
+                applyProductToPage();
+            } catch (_e) { /* ignore */ }
+        }
+
+        loadProductFromApi().then(() => {
+            applyProductToPage();
+            setTimeout(renderSpecs, 0);
+        });
 
         // When navigating away/back, browsers may restore from bfcache and skip running scripts.
         // Re-render on pageshow so Specifications never appears empty.
-        window.addEventListener('pageshow', () => {
+        window.addEventListener('pageshow', async () => {
             try {
+                await loadProductFromApi();
                 applyProductToPage();
                 renderSpecs();
                 updateCart();
@@ -736,10 +813,12 @@
         const totalAmount = document.querySelector('.total-amount');
 
         function getProductImageById(productId) {
+            if (productId === id) return product.image || fallbackImage;
             return PRODUCT_DATA[productId]?.image || fallbackImage;
         }
 
         function getProductArabicNameById(productId) {
+            if (productId === id) return product.arabicName || '';
             return PRODUCT_DATA[productId]?.arabicName || '';
         }
 

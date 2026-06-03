@@ -645,18 +645,24 @@
         // Add resize listener
         window.addEventListener('resize', handleResponsive);
 
+        function syncPasswordToggle(btn, input) {
+            const hidden = input.type === 'password';
+            btn.innerHTML = hidden
+                ? '<i class="fas fa-eye-slash"></i>'
+                : '<i class="fas fa-eye"></i>';
+            btn.setAttribute('aria-label', hidden ? 'Show password' : 'Hide password');
+        }
+
         // Password visibility toggles
         document.querySelectorAll('.toggle-password').forEach((btn) => {
+            const targetId = btn.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            if (!input) return;
+            syncPasswordToggle(btn, input);
             btn.addEventListener('click', () => {
-                const targetId = btn.getAttribute('data-target');
-                const input = document.getElementById(targetId);
-                if (!input) return;
-                const isPassword = input.type === 'password';
-                input.type = isPassword ? 'text' : 'password';
-                btn.innerHTML = isPassword
-                    ? '<i class="fas fa-eye-slash"></i>'
-                    : '<i class="fas fa-eye"></i>';
-                btn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+                const hidden = input.type === 'password';
+                input.type = hidden ? 'text' : 'password';
+                syncPasswordToggle(btn, input);
             });
         });
     </script>

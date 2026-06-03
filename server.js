@@ -60,6 +60,8 @@ app.use(cors({
     origin: true,
     credentials: true
 }));
+app.use(bodyParser.json({ limit: "12mb" }));
+app.use(bodyParser.urlencoded({ extended: true, limit: "12mb" }));
 app.use(compression());
 app.use(express.static(__dirname, {
     maxAge: "7d",
@@ -74,7 +76,6 @@ app.use(express.static(__dirname, {
         }
     }
 }));
-app.use(bodyParser.json());
 
 app.use(session({
     secret: SESSION_SECRET,
@@ -251,15 +252,166 @@ const CartSchema = new mongoose.Schema({
     items: { type: [CartItemSchema], default: [] },
 }, { timestamps: true });
 
+const ProductSpecSchema = new mongoose.Schema({
+    en: { type: String, default: "" },
+    ar: { type: String, default: "" }
+}, { _id: false });
+
+const ProductSpecSectionSchema = new mongoose.Schema({
+    title: { type: String, default: "" },
+    items: { type: [ProductSpecSchema], default: [] }
+}, { _id: false });
+
 const ProductSchema = new mongoose.Schema({
     productId: { type: String, required: true, unique: true, index: true },
     name: { type: String, required: true },
+    nameAr: { type: String, default: "" },
     image: { type: String, default: "" },
     price: { type: Number, required: true, default: 0 },
     installation: { type: Number, required: true, default: 0 },
     stock: { type: Number, required: true, default: 0, min: 0 },
+    descriptionEn: { type: String, default: "" },
+    descriptionAr: { type: String, default: "" },
+    category: { type: String, default: "gps" },
+    specs: { type: [ProductSpecSchema], default: [] },
+    specSections: { type: [ProductSpecSectionSchema], default: [] },
     active: { type: Boolean, default: true }
 }, { timestamps: true });
+
+const PUBLIC_PRODUCT_FIELDS = "productId name nameAr image price installation stock descriptionEn descriptionAr category specs specSections active -_id";
+
+function slugifyProductId(value) {
+    const slug = String(value || "")
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 48);
+    return slug || `product-${Date.now()}`;
+}
+
+function parseSpecLine(line) {
+    const parts = String(line || "").split("|").map((s) => s.trim());
+    const en = parts[0] || "";
+    const ar = parts[1] || parts[0] || "";
+    if (!en && !ar) return null;
+    return { en, ar: ar || en };
+}
+
+function normalizeProductSpecs(rawSpecs, descriptionEn = "", descriptionAr = "") {
+    const specs = [];
+    if (Array.isArray(rawSpecs)) {
+        rawSpecs.forEach((row) => {
+            if (!row) return;
+            if (typeof row === "string") {
+                const parsed = parseSpecLine(row);
+                if (parsed) specs.push(parsed);
+                return;
+            }
+            const en = String(row.en || "").trim();
+            const ar = String(row.ar || "").trim();
+            if (en || ar) specs.push({ en, ar: ar || en });
+        });
+    } else if (typeof rawSpecs === "string" && rawSpecs.trim()) {
+        rawSpecs.split("\n").map((line) => line.trim()).filter(Boolean).forEach((line) => {
+            const parsed = parseSpecLine(line);
+            if (parsed) specs.push(parsed);
+        });
+    }
+    if (!specs.length) {
+        const en = String(descriptionEn || "").trim();
+        const ar = String(descriptionAr || "").trim();
+        if (en || ar) specs.push({ en, ar: ar || en });
+    }
+    return specs;
+}
+
+function normalizeSpecSections(rawSections, rawSpecs, descriptionEn = "", descriptionAr = "") {
+    const sections = [];
+
+    const pushSection = (title, itemsInput) => {
+        const titleText = String(title || "").trim();
+        const items = normalizeProductSpecs(itemsInput);
+        if (!titleText || !items.length) return;
+        sections.push({ title: titleText, items });
+    };
+
+    if (Array.isArray(rawSections)) {
+        rawSections.forEach((section) => {
+            if (!section) return;
+            if (typeof section === "string") {
+                const lines = section.split("\n").map((l) => l.trim()).filter(Boolean);
+                if (!lines.length) return;
+                const title = lines[0].replace(/^\[SECTION\]\s*/i, "").trim();
+                pushSection(title, lines.slice(1));
+                return;
+            }
+            pushSection(section.title, section.items || section.specs || []);
+        });
+    } else if (typeof rawSections === "string" && rawSections.trim()) {
+        let currentTitle = "";
+        let currentLines = [];
+        const flush = () => {
+            if (currentTitle && currentLines.length) {
+                pushSection(currentTitle, currentLines);
+            }
+            currentTitle = "";
+            currentLines = [];
+        };
+        rawSections.split("\n").forEach((line) => {
+            const trimmed = line.trim();
+            if (!trimmed) return;
+            const isSectionHeader = /^\[SECTION\]/i.test(trimmed)
+                || /^\d+\.\s/.test(trimmed)
+                || (/^[\u0600-\u06FF]/.test(trimmed) && !trimmed.includes("|") && trimmed.length < 90);
+            if (isSectionHeader && (currentTitle || currentLines.length)) {
+                flush();
+            }
+            if (/^\[SECTION\]/i.test(trimmed)) {
+                currentTitle = trimmed.replace(/^\[SECTION\]\s*/i, "").trim();
+                return;
+            }
+            if (/^\d+\.\s/.test(trimmed) && !trimmed.includes("|")) {
+                currentTitle = trimmed;
+                return;
+            }
+            if (!currentTitle) currentTitle = "1. المواصفات الفنية";
+            currentLines.push(trimmed);
+        });
+        flush();
+    }
+
+    if (sections.length) {
+        return sections;
+    }
+
+    const flatSpecs = normalizeProductSpecs(rawSpecs, descriptionEn, descriptionAr);
+    if (flatSpecs.length) {
+        return [{ title: "1. المواصفات الفنية", items: flatSpecs }];
+    }
+    return [];
+}
+
+function saveProductImage(productId, imagePath, imageData) {
+    if (typeof imageData === "string" && imageData.startsWith("data:image/")) {
+        const match = imageData.match(/^data:image\/(\w+);base64,(.+)$/);
+        if (!match) throw new Error("Invalid image upload format");
+        let ext = String(match[1] || "png").toLowerCase();
+        if (ext === "jpeg") ext = "jpg";
+        if (!["png", "jpg", "webp", "gif"].includes(ext)) ext = "jpg";
+        const rel = `assets/products/${productId}.${ext}`;
+        const abs = path.join(__dirname, rel);
+        try {
+            fs.mkdirSync(path.dirname(abs), { recursive: true });
+            fs.writeFileSync(abs, Buffer.from(match[2], "base64"));
+        } catch (err) {
+            throw new Error(`Could not save image file: ${err.message}`);
+        }
+        return rel;
+    }
+    if (typeof imagePath === "string" && imagePath.trim()) return imagePath.trim();
+    return "";
+}
 
 const User = mongoose.model("User", UserSchema);
 const Order = mongoose.model("Order", OrderSchema);
@@ -585,8 +737,23 @@ app.post("/api/orders", requireAuth, async (req, res) => {
 // Public products with live stock for storefront
 app.get("/api/products/public", async (_req, res) => {
     try {
-        const products = await Product.find({ active: true }).select("productId name image price installation stock active -_id").lean();
+        const products = await Product.find({ active: true })
+            .select(PUBLIC_PRODUCT_FIELDS)
+            .sort({ createdAt: 1, productId: 1 })
+            .lean();
         res.json({ products });
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+app.get("/api/products/public/:productId", async (req, res) => {
+    try {
+        const product = await Product.findOne({ productId: req.params.productId, active: true })
+            .select(PUBLIC_PRODUCT_FIELDS)
+            .lean();
+        if (!product) return res.status(404).json({ error: "Product not found" });
+        res.json({ product });
     } catch (error) {
         res.status(500).json({ error: "Internal server error" });
     }
@@ -816,16 +983,32 @@ app.get("/api/dashboard/products", requireRole(["technical", "employee", "manage
 app.patch("/api/dashboard/products/:productId/stock", requireRole(["employee", "manager", "primary"]), async (req, res) => {
     try {
         const { productId } = req.params;
-        const { stock, name, active, price, installation, image } = req.body || {};
+        const body = req.body || {};
+        const { stock, name, nameAr, active, price, installation, image, imageData, descriptionEn, descriptionAr, category, specs, specSections } = body;
         if (typeof stock !== "number" || stock < 0) {
             return res.status(400).json({ error: "Stock must be a non-negative number" });
         }
         const update = { stock: Math.floor(stock) };
         if (typeof name === "string" && name.trim()) update.name = name.trim();
+        if (typeof nameAr === "string") update.nameAr = nameAr.trim();
         if (typeof active === "boolean") update.active = active;
         if (typeof price === "number" && price >= 0) update.price = price;
         if (typeof installation === "number" && installation >= 0) update.installation = installation;
-        if (typeof image === "string" && image.trim()) update.image = image.trim();
+        if (typeof descriptionEn === "string") update.descriptionEn = descriptionEn.trim();
+        if (typeof descriptionAr === "string") update.descriptionAr = descriptionAr.trim();
+        if (typeof category === "string" && category.trim()) update.category = category.trim();
+        if (specSections !== undefined) {
+            const sections = normalizeSpecSections(specSections, specs, descriptionEn, descriptionAr);
+            update.specSections = sections;
+            update.specs = sections.flatMap((sec) => sec.items);
+        } else if (specs !== undefined) {
+            const flat = normalizeProductSpecs(specs, descriptionEn, descriptionAr);
+            update.specs = flat;
+            update.specSections = flat.length ? [{ title: "1. المواصفات الفنية", items: flat }] : [];
+        }
+        const savedImage = saveProductImage(productId, image, imageData);
+        if (savedImage) update.image = savedImage;
+        else if (typeof image === "string" && image.trim()) update.image = image.trim();
 
         const product = await Product.findOneAndUpdate(
             { productId },
@@ -836,6 +1019,101 @@ app.patch("/api/dashboard/products/:productId/stock", requireRole(["employee", "
         res.json({ product });
     } catch (error) {
         res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+app.post("/api/dashboard/products", requireRole(["manager", "primary"]), async (req, res) => {
+    try {
+        const body = req.body || {};
+        const name = typeof body.name === "string" ? body.name.trim() : "";
+        if (!name) return res.status(400).json({ error: "Product name (English) is required" });
+
+        const price = Number(body.price);
+        const installation = Number(body.installation ?? 0);
+        const stock = Number(body.stock ?? 0);
+        if (!Number.isFinite(price) || price < 0) {
+            return res.status(400).json({ error: "Price must be a non-negative number" });
+        }
+        if (!Number.isFinite(installation) || installation < 0) {
+            return res.status(400).json({ error: "Installation must be a non-negative number" });
+        }
+        if (!Number.isFinite(stock) || stock < 0) {
+            return res.status(400).json({ error: "Stock must be a non-negative number" });
+        }
+
+        const productId = slugifyProductId(body.productId || name);
+        const existing = await Product.findOne({ productId }).lean();
+        if (existing) return res.status(409).json({ error: "Product ID already exists. Choose a different ID." });
+
+        let image = "";
+        try {
+            image = saveProductImage(productId, body.image, body.imageData);
+        } catch (imgErr) {
+            return res.status(400).json({ error: imgErr.message || "Failed to save product image" });
+        }
+        if (!image) return res.status(400).json({ error: "Product image is required (upload a file or provide a path)" });
+
+        const descriptionEn = typeof body.descriptionEn === "string" ? body.descriptionEn.trim() : "";
+        const descriptionAr = typeof body.descriptionAr === "string" ? body.descriptionAr.trim() : "";
+        const category = typeof body.category === "string" && body.category.trim()
+            ? body.category.trim()
+            : "gps";
+
+        const specSections = normalizeSpecSections(body.specSections, body.specs, descriptionEn, descriptionAr);
+        const flatSpecs = specSections.flatMap((sec) => sec.items);
+
+        const product = await Product.create({
+            productId,
+            name,
+            nameAr: typeof body.nameAr === "string" ? body.nameAr.trim() : "",
+            image,
+            price,
+            installation,
+            stock: Math.floor(stock),
+            descriptionEn,
+            descriptionAr,
+            category,
+            specs: flatSpecs,
+            specSections,
+            active: body.active !== false
+        });
+
+        res.status(201).json({ product });
+    } catch (error) {
+        console.error("Create product failed:", error);
+        if (error && error.code === 11000) {
+            return res.status(409).json({ error: "Product ID already exists" });
+        }
+        res.status(500).json({ error: error?.message || "Internal server error" });
+    }
+});
+
+app.delete("/api/dashboard/products/:productId", requireRole(["manager", "primary"]), async (req, res) => {
+    try {
+        const { productId } = req.params;
+        const permanent = String(req.query.permanent || "") === "1";
+        const existing = await Product.findOne({ productId }).lean();
+        if (!existing) return res.status(404).json({ error: "Product not found" });
+
+        if (permanent) {
+            await Product.deleteOne({ productId });
+            return res.json({ message: "Product permanently deleted", productId, permanent: true });
+        }
+
+        const product = await Product.findOneAndUpdate(
+            { productId },
+            { $set: { active: false, stock: 0 } },
+            { new: true }
+        );
+        res.json({
+            message: "Product removed from store",
+            productId,
+            permanent: false,
+            product
+        });
+    } catch (error) {
+        console.error("Delete product failed:", error);
+        res.status(500).json({ error: error?.message || "Internal server error" });
     }
 });
 
@@ -1279,6 +1557,23 @@ app.post("/api/profile/complete", requireAuth, async (req, res) => {
 app.post("/api/logout", (req, res) => {
     req.session.destroy();
     res.json({ message: "Logged out successfully" });
+});
+
+app.use("/api", (_req, res) => {
+    res.status(404).json({ error: "API route not found. Restart the server with npm start." });
+});
+
+app.use((err, req, res, _next) => {
+    if (err && (err.type === "entity.too.large" || err.status === 413)) {
+        return res.status(413).json({
+            error: "Upload is too large. Use a smaller image (under 3 MB) or enter an image path instead."
+        });
+    }
+    console.error("Unhandled server error:", err);
+    if (req.path && req.path.startsWith("/api")) {
+        return res.status(500).json({ error: err?.message || "Internal server error" });
+    }
+    res.status(500).send("Internal server error");
 });
 
 start();

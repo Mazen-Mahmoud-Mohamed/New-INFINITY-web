@@ -51,8 +51,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Sections with faster fade-in
+    // Sections with faster fade-in (skip dashboard modals/dialogs)
     document.querySelectorAll('section').forEach((section, index) => {
+        if (section.closest('.product-edit-modal, .dash-dialog, .product-edit-dialog')) return;
         section.classList.add('fade-in');
         section.dataset.delay = index * 80; // Reduced from 150
         revealObserver.observe(section);
