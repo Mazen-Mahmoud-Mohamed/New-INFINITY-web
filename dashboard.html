@@ -32,12 +32,15 @@
             --dash-header-text: #0369a1;
         }
 
-        /* mazen.css styles ALL <nav> as fixed — reset for dashboard tabs only */
-        body.dashboard-page nav.dash-tabs {
+        /* mazen.css styles ALL <nav> as fixed — reset dashboard nav regions */
+        body.dashboard-page nav.dash-tabs,
+        body.dashboard-page nav.dash-guide-nav {
             position: static !important;
             width: auto !important;
             top: auto !important;
             left: auto !important;
+            right: auto !important;
+            bottom: auto !important;
             z-index: auto !important;
             padding: 0 !important;
             margin: 0 !important;
@@ -1717,6 +1720,349 @@
                 box-sizing: border-box;
             }
         }
+
+        /* Dashboard guide & walkthrough */
+        .dash-welcome {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            padding: 0.85rem 1rem;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 1px solid #bae6fd;
+            border-radius: var(--dash-radius);
+            box-shadow: var(--dash-shadow);
+        }
+        .dash-welcome.is-visible { display: flex; }
+        .dash-welcome-text { flex: 1; min-width: 200px; }
+        .dash-welcome-text strong { display: block; color: var(--dash-text-heading); font-size: 0.95rem; margin-bottom: 0.2rem; }
+        .dash-welcome-text p { margin: 0; font-size: 0.84rem; color: var(--dash-text-muted); line-height: 1.45; }
+        .dash-welcome-actions { display: flex; flex-wrap: wrap; gap: 0.45rem; align-items: center; }
+        .dash-welcome-pref {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.78rem;
+            color: var(--dash-text-muted);
+            cursor: pointer;
+            user-select: none;
+            margin-top: 0.35rem;
+            width: 100%;
+        }
+        .dash-welcome-pref input { accent-color: var(--dash-primary); }
+        .dash-btn.guide {
+            background: #fff;
+            color: var(--dash-primary-dark);
+            border: 1px solid #7dd3fc;
+        }
+        .dash-btn.guide:hover { background: #f0f9ff; border-color: var(--dash-primary); }
+
+        .dash-guide-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 2500;
+            isolation: isolate;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem;
+        }
+        .dash-guide-modal.open { display: flex; }
+        .dash-guide-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(2px);
+        }
+        .dash-guide-panel {
+            position: relative;
+            z-index: 1;
+            width: min(920px, 100%);
+            max-height: min(88vh, 780px);
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            border-radius: var(--dash-radius);
+            border: 1px solid var(--dash-border);
+            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.18);
+            overflow: hidden;
+        }
+        .dash-guide-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 1rem 1.1rem;
+            border-bottom: 1px solid var(--dash-border-soft);
+            background: var(--dash-surface-muted);
+        }
+        .dash-guide-head h2 { margin: 0; font-size: 1.1rem; color: var(--dash-text-heading); }
+        .dash-guide-head p { margin: 0.25rem 0 0; font-size: 0.82rem; color: var(--dash-text-muted); }
+        .dash-guide-body {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            min-height: 0;
+            flex: 1;
+            overflow: hidden;
+        }
+        .dash-guide-nav {
+            position: static !important;
+            width: auto !important;
+            top: auto !important;
+            left: auto !important;
+            z-index: auto !important;
+            border-right: 1px solid var(--dash-border-soft);
+            background: #fafbfc;
+            overflow-y: auto;
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+            min-height: 0;
+        }
+        .dash-guide-nav button {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            width: 100%;
+            text-align: left;
+            border: none;
+            background: transparent;
+            padding: 0.5rem 0.55rem;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--dash-text-muted);
+            cursor: pointer;
+        }
+        .dash-guide-nav button:hover { background: #fff; color: var(--dash-text-heading); }
+        .dash-guide-nav button.active {
+            background: #fff;
+            color: var(--dash-primary-dark);
+            box-shadow: 0 1px 3px rgba(14, 165, 233, 0.12);
+            border: 1px solid #bae6fd;
+        }
+        .dash-guide-nav button i { width: 1rem; text-align: center; font-size: 0.75rem; }
+        .dash-guide-content {
+            overflow-y: auto;
+            padding: 1rem 1.1rem 1.1rem;
+        }
+        .dash-guide-section { display: none; }
+        .dash-guide-section.active { display: block; }
+        .dash-guide-section h3 { margin: 0 0 0.5rem; font-size: 1rem; color: var(--dash-text-heading); }
+        .dash-guide-section p { margin: 0 0 0.65rem; font-size: 0.86rem; line-height: 1.55; color: var(--dash-text); }
+        .dash-guide-lead {
+            margin: 0 0 0.75rem;
+            padding: 0.55rem 0.65rem;
+            font-size: 0.84rem;
+            line-height: 1.55;
+            color: var(--dash-text);
+            background: var(--dash-surface-muted);
+            border-radius: 6px;
+            border-left: 3px solid var(--dash-primary);
+        }
+        .dash-guide-perms {
+            margin: 0 0 0.75rem;
+            padding: 0;
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+        }
+        .dash-guide-perms li {
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 0.2rem 0.45rem;
+            border-radius: 4px;
+            background: #f0f9ff;
+            color: var(--dash-primary-dark);
+            border: 1px solid #bae6fd;
+        }
+        .dash-guide-steps {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            display: grid;
+            gap: 0.55rem;
+        }
+        .dash-guide-steps li {
+            display: flex;
+            gap: 0.55rem;
+            align-items: flex-start;
+            padding: 0.55rem 0.65rem;
+            background: var(--dash-surface-muted);
+            border: 1px solid var(--dash-border-soft);
+            border-radius: 6px;
+            font-size: 0.84rem;
+            line-height: 1.45;
+        }
+        .dash-guide-steps li span.num {
+            flex-shrink: 0;
+            width: 1.35rem;
+            height: 1.35rem;
+            border-radius: 50%;
+            background: var(--dash-primary);
+            color: #fff;
+            font-size: 0.72rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .dash-guide-tip {
+            margin-top: 0.75rem;
+            padding: 0.55rem 0.65rem;
+            font-size: 0.8rem;
+            color: #0369a1;
+            background: #f0f9ff;
+            border-left: 3px solid var(--dash-primary);
+            border-radius: 4px;
+        }
+        .dash-guide-foot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 0.75rem 1.1rem;
+            border-top: 1px solid var(--dash-border-soft);
+            background: #fafbfc;
+        }
+        .dash-guide-foot label {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.8rem;
+            color: var(--dash-text-muted);
+            cursor: pointer;
+        }
+        .dash-guide-foot label input { accent-color: var(--dash-primary); }
+
+        .dash-tour-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 2600;
+            display: none;
+            pointer-events: none;
+        }
+        .dash-tour-overlay.active { display: block; pointer-events: none; }
+        .dash-tour-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            pointer-events: none;
+        }
+        .dash-tour-spotlight {
+            position: fixed;
+            border-radius: 8px;
+            box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.45);
+            border: 2px solid var(--dash-primary);
+            pointer-events: none;
+            transition: top 0.28s ease, left 0.28s ease, width 0.28s ease, height 0.28s ease;
+            z-index: 2601;
+        }
+        .dash-tour-spotlight.no-transition { transition: none; }
+        .dash-tour-tooltip {
+            position: fixed;
+            z-index: 2602;
+            top: 0;
+            left: 0;
+            width: min(400px, calc(100vw - 1.5rem));
+            max-height: min(50vh, 300px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            background: #fff;
+            border-radius: var(--dash-radius-sm);
+            border: 1px solid var(--dash-border);
+            box-shadow: 0 12px 40px rgba(15, 23, 42, 0.25);
+            padding: 0.85rem 0.95rem;
+            pointer-events: auto;
+            transition: top 0.28s ease, left 0.28s ease;
+        }
+        .dash-tour-tooltip.no-transition { transition: none; }
+        .dash-tour-scroll-hint {
+            font-size: 0.72rem;
+            color: var(--dash-text-muted);
+            margin: 0 0 0.5rem;
+            padding: 0.35rem 0.5rem;
+            background: #f8fafc;
+            border-radius: 4px;
+            border: 1px dashed var(--dash-border);
+        }
+        .dash-tour-scroll-hint i { color: var(--dash-primary); margin-right: 0.25rem; }
+        body.dash-tour-active { overflow: auto; }
+        .dash-guide-tours {
+            padding: 0.65rem 1.1rem;
+            border-top: 1px solid var(--dash-border-soft);
+            background: #fff;
+        }
+        .dash-guide-tours h4 {
+            margin: 0 0 0.5rem;
+            font-size: 0.82rem;
+            color: var(--dash-text-heading);
+        }
+        .dash-guide-tour-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+        .dash-guide-tour-grid .dash-btn { font-size: 0.78rem; padding: 0.45rem 0.65rem; }
+        .dash-guide-section-tour {
+            margin-top: 0.85rem;
+            width: 100%;
+            justify-content: center;
+        }
+        .dash-welcome-tour-pick {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            align-items: center;
+            width: 100%;
+            margin-top: 0.35rem;
+        }
+        .dash-tour-select {
+            flex: 1;
+            min-width: 140px;
+            padding: 0.45rem 0.6rem;
+            border: 1px solid var(--dash-border);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.82rem;
+            background: #fff;
+        }
+        .dash-tour-tooltip h4 { margin: 0 0 0.35rem; font-size: 0.95rem; color: var(--dash-text-heading); }
+        .dash-tour-tooltip p { margin: 0 0 0.65rem; font-size: 0.84rem; line-height: 1.5; color: var(--dash-text-muted); }
+        .dash-tour-tooltip .dash-tour-group {
+            display: inline-block;
+            margin-bottom: 0.35rem;
+            padding: 0.12rem 0.45rem;
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--dash-primary-dark);
+            background: #f0f9ff;
+            border-radius: 4px;
+        }
+        .dash-tour-tooltip .dash-tour-progress {
+            font-size: 0.72rem;
+            color: var(--dash-text-muted);
+            margin-bottom: 0.5rem;
+        }
+        .dash-tour-tooltip-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+        @media (max-width: 720px) {
+            .dash-guide-body { grid-template-columns: 1fr; }
+            .dash-guide-nav {
+                display: flex;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--dash-border-soft);
+            }
+            .dash-guide-nav button { white-space: nowrap; width: auto; flex-shrink: 0; }
+        }
     </style>
 </head>
 <body class="dashboard-page">
@@ -1736,6 +2082,7 @@
                     </div>
                 </div>
                 <div class="dash-actions">
+                    <button type="button" class="dash-btn guide" id="dash-help-btn" title="How to use the dashboard"><i class="fas fa-circle-question" aria-hidden="true"></i> Guide</button>
                     <a href="/index.html" class="dash-btn ghost"><i class="fas fa-home" aria-hidden="true"></i> Website</a>
                     <button class="dash-btn primary" id="dash-logout-btn" type="button"><i class="fas fa-sign-out-alt" aria-hidden="true"></i> Sign Out</button>
                 </div>
@@ -1753,6 +2100,26 @@
                 <button type="button" class="dash-tab" data-section="users-section"><i class="fas fa-user-cog" aria-hidden="true"></i> Users</button>
             </nav>
         </div>
+        </div>
+
+        <div id="dash-welcome" class="dash-welcome" role="region" aria-label="Dashboard welcome">
+            <div class="dash-welcome-text">
+                <strong>New here? Take a quick tour</strong>
+                <p>Learn how Inventory, Orders, Team management, and the new features work — tailored to your role.</p>
+                <label class="dash-welcome-pref">
+                    <input type="checkbox" id="dash-welcome-skip-pref">
+                    Don&apos;t show this again when I open the dashboard
+                </label>
+            </div>
+            <div class="dash-welcome-actions">
+                <div class="dash-welcome-tour-pick">
+                    <label for="dash-welcome-tour-select" class="visually-hidden">Choose a tour</label>
+                    <select id="dash-welcome-tour-select" class="dash-tour-select" aria-label="Choose section tour"></select>
+                    <button type="button" class="dash-btn primary" id="dash-welcome-tour-btn"><i class="fas fa-play" aria-hidden="true"></i> Start tour</button>
+                </div>
+                <button type="button" class="dash-btn ghost" id="dash-welcome-dismiss">Maybe later</button>
+                <button type="button" class="dash-btn guide" id="dash-welcome-guide-btn"><i class="fas fa-book-open" aria-hidden="true"></i> Read guide</button>
+            </div>
         </div>
 
         <div id="inventory-section" class="dash-section active">
@@ -2114,6 +2481,48 @@
         </div>
     </div>
     <div id="dash-toast" class="dash-toast" role="status" aria-live="polite"></div>
+
+    <div id="dash-guide-modal" class="dash-guide-modal" aria-hidden="true">
+        <div class="dash-guide-backdrop" id="dash-guide-backdrop"></div>
+        <div class="dash-guide-panel" role="dialog" aria-labelledby="dash-guide-title" aria-modal="true">
+            <div class="dash-guide-head">
+                <div>
+                    <h2 id="dash-guide-title">How to use the Staff Dashboard</h2>
+                    <p id="dash-guide-subtitle">Tips for your role — open anytime from <strong>Guide</strong> in the header.</p>
+                </div>
+                <button type="button" class="dash-btn ghost" id="dash-guide-close" aria-label="Close guide"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="dash-guide-body">
+                <div class="dash-guide-nav" id="dash-guide-nav" role="navigation" aria-label="Guide sections"></div>
+                <div class="dash-guide-content" id="dash-guide-content"></div>
+            </div>
+            <div class="dash-guide-tours" id="dash-guide-tours">
+                <h4><i class="fas fa-route" aria-hidden="true"></i> Interactive tours (one section each)</h4>
+                <div class="dash-guide-tour-grid" id="dash-guide-tour-grid"></div>
+            </div>
+            <div class="dash-guide-foot">
+                <label><input type="checkbox" id="dash-guide-auto-pref"> Show welcome tips when I open the dashboard</label>
+                <button type="button" class="dash-btn primary" id="dash-guide-done">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="dash-tour-overlay" class="dash-tour-overlay" aria-hidden="true">
+        <div class="dash-tour-backdrop" id="dash-tour-backdrop"></div>
+        <div class="dash-tour-spotlight" id="dash-tour-spotlight" hidden></div>
+        <div class="dash-tour-tooltip" id="dash-tour-tooltip" role="dialog" aria-live="polite" hidden>
+            <p class="dash-tour-scroll-hint"><i class="fas fa-arrows-up-down" aria-hidden="true"></i>Each step scrolls to the highlighted area. You can still scroll the page anytime.</p>
+            <p class="dash-tour-progress" id="dash-tour-progress"></p>
+            <span class="dash-tour-group" id="dash-tour-group" hidden></span>
+            <h4 id="dash-tour-title"></h4>
+            <p id="dash-tour-body"></p>
+            <div class="dash-tour-tooltip-actions">
+                <button type="button" class="dash-btn ghost" id="dash-tour-skip">Skip tour</button>
+                <button type="button" class="dash-btn ghost" id="dash-tour-prev">Back</button>
+                <button type="button" class="dash-btn primary" id="dash-tour-next">Next</button>
+            </div>
+        </div>
+    </div>
 
     <div id="dash-dialog" class="dash-dialog" aria-hidden="true">
         <div class="dash-dialog-backdrop" id="dash-dialog-backdrop"></div>
@@ -4075,6 +4484,717 @@
             });
         });
 
+        const DASH_GUIDE_VERSION = 1;
+        const DASH_PREF_PREFIX = 'infinity-dash-pref';
+
+        function dashPrefStorageKey() {
+            return `${DASH_PREF_PREFIX}:v${DASH_GUIDE_VERSION}:${currentUserId || 'local'}`;
+        }
+
+        function getDashPref() {
+            try {
+                const raw = localStorage.getItem(dashPrefStorageKey());
+                if (!raw) return { autoShow: true, tourCompleted: false };
+                const parsed = JSON.parse(raw);
+                return {
+                    autoShow: parsed.autoShow !== false,
+                    tourCompleted: !!parsed.tourCompleted,
+                };
+            } catch (_e) {
+                return { autoShow: true, tourCompleted: false };
+            }
+        }
+
+        function setDashPref(partial) {
+            const next = { ...getDashPref(), ...partial };
+            localStorage.setItem(dashPrefStorageKey(), JSON.stringify(next));
+            syncDashPrefUi();
+        }
+
+        function syncDashPrefUi() {
+            const pref = getDashPref();
+            const skip = document.getElementById('dash-welcome-skip-pref');
+            const auto = document.getElementById('dash-guide-auto-pref');
+            if (skip) skip.checked = !pref.autoShow;
+            if (auto) auto.checked = pref.autoShow;
+        }
+
+        function getDashGuideRoleMeta() {
+            const meta = {
+                primary: {
+                    label: 'Primary Admin',
+                    summary: 'Highest access: full catalog, team page, analytics, staff management, and order fulfillment. Your account cannot be deleted from the dashboard.',
+                    perms: ['All tabs', 'Add / delete products', 'Our Team', 'Analytics', 'Create staff', 'Orders & inventory'],
+                },
+                manager: {
+                    label: 'Manager',
+                    summary: 'Manage the store catalog, public team page, business analytics, and most staff accounts. Cannot remove the primary admin.',
+                    perms: ['Add / delete products', 'Our Team', 'Analytics', 'Create staff', 'Orders & inventory'],
+                },
+                employee: {
+                    label: 'Employee',
+                    summary: 'Day-to-day operations: update stock and prices, change order status, and view customers. Cannot add products or manage team.',
+                    perms: ['Inventory edits', 'Order status', 'Customers (view)', 'Users (limited)'],
+                },
+                technical: {
+                    label: 'Technical',
+                    summary: 'Read-only access to dashboard data for support and auditing. No catalog, team, or user changes.',
+                    perms: ['View inventory', 'View orders', 'View customers', 'View users'],
+                },
+            };
+            return meta[currentRole] || { label: currentRole, summary: 'Staff dashboard access.', perms: [] };
+        }
+
+        function getDashGuideSections() {
+            const roleMeta = getDashGuideRoleMeta();
+            const tourHint = 'Use <strong>Interactive tours</strong> at the bottom of this guide (or <strong>Start [section] tour</strong> in each article) for a step-by-step walkthrough that scrolls to each control.';
+
+            const sections = [
+                {
+                    id: 'overview',
+                    icon: 'fa-compass',
+                    title: 'Overview',
+                    roles: null,
+                    lead: `Welcome, <strong>${escapeHtml(roleMeta.label)}</strong>. ${roleMeta.summary} ${tourHint}`,
+                    perms: roleMeta.perms,
+                    steps: [
+                        'The <strong>INFINITY Staff Portal</strong> header shows your name and role. <strong>Guide</strong> opens this help panel; <strong>Website</strong> opens the public store; <strong>Sign Out</strong> ends your session.',
+                        'Tabs below the header switch sections: <strong>Inventory</strong>, <strong>Orders</strong>, <strong>Customers</strong>, and <strong>Users</strong> are available to all staff roles.',
+                        ['manager', 'primary'].includes(currentRole)
+                            ? 'Managers and primary admins also see <strong>Add Product</strong>, <strong>Our Team</strong>, and <strong>Analytics</strong>.'
+                            : 'Tabs such as Add Product, Our Team, and Analytics appear only for manager and primary admin roles.',
+                        'Green <strong>toast</strong> messages confirm saves; red toasts show errors. Destructive actions (delete product, delete user) use a custom confirmation dialog.',
+                        'Run the server with <code>npm start</code> and use <code>http://localhost:3000/dashboard.html</code> — opening HTML files directly will break API calls.',
+                    ],
+                    tip: 'Prefer learning by doing? Pick a section tour below (Inventory, Orders, etc.). Each tour only covers that tab.',
+                },
+                {
+                    id: 'inventory',
+                    icon: 'fa-boxes',
+                    title: 'Inventory',
+                    roles: null,
+                    lead: 'The product catalog for the website: every item on <strong>Our Products</strong>, including hidden ones, is listed here.',
+                    steps: [
+                        '<strong>Search</strong> by product name or ID (slug) to find items quickly.',
+                        '<strong>Columns:</strong> Product name & ID, thumbnail, Price (EGP), Install (installation fee per unit), Stock, Active (visible on site), Actions.',
+                        canEditInventory()
+                            ? 'Change <strong>Price</strong>, <strong>Install</strong>, or <strong>Stock</strong> directly in the table cells, then click <strong>Save All</strong> to publish all row changes at once.'
+                            : 'Inline price/stock fields may be disabled for your role — open <strong>Edit</strong> to view details or ask a manager to update values.',
+                        '<strong>Edit</strong> opens a full modal: English/Arabic names and descriptions, category, image upload or path, specification sections (bilingual lines), and <strong>Active on website</strong> (Yes/No).',
+                        '<strong>Active = No</strong> hides the product from the store but keeps it in inventory (row highlighted). Toggle in the Edit modal — the table shows Yes/No chips.',
+                        canAddProducts()
+                            ? '<strong>Delete</strong> permanently removes the product after confirmation. To hide only, set Active to No instead of deleting.'
+                            : 'Product deletion is limited to manager and primary admin roles.',
+                    ],
+                    tip: 'Images: upload in Edit (saved to Cloudinary when configured) or use a path like <code>assets/products/item.png</code>. Upload takes priority if both are set.',
+                },
+                {
+                    id: 'add-product',
+                    icon: 'fa-plus-circle',
+                    title: 'Add Product',
+                    roles: ['manager', 'primary'],
+                    lead: 'Create new items for the online catalog. After saving, they appear on <strong>Our Products</strong> when stock is available and the product is active.',
+                    steps: [
+                        '<strong>Product ID</strong> is optional — leave blank to auto-generate from the English name.',
+                        'Choose <strong>Category</strong>: GPS Devices, CCTV Systems, or Sensors.',
+                        'Enter <strong>Name (English)</strong> (required) and optional Arabic name for bilingual pages.',
+                        'Set <strong>Price (EGP)</strong>, <strong>Installation (EGP)</strong> (default 0), and <strong>Stock</strong> (0 = out of stock on the site).',
+                        '<strong>Image:</strong> drag a file to the upload zone or enter a path (e.g. <code>assets/products/my-item.png</code>). Upload wins when both are provided.',
+                        'Add <strong>Description (EN/AR)</strong> for the product card and detail page.',
+                        'Under <strong>Specification Sections</strong>, click <strong>+ Add Section</strong> for titled blocks with separate English and Arabic lines per spec.',
+                        'Click <strong>Add Product</strong> to save. Check the <strong>Inventory</strong> tab to confirm the new row.',
+                    ],
+                    tip: 'New products are active by default. Set stock to 0 or Active to No in Inventory/Edit if you are not ready to sell yet.',
+                },
+                {
+                    id: 'team',
+                    icon: 'fa-users',
+                    title: 'Our Team',
+                    roles: ['manager', 'primary'],
+                    lead: 'Manage who appears on the public <a href="/team.html" target="_blank" rel="noopener">Our Team</a> page, grouped by category.',
+                    steps: [
+                        '<strong>Categories on the website:</strong> Leadership, Technical Team, Employees, Operations, Sales &amp; Support — pick one per member.',
+                        '<strong>Profile:</strong> full name, job title, category, optional Member ID (auto-generated), comma-separated skills.',
+                        '<strong>Display options:</strong> sort order (lower numbers appear first within a category), featured card, optional badge text.',
+                        '<strong>Photo:</strong> upload a file or set <code>assets/images/team/name.jpg</code>. Upload replaces path when both are sent.',
+                        '<strong>Bio</strong> is shown on the team card. Click <strong>Add Team Member</strong> to publish to the roster.',
+                        'The <strong>Team roster</strong> table supports search. <strong>Edit</strong> opens the same fields in a modal. <strong>Hide</strong> removes from the public page. <strong>Delete</strong> removes from the database permanently.',
+                        'Use <strong>View live page</strong> to open team.html and verify layout after changes.',
+                    ],
+                    tip: 'Featured members get a highlighted card style on the public page. Use sort order to control order within each category.',
+                },
+                {
+                    id: 'orders',
+                    icon: 'fa-receipt',
+                    title: 'Orders',
+                    roles: null,
+                    lead: 'All customer purchases: review items, payment method, receipts, and fulfillment status.',
+                    steps: [
+                        '<strong>Search</strong> by transaction ID, customer name, email, phone, payment method, status, or amount.',
+                        '<strong>Filter</strong> by status: pending, processing, completed, cancelled, failed.',
+                        'Each row shows customer contact, location/company, line items with images, total amount, VAT, billing address, and payment method.',
+                        'For <strong>bank transfer</strong> and <strong>InstaPay</strong> orders, a <strong>Payment receipt</strong> thumbnail may appear — open it to verify payment before marking completed.',
+                        canEditOrders()
+                            ? 'Change status with the dropdown, then click <strong>Update</strong>. Typical flow: <em>pending</em> → <em>processing</em> → <em>completed</em> after verification.'
+                            : 'Status updates may require employee, manager, or primary role.',
+                        '<strong>PDF</strong> downloads a printable invoice for the order in a new browser tab.',
+                    ],
+                    tip: 'Cross-check doubtful orders against the <strong>Customers</strong> tab for account details.',
+                },
+                {
+                    id: 'customers',
+                    icon: 'fa-user-friends',
+                    title: 'Customers',
+                    roles: null,
+                    lead: 'Registered storefront accounts — not staff users. Use this list for support and account lookups.',
+                    steps: [
+                        '<strong>Search</strong> by name, email, phone, gender, age, or address.',
+                        'Columns include profile info, phone, gender/age, state, company name/location, and account creation date.',
+                        'Customers place orders with the same email shown here — match with <strong>Orders</strong> when resolving tickets.',
+                        'This list is read-only; customers sign up and update profiles through the public site and <strong>complete-profile</strong> flow.',
+                    ],
+                    tip: 'Staff accounts are managed under the <strong>Users</strong> tab, not Customers.',
+                },
+                {
+                    id: 'analytics',
+                    icon: 'fa-chart-line',
+                    title: 'Analytics',
+                    roles: ['manager', 'primary'],
+                    lead: 'Business performance for the selected date range — revenue, orders, products, and customers.',
+                    steps: [
+                        '<strong>Range:</strong> Last 7, 30, or 90 days, All Time, or Custom (set From/To dates). KPIs and charts refresh when the range changes.',
+                        '<strong>KPI cards:</strong> Total revenue (EGP), order count, average order value, and customer count.',
+                        '<strong>Top Selling Items</strong> — bar chart of quantity sold in the period.',
+                        '<strong>Order Status</strong> — grid and donut views (pending, processing, completed, etc.).',
+                        '<strong>Revenue</strong> trend chart (title reflects the selected range).',
+                        '<strong>Payment Methods</strong> — how customers paid (card, transfer, InstaPay, etc.).',
+                        'Scroll down for <strong>Top Customers by Spend</strong> and insight text below the chart.',
+                    ],
+                    tip: 'Analytics uses orders in MongoDB for the chosen dates. Compare 7-day vs 30-day ranges to spot trends.',
+                },
+                {
+                    id: 'users',
+                    icon: 'fa-user-cog',
+                    title: 'Users',
+                    roles: null,
+                    lead: 'Staff accounts that can sign in to this dashboard — roles: technical, employee, manager, primary.',
+                    steps: [
+                        '<strong>Search</strong> by name, email, or role.',
+                        currentRole === 'technical'
+                            ? '<strong>Technical role:</strong> view-only — you cannot create or delete staff accounts.'
+                            : ['manager', 'primary'].includes(currentRole)
+                                ? '<strong>Create:</strong> enter name, email, password, and role (technical, employee, or manager), then <strong>Create</strong>. They sign in at auth.html with those credentials.'
+                                : '<strong>Employee role:</strong> can delete some users per permission rules but cannot create manager accounts.',
+                        '<strong>Delete rules:</strong> primary admin cannot be deleted. Managers cannot delete primary. Employees cannot delete managers or primary.',
+                        'Server <code>.env</code> lists (<code>MANAGER_EMAILS</code>, <code>EMPLOYEE_EMAILS</code>) can auto-assign roles on login when emails match.',
+                        'Primary admin is also seeded via <code>PRIMARY_ADMIN_EMAIL</code> in environment configuration.',
+                    ],
+                    tip: 'Customers who shop on the website are listed under <strong>Customers</strong>, not here.',
+                },
+            ];
+            return sections.filter((s) => {
+                if (!s.roles) return true;
+                return s.roles.includes(currentRole);
+            });
+        }
+
+        function renderDashGuide(activeId) {
+            const sections = getDashGuideSections();
+            const nav = document.getElementById('dash-guide-nav');
+            const content = document.getElementById('dash-guide-content');
+            if (!nav || !content) return;
+            const firstId = activeId || sections[0]?.id;
+            nav.innerHTML = sections.map((s) => (
+                `<button type="button" data-guide-id="${s.id}" class="${s.id === firstId ? 'active' : ''}">`
+                + `<i class="fas ${s.icon}" aria-hidden="true"></i> ${escapeHtml(s.title)}</button>`
+            )).join('');
+            content.innerHTML = sections.map((s) => {
+                const stepsHtml = s.steps.map((text, i) => (
+                    `<li><span class="num">${i + 1}</span><span>${text}</span></li>`
+                )).join('');
+                const lead = s.lead ? `<p class="dash-guide-lead">${s.lead}</p>` : '';
+                const perms = Array.isArray(s.perms) && s.perms.length
+                    ? `<ul class="dash-guide-perms" aria-label="Your access">${s.perms.map((p) => `<li>${escapeHtml(p)}</li>`).join('')}</ul>`
+                    : '';
+                const tip = s.tip ? `<p class="dash-guide-tip"><i class="fas fa-lightbulb" aria-hidden="true"></i> ${s.tip}</p>` : '';
+                const tourBtn = getDashTourMeta(s.id)
+                    ? `<button type="button" class="dash-btn guide dash-guide-section-tour" data-tour-id="${s.id}"><i class="fas fa-play" aria-hidden="true"></i> Start ${escapeHtml(s.title)} tour</button>`
+                    : '';
+                return `<article class="dash-guide-section${s.id === firstId ? ' active' : ''}" id="guide-section-${s.id}" data-guide-id="${s.id}">`
+                    + `<h3>${escapeHtml(s.title)}</h3>${lead}${perms}`
+                    + `<ol class="dash-guide-steps">${stepsHtml}</ol>${tip}${tourBtn}</article>`;
+            }).join('');
+            nav.querySelectorAll('button').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const id = btn.dataset.guideId;
+                    nav.querySelectorAll('button').forEach((b) => b.classList.toggle('active', b === btn));
+                    content.querySelectorAll('.dash-guide-section').forEach((el) => {
+                        el.classList.toggle('active', el.dataset.guideId === id);
+                    });
+                });
+            });
+            content.querySelectorAll('.dash-guide-section-tour').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const tourId = btn.getAttribute('data-tour-id');
+                    closeDashGuide();
+                    startDashTour(tourId);
+                });
+            });
+            renderDashTourPickers();
+        }
+
+        function openDashGuide(sectionId) {
+            renderDashGuide(sectionId);
+            syncDashPrefUi();
+            const modal = document.getElementById('dash-guide-modal');
+            modal?.classList.add('open');
+            modal?.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+            hideDashWelcome();
+        }
+
+        function closeDashGuide() {
+            const modal = document.getElementById('dash-guide-modal');
+            modal?.classList.remove('open');
+            modal?.setAttribute('aria-hidden', 'true');
+            if (!document.getElementById('dash-tour-overlay')?.classList.contains('active')) {
+                document.body.style.overflow = '';
+            }
+        }
+
+        function hideDashWelcome() {
+            document.getElementById('dash-welcome')?.classList.remove('is-visible');
+        }
+
+        function showDashWelcome() {
+            if (!getDashPref().autoShow) return;
+            document.getElementById('dash-welcome')?.classList.add('is-visible');
+        }
+
+        function applyWelcomeSkipPrefFromCheckbox() {
+            const skip = document.getElementById('dash-welcome-skip-pref');
+            if (skip?.checked) setDashPref({ autoShow: false });
+        }
+
+        function activateDashSection(sectionId) {
+            const tab = document.querySelector(`.dash-tab[data-section="${sectionId}"]`);
+            if (tab && tab.offsetParent !== null) tab.click();
+        }
+
+        let dashTourIndex = 0;
+        let dashTourSteps = [];
+        let dashCurrentTourId = 'inventory';
+
+        function tourTableHasData(tableId) {
+            const row = document.querySelector(`#${tableId} tbody tr:first-child`);
+            return !!(row && !row.querySelector('td[colspan]'));
+        }
+
+        function tourStep(group, section, title, body, target, fallbackTarget) {
+            return { group, section, title, body, target, fallbackTarget: fallbackTarget || null };
+        }
+
+        function resolveTourTargetEl(step) {
+            const selectors = [step?.target, step?.fallbackTarget].filter(Boolean);
+            for (const sel of selectors) {
+                const el = document.querySelector(sel);
+                if (!el) continue;
+                const r = el.getBoundingClientRect();
+                if (r.width > 0 && r.height > 0) return el;
+            }
+            return null;
+        }
+
+        function getDashTourCatalog() {
+            return [
+                { id: 'inventory', label: 'Inventory', icon: 'fa-boxes', section: 'inventory-section', visible: () => true },
+                { id: 'add-product', label: 'Add Product', icon: 'fa-plus-circle', section: 'add-product-section', visible: canAddProducts },
+                { id: 'team', label: 'Our Team', icon: 'fa-users', section: 'team-section', visible: canManageTeam },
+                { id: 'orders', label: 'Orders', icon: 'fa-receipt', section: 'orders-section', visible: () => true },
+                { id: 'customers', label: 'Customers', icon: 'fa-user-friends', section: 'customers-section', visible: () => true },
+                { id: 'analytics', label: 'Analytics', icon: 'fa-chart-line', section: 'analytics-section', visible: canViewAnalytics },
+                { id: 'users', label: 'Users', icon: 'fa-user-cog', section: 'users-section', visible: () => true },
+            ].filter((t) => t.visible());
+        }
+
+        function getDashTourMeta(tourId) {
+            return getDashTourCatalog().find((t) => t.id === tourId) || null;
+        }
+
+        function buildInventoryTourSteps() {
+            const label = 'Inventory';
+            const section = 'inventory-section';
+            const invRow = tourTableHasData('products-table') ? '#products-table tbody tr:first-child' : null;
+            const steps = [
+                tourStep(label, section, 'Inventory overview', 'This tab lists every product on the website (including hidden). Columns: name/ID, image, price, install fee, stock, active, and actions.', '#products-table thead', '#inventory-section .dash-card'),
+                tourStep(label, section, 'Search products', 'Type a product name or slug (ID) to filter the table. Clear the search box to show all items again.', '#inventory-search', '#inventory-section .section-tools'),
+            ];
+            if (canEditInventory()) {
+                steps.push(
+                    tourStep(label, section, 'Edit price (EGP)', 'Click the number in the <strong>Price</strong> column, type the new amount, then use Save All. Customers see this on Our Products and at checkout.', invRow ? `${invRow} td[data-label="Price"] input` : '#products-table thead th:nth-child(3)', '#products-table'),
+                    tourStep(label, section, 'Edit installation fee', '<strong>Install</strong> is the optional per-unit service charge (EGP). Change it the same way as price, then Save All.', invRow ? `${invRow} td[data-label="Install"] input` : '#products-table thead th:nth-child(4)', '#products-table'),
+                    tourStep(label, section, 'Update stock', '<strong>Stock</strong> is quantity available. Use <strong>0</strong> for out-of-stock. Edit the number, then Save All.', invRow ? `${invRow} td[data-label="Stock"] input` : '#products-table thead th:nth-child(5)', '#products-table'),
+                    tourStep(label, section, 'Active on website', '<strong>Yes</strong> = visible on the store. <strong>No</strong> = hidden (yellow row) but kept in inventory. Toggle via <strong>Edit</strong> → Active on website.', invRow ? `${invRow} td[data-label="Active"]` : '#products-table thead th:nth-child(6)', '#products-table'),
+                    tourStep(label, section, 'Edit full details', '<strong>Edit</strong> opens a modal: names (EN/AR), category, descriptions, image upload/path, spec sections, and active toggle. Click <strong>Save changes</strong> at the bottom.', invRow ? `${invRow} [data-edit-product]` : '#products-table thead th:last-child', '#products-table'),
+                    tourStep(label, section, 'Save All', 'After changing any Price, Install, or Stock cells, click <strong>Save All</strong> once to update the server. Wait for the green toast.', '#save-all-inventory-btn', '#inventory-section .section-tools')
+                );
+                if (canAddProducts()) {
+                    steps.push(tourStep(label, section, 'Delete product', '<strong>Delete</strong> removes the product permanently (with confirmation). To hide only, set Active to No in Edit instead.', invRow ? `${invRow} [data-delete-product]` : '#products-table', '#products-table'));
+                }
+            } else {
+                steps.push(tourStep(label, section, 'View-only mode', 'You can browse and open Edit to view details; inline fields may be disabled. Ask a manager to change prices or stock.', '#products-table', '#inventory-section .dash-card'));
+            }
+            steps.push(tourStep(label, section, 'Tour complete', 'You finished the Inventory tour. Open <strong>Guide</strong> to start tours for Orders, Add Product, Team, and other sections.', '#dash-help-btn', '.dash-actions'));
+            return steps;
+        }
+
+        function buildAddProductTourSteps() {
+            const label = 'Add Product';
+            const section = 'add-product-section';
+            return [
+                tourStep(label, section, 'Add Product tab', 'Managers use this tab to create new catalog items. They appear on Our Products when active and in stock.', '#add-product-section .section-head', '#add-product-section'),
+                tourStep(label, section, 'Product ID & category', 'Product ID is optional (auto-generated from the English name). Pick a category: GPS, CCTV, or Sensors.', '#new-product-category', '#add-product-form'),
+                tourStep(label, section, 'Names', 'English name is required. Arabic name is optional but shown on bilingual pages.', '#new-product-name', '#new-product-name-ar'),
+                tourStep(label, section, 'Price, install & stock', '<strong>Price (EGP)</strong> is required. <strong>Installation</strong> is extra per unit (default 0). <strong>Stock</strong> controls availability (0 = out of stock).', '#new-product-price', '#new-product-stock'),
+                tourStep(label, section, 'Product image', 'Drag a file onto the upload zone or enter a path like <code>assets/products/item.png</code>. Upload wins when both are set (Cloudinary when configured).', '#new-product-image-zone', '#new-product-image-path'),
+                tourStep(label, section, 'Descriptions', 'Short EN/AR text shown on the product card and detail page.', '#new-product-desc-en', '#new-product-desc-ar'),
+                tourStep(label, section, 'Specification sections', 'Click <strong>+ Add Section</strong> for spec blocks. Each line has English and Arabic fields on the product page.', '.spec-sections-builder', '#spec-sections-list'),
+                tourStep(label, section, 'Publish', 'Click <strong>Add Product</strong> to save. The item is live when stock &gt; 0 and active (default: active).', '#create-product-btn', '#add-product-form .product-create-actions'),
+                tourStep(label, section, 'Tour complete', 'Add Product tour done. Check Inventory to verify the new item, or start another tour from Guide.', '#dash-help-btn', '.dash-actions'),
+            ];
+        }
+
+        function buildTeamTourSteps() {
+            const label = 'Our Team';
+            const section = 'team-section';
+            const teamRow = tourTableHasData('team-table') ? '#team-table tbody tr:first-child' : null;
+            const steps = [
+                tourStep(label, section, 'Public team page', 'Profiles sync to <strong>team.html</strong> by category. Use <strong>View live page</strong> to preview after saving.', '#team-section .team-dash-header', '#team-section'),
+                tourStep(label, section, 'Categories', 'Leadership, Technical, Employees, Operations, and Sales — each member belongs to one category on the website.', '#team-section .team-dash-categories', '#team-section'),
+                tourStep(label, section, 'Profile fields', 'Full name, job title, and category are required. Member ID is optional (auto-generated). Skills are comma-separated tags.', '#new-team-name', '#new-team-category'),
+                tourStep(label, section, 'Display options', 'Sort order: lower numbers appear first in a category. Featured highlights the card. Badge is optional short text.', '#new-team-sort', '#new-team-featured'),
+                tourStep(label, section, 'Photo', 'Upload a photo or set <code>assets/images/team/name.jpg</code>. Upload replaces path when both are provided.', '#new-team-image-zone', '#new-team-image-path'),
+                tourStep(label, section, 'Bio & add', 'Write a short bio, then click <strong>Add Team Member</strong>. The roster table updates below.', '#new-team-bio', '#create-team-btn'),
+                tourStep(label, section, 'Roster search', 'Search by name, title, category, or badge. The count shows how many members match.', '#team-search', '#team-roster-count'),
+            ];
+            if (teamRow) {
+                steps.push(tourStep(label, section, 'Edit, hide, delete', '<strong>Edit</strong> opens the same fields in a modal. <strong>Hide</strong> removes from the public page. <strong>Delete</strong> is permanent.', `${teamRow} td[data-label="Actions"]`, '#team-table'));
+            } else {
+                steps.push(tourStep(label, section, 'Roster actions', 'After adding members, use Edit, Hide, or Delete in the roster table.', '#team-table', '#team-section'));
+            }
+            steps.push(tourStep(label, section, 'Tour complete', 'Our Team tour done. Preview team.html, or start another section tour from Guide.', '#dash-help-btn', '.dash-actions'));
+            return steps;
+        }
+
+        function buildOrdersTourSteps() {
+            const label = 'Orders';
+            const section = 'orders-section';
+            const orderRow = tourTableHasData('orders-table') ? '#orders-table tbody tr:first-child' : null;
+            const steps = [
+                tourStep(label, section, 'Orders overview', 'All customer orders appear here with customer info, items, payment method, and status.', '#orders-section .section-head', '#orders-table'),
+                tourStep(label, section, 'Search orders', 'Search by transaction ID, customer name, email, phone, payment method, status, or amount.', '#orders-search', '#orders-section .section-tools'),
+                tourStep(label, section, 'Status filter', 'Filter to pending, processing, completed, cancelled, or failed to focus on what needs action.', '#status-filter', '#orders-section .section-tools'),
+                tourStep(label, section, 'Order details', 'Each row lists items, total amount, VAT, billing address, and payment method. Bank transfer / InstaPay may show a <strong>payment receipt</strong> thumbnail — open it to verify payment.', orderRow ? `${orderRow} td[data-label="Items / Amount"]` : '#orders-table', '#orders-table'),
+            ];
+            if (canEditOrders()) {
+                steps.push(tourStep(label, section, 'Update status', 'Choose a new status in the dropdown, then click <strong>Update</strong>. Typical flow: pending → processing → completed.', orderRow ? `${orderRow} .order-action select` : '#orders-table thead th:last-child', '#orders-table'));
+            }
+            steps.push(
+                tourStep(label, section, 'PDF invoice', '<strong>PDF</strong> opens a printable invoice in a new tab for records or emailing the customer.', orderRow ? `${orderRow} .pdf-btn` : '#orders-table', '#orders-table'),
+                tourStep(label, section, 'Tour complete', 'Orders tour done. Cross-check Customers tab for account details when supporting buyers.', '#dash-help-btn', '.dash-actions')
+            );
+            return steps;
+        }
+
+        function buildCustomersTourSteps() {
+            const label = 'Customers';
+            const section = 'customers-section';
+            return [
+                tourStep(label, section, 'Customers overview', 'Registered storefront customers with profile and contact details.', '#customers-section .section-head', '#customers-table'),
+                tourStep(label, section, 'Search customers', 'Filter by name, email, phone, gender, age, or address.', '#customers-search', '#customers-section .section-tools'),
+                tourStep(label, section, 'Profile columns', 'See signup date, phone, gender/age, state, and company fields. Match with Orders when handling support tickets.', tourTableHasData('customers-table') ? '#customers-table tbody tr:first-child' : '#customers-table', '#customers-table'),
+                tourStep(label, section, 'Tour complete', 'Customers tour done. Use Orders for purchase history and receipts.', '#dash-help-btn', '.dash-actions'),
+            ];
+        }
+
+        function buildAnalyticsTourSteps() {
+            const label = 'Analytics';
+            const section = 'analytics-section';
+            return [
+                tourStep(label, section, 'Analytics overview', 'Business KPIs and charts for managers and primary admins. Data comes from orders in the selected date range.', '#analytics-section .section-head', '#analytics-section'),
+                tourStep(label, section, 'Date range', 'Pick Last 7/30/90 days, All Time, or Custom (set From/To). All KPIs and charts refresh for that period.', '#analytics-range', '#analytics-section .analytics-controls'),
+                tourStep(label, section, 'KPI cards', 'Total revenue, order count, average order value, and customer count for the range.', '#analytics-section .analytics-kpis', '#kpi-revenue'),
+                tourStep(label, section, 'Top selling items', 'Bar chart of products by quantity sold in the selected period.', '#chart-top-items', '.analytics-grid'),
+                tourStep(label, section, 'Order status charts', 'Grid and donut views of pending, processing, completed, cancelled, and failed orders.', '#chart-status-donut', '#chart-status-grid'),
+                tourStep(label, section, 'Revenue trend', 'Revenue over time for the selected range (title updates with the range).', '#chart-revenue', '#analytics-revenue-title'),
+                tourStep(label, section, 'Payment methods', 'How customers paid (card, transfer, InstaPay, etc.) in the period.', '#chart-payment-donut', '#chart-payment-grid'),
+                tourStep(label, section, 'Top customers', 'Scroll down for spend by customer (EGP). Useful for VIP and repeat-buyer insights.', '#chart-customers', '#top-customers-insights'),
+                tourStep(label, section, 'Tour complete', 'Analytics tour done. Change the date range anytime to compare periods.', '#dash-help-btn', '.dash-actions'),
+            ];
+        }
+
+        function buildUsersTourSteps() {
+            const label = 'Users';
+            const section = 'users-section';
+            const steps = [
+                tourStep(label, section, 'User management', 'Staff accounts (technical, employee, manager, primary) — not storefront customers.', '#users-section h3', '#user-mgmt-note'),
+                tourStep(label, section, 'Search users', 'Find staff by name, email, or role.', '#users-search', '#users-section .dash-card'),
+            ];
+            if (['manager', 'primary'].includes(currentRole)) {
+                steps.push(tourStep(label, section, 'Create staff user', 'Enter name, email, password, and role, then <strong>Create</strong>. They sign in at auth.html with those credentials.', '#user-create-form', '#create-user-btn'));
+            }
+            steps.push(
+                tourStep(label, section, 'Delete rules', currentRole === 'technical' ? 'Technical role: view-only — cannot create or delete users.' : 'Delete permissions depend on your role. Primary admin cannot be deleted. Managers cannot delete primary.', tourTableHasData('users-table') ? '#users-table tbody tr:first-child' : '#users-table', '#user-mgmt-note'),
+                tourStep(label, section, 'Tour complete', 'Users tour done. Role lists in server .env (MANAGER_EMAILS, etc.) can also affect roles on login.', '#dash-help-btn', '.dash-actions')
+            );
+            return steps;
+        }
+
+        function getDashTourSteps(tourId) {
+            const builders = {
+                inventory: buildInventoryTourSteps,
+                'add-product': buildAddProductTourSteps,
+                team: buildTeamTourSteps,
+                orders: buildOrdersTourSteps,
+                customers: buildCustomersTourSteps,
+                analytics: buildAnalyticsTourSteps,
+                users: buildUsersTourSteps,
+            };
+            const fn = builders[tourId];
+            return fn ? fn() : buildInventoryTourSteps();
+        }
+
+        function renderDashTourPickers() {
+            const tours = getDashTourCatalog();
+            const grid = document.getElementById('dash-guide-tour-grid');
+            const select = document.getElementById('dash-welcome-tour-select');
+            if (grid) {
+                grid.innerHTML = tours.map((t) => (
+                    `<button type="button" class="dash-btn guide" data-tour-id="${t.id}">`
+                    + `<i class="fas ${t.icon}" aria-hidden="true"></i> ${escapeHtml(t.label)}</button>`
+                )).join('');
+                grid.querySelectorAll('[data-tour-id]').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        closeDashGuide();
+                        startDashTour(btn.getAttribute('data-tour-id'));
+                    });
+                });
+            }
+            if (select) {
+                select.innerHTML = tours.map((t) => (
+                    `<option value="${t.id}">${escapeHtml(t.label)}</option>`
+                )).join('');
+            }
+        }
+
+        function tourPrefersReducedMotion() {
+            return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        }
+
+        function estimateTourTooltipHeight() {
+            const tooltip = document.getElementById('dash-tour-tooltip');
+            if (!tooltip || tooltip.hidden) return 260;
+            return Math.min(tooltip.offsetHeight || 260, 300);
+        }
+
+        async function scrollTourTargetIntoView(el) {
+            if (!el) return;
+            const reduceMotion = tourPrefersReducedMotion();
+            const behavior = reduceMotion ? 'auto' : 'smooth';
+            const gap = 14;
+            const margin = 14;
+            const tooltipH = estimateTourTooltipHeight();
+
+            el.scrollIntoView({ behavior, block: 'center', inline: 'nearest' });
+            await new Promise((r) => setTimeout(r, reduceMotion ? 60 : 520));
+
+            let rect = el.getBoundingClientRect();
+            let overflowBelow = rect.bottom + gap + tooltipH + margin - window.innerHeight;
+            if (overflowBelow > 0) {
+                window.scrollBy({ top: overflowBelow, behavior });
+                await new Promise((r) => setTimeout(r, reduceMotion ? 60 : 380));
+                rect = el.getBoundingClientRect();
+            }
+            const overflowAbove = margin - (rect.top - gap - tooltipH);
+            if (overflowAbove > 0) {
+                window.scrollBy({ top: -overflowAbove, behavior });
+                await new Promise((r) => setTimeout(r, reduceMotion ? 60 : 380));
+            }
+        }
+
+        function positionDashTourStep(step, opts = {}) {
+            const spotlight = document.getElementById('dash-tour-spotlight');
+            const tooltip = document.getElementById('dash-tour-tooltip');
+            const target = resolveTourTargetEl(step);
+            if (!tooltip) return;
+
+            const instant = !!opts.instant;
+            spotlight?.classList.toggle('no-transition', instant);
+            tooltip.classList.toggle('no-transition', instant);
+
+            tooltip.hidden = false;
+            tooltip.style.transform = '';
+
+            if (!target || !spotlight) {
+                spotlight.hidden = true;
+                tooltip.style.top = '50%';
+                tooltip.style.left = '50%';
+                tooltip.style.transform = 'translate(-50%, -50%)';
+                return;
+            }
+
+            const pad = 8;
+            const gap = 14;
+            const margin = 14;
+            const rect = target.getBoundingClientRect();
+
+            let spotTop = rect.top - pad;
+            let spotLeft = rect.left - pad;
+            let spotW = rect.width + pad * 2;
+            let spotH = rect.height + pad * 2;
+            spotLeft = Math.max(margin, Math.min(spotLeft, window.innerWidth - margin - 24));
+            spotW = Math.min(spotW, window.innerWidth - margin * 2);
+            spotTop = Math.max(margin, spotTop);
+            spotH = Math.max(24, Math.min(spotH, window.innerHeight - margin * 2));
+
+            spotlight.hidden = false;
+            spotlight.style.top = `${spotTop}px`;
+            spotlight.style.left = `${spotLeft}px`;
+            spotlight.style.width = `${spotW}px`;
+            spotlight.style.height = `${spotH}px`;
+
+            tooltip.style.visibility = 'hidden';
+            tooltip.style.top = '0px';
+            tooltip.style.left = '0px';
+            const ttW = tooltip.offsetWidth;
+            const ttH = tooltip.offsetHeight;
+            tooltip.style.visibility = 'visible';
+
+            let tipTop = rect.bottom + gap;
+            let tipLeft = Math.max(margin, Math.min(rect.left, window.innerWidth - margin - ttW));
+
+            if (tipTop + ttH > window.innerHeight - margin) {
+                tipTop = rect.top - gap - ttH;
+            }
+            if (tipTop < margin) {
+                tipTop = Math.min(window.innerHeight - margin - ttH, Math.max(margin, rect.bottom + gap));
+            }
+            if (tipLeft + ttW > window.innerWidth - margin) {
+                tipLeft = window.innerWidth - margin - ttW;
+            }
+
+            tooltip.style.top = `${tipTop}px`;
+            tooltip.style.left = `${tipLeft}px`;
+        }
+
+        async function renderDashTourStep() {
+            const step = dashTourSteps[dashTourIndex];
+            if (!step) return endDashTour(true);
+            const meta = getDashTourMeta(dashCurrentTourId);
+            const isFirstStep = dashTourIndex === 0;
+
+            if (step.section) activateDashSection(step.section);
+            await new Promise((r) => setTimeout(r, 180));
+
+            const groupEl = document.getElementById('dash-tour-group');
+            if (groupEl) {
+                const groupLabel = meta?.label || step.group || 'Tour';
+                groupEl.textContent = groupLabel;
+                groupEl.hidden = false;
+            }
+            document.getElementById('dash-tour-progress').textContent =
+                `${meta?.label || step.group || 'Tour'} · Step ${dashTourIndex + 1} of ${dashTourSteps.length}`;
+            document.getElementById('dash-tour-title').textContent = step.title;
+            document.getElementById('dash-tour-body').innerHTML = step.body;
+            document.getElementById('dash-tour-prev').style.display = dashTourIndex > 0 ? '' : 'none';
+            document.getElementById('dash-tour-next').textContent =
+                dashTourIndex >= dashTourSteps.length - 1 ? 'Finish' : 'Next';
+
+            const target = resolveTourTargetEl(step);
+            await scrollTourTargetIntoView(target);
+            requestAnimationFrame(() => {
+                positionDashTourStep(step, { instant: isFirstStep });
+            });
+        }
+
+        function startDashTour(tourId) {
+            const meta = getDashTourMeta(tourId) || getDashTourCatalog()[0];
+            if (!meta) return;
+            closeDashGuide();
+            hideDashWelcome();
+            applyWelcomeSkipPrefFromCheckbox();
+            dashCurrentTourId = meta.id;
+            dashTourSteps = getDashTourSteps(meta.id);
+            dashTourIndex = 0;
+            const overlay = document.getElementById('dash-tour-overlay');
+            overlay?.classList.add('active');
+            overlay?.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('dash-tour-active');
+            if (meta.section) activateDashSection(meta.section);
+            renderDashTourStep();
+        }
+
+
+        function endDashTour(markComplete) {
+            document.getElementById('dash-tour-overlay')?.classList.remove('active');
+            document.getElementById('dash-tour-overlay')?.setAttribute('aria-hidden', 'true');
+            document.getElementById('dash-tour-spotlight').hidden = true;
+            document.getElementById('dash-tour-tooltip').hidden = true;
+            document.body.classList.remove('dash-tour-active');
+            if (markComplete) setDashPref({ tourCompleted: true });
+        }
+
+        function initDashGuideUi() {
+            const roleMeta = getDashGuideRoleMeta();
+            const sub = document.getElementById('dash-guide-subtitle');
+            if (sub) {
+                sub.innerHTML = `<strong>${escapeHtml(roleMeta.label)}</strong> — ${escapeHtml(roleMeta.summary)} Reopen this panel anytime from <strong>Guide</strong> in the header.`;
+            }
+            syncDashPrefUi();
+            renderDashTourPickers();
+            showDashWelcome();
+
+            document.getElementById('dash-help-btn')?.addEventListener('click', () => openDashGuide());
+            document.getElementById('dash-welcome-guide-btn')?.addEventListener('click', () => {
+                applyWelcomeSkipPrefFromCheckbox();
+                openDashGuide();
+            });
+            document.getElementById('dash-welcome-tour-btn')?.addEventListener('click', () => {
+                const tourId = document.getElementById('dash-welcome-tour-select')?.value || 'inventory';
+                startDashTour(tourId);
+            });
+            document.getElementById('dash-welcome-dismiss')?.addEventListener('click', () => {
+                applyWelcomeSkipPrefFromCheckbox();
+                hideDashWelcome();
+            });
+            document.getElementById('dash-guide-close')?.addEventListener('click', closeDashGuide);
+            document.getElementById('dash-guide-backdrop')?.addEventListener('click', closeDashGuide);
+            document.getElementById('dash-guide-done')?.addEventListener('click', closeDashGuide);
+            document.getElementById('dash-guide-auto-pref')?.addEventListener('change', (e) => {
+                setDashPref({ autoShow: e.target.checked });
+            });
+            document.getElementById('dash-welcome-skip-pref')?.addEventListener('change', (e) => {
+                if (e.target.checked) setDashPref({ autoShow: false });
+                else setDashPref({ autoShow: true });
+            });
+            document.getElementById('dash-tour-next')?.addEventListener('click', () => {
+                if (dashTourIndex >= dashTourSteps.length - 1) endDashTour(true);
+                else { dashTourIndex += 1; renderDashTourStep(); }
+            });
+            document.getElementById('dash-tour-prev')?.addEventListener('click', () => {
+                if (dashTourIndex > 0) { dashTourIndex -= 1; renderDashTourStep(); }
+            });
+            document.getElementById('dash-tour-skip')?.addEventListener('click', () => endDashTour(false));
+            document.getElementById('dash-tour-backdrop')?.addEventListener('click', () => endDashTour(false));
+            const repositionActiveTourStep = () => {
+                if (!document.getElementById('dash-tour-overlay')?.classList.contains('active')) return;
+                const step = dashTourSteps[dashTourIndex];
+                if (step) positionDashTourStep(step);
+            };
+            window.addEventListener('resize', repositionActiveTourStep);
+            window.addEventListener('scroll', repositionActiveTourStep, { passive: true });
+        }
+
         (async () => {
             const ok = await ensureStaff();
             if (!ok) return;
@@ -4098,6 +5218,7 @@
                 document.getElementById('team-section')?.remove();
             }
             applyAnalyticsAccess();
+            initDashGuideUi();
             document.getElementById('save-all-inventory-btn').disabled = !canEditInventory();
             if (currentRole === 'technical') {
                 document.getElementById('user-mgmt-note').textContent = 'Technical role: view-only access.';

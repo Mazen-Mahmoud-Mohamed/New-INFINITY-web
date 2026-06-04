@@ -164,6 +164,9 @@ Tabbed interface for staff operations:
 - Custom confirm/alert dialogs (no browser `confirm()` popups)
 - Toast notifications for save/delete feedback
 - Mobile-friendly tables (card layout on phones/tablets) and analytics layout
+- **Guide** button — role-based how-to articles plus **separate interactive tours** per section (Inventory, Add Product, Our Team, Orders, Customers, Analytics, Users)
+- Interactive tours **move the tooltip next to each control** and **auto-scroll** the page so the highlighted area stays visible; you can still scroll manually anytime
+- Preferences saved per user in the browser (`localStorage` key prefix `infinity-dash-pref:v1:{userId}`): “don’t show welcome again” and optional tour completion
 
 ### 9. Business Analytics
 
