@@ -63,7 +63,7 @@ Each product in MongoDB includes:
 | `name` / `nameAr` | English and Arabic display names |
 | `price` / `installation` | EGP amounts |
 | `stock` | Quantity available |
-| `image` | Path under `assets/products/` or uploaded file |
+| `image` | Cloudinary URL, path under `assets/products/`, or external URL |
 | `descriptionEn` / `descriptionAr` | Short catalog descriptions |
 | `category` | `gps`, `cctv`, or `sensors` |
 | `specSections` | Array of `{ title, items: [{ en, ar }] }` for the details page |
@@ -293,7 +293,7 @@ OAuth: `/auth/google`, `/auth/facebook` (+ callbacks) when configured.
 
 1. Dashboard → **Add Product**
 2. Fill English/Arabic names, category, price, installation, stock
-3. Upload an image or set path `assets/products/your-file.png`
+3. Upload an image (Cloudinary) or set path `assets/products/your-file.png` (no upload needed)
 4. Add **Specification sections** with a title and English / Arabic lines
 5. Submit — product appears on **Our Products** when **Active** is Yes
 
@@ -317,8 +317,8 @@ Refresh **`team.html`** after adding files. SVG placeholders show if JPG is miss
 - **Mongoose** models: User, Product, Cart, Order, Session (MongoStore)
 - **Passport** + **bcrypt** for OAuth and passwords
 - **PDFKit** for order PDFs
-- Product images → `assets/products/` (base64 upload from dashboard)
-- Payment receipts → **Cloudinary** (`CLOUDINARY_*` in `.env`) or local `assets/orders/receipts/` fallback
+- Product images → **Cloudinary** (`products/{productId}`) when configured, or `assets/products/` local fallback; optional image path without upload
+- Payment receipts → **Cloudinary** (`payment-receipts/{orderId}`) when configured, or local `assets/orders/receipts/` fallback
 
 ---
 
@@ -363,7 +363,7 @@ http://localhost:3000/
 | `EMPLOYEE_EMAILS` | Comma-separated employee emails |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Optional Google OAuth |
 | `FACEBOOK_APP_ID` / `FACEBOOK_APP_SECRET` | Optional Facebook OAuth |
-| `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name (payment receipt uploads) |
+| `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name (product images & payment receipts) |
 | `CLOUDINARY_API_KEY` | Cloudinary API key |
 | `CLOUDINARY_API_SECRET` | Cloudinary API secret |
 | `STRIPE_API_KEY_BASE64` | Optional payment config |

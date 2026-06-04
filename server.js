@@ -463,22 +463,81 @@ async function deletePaymentReceiptAsset(orderId, receiptImage) {
     }
 }
 
-function saveProductImage(productId, imagePath, imageData) {
-    if (typeof imageData === "string" && imageData.startsWith("data:image/")) {
-        const match = imageData.match(/^data:image\/(\w+);base64,(.+)$/);
-        if (!match) throw new Error("Invalid image upload format");
-        let ext = String(match[1] || "png").toLowerCase();
-        if (ext === "jpeg") ext = "jpg";
-        if (!["png", "jpg", "webp", "gif"].includes(ext)) ext = "jpg";
-        const rel = `assets/products/${productId}.${ext}`;
-        const abs = path.join(__dirname, rel);
-        try {
-            fs.mkdirSync(path.dirname(abs), { recursive: true });
-            fs.writeFileSync(abs, Buffer.from(match[2], "base64"));
-        } catch (err) {
-            throw new Error(`Could not save image file: ${err.message}`);
+function cloudinarySafeProductId(productId) {
+    const id = String(productId || "")
+        .replace(/[^a-zA-Z0-9_-]/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 80);
+    return id || "product";
+}
+
+function saveProductImageLocal(productId, imageData) {
+    const match = imageData.match(/^data:image\/(\w+);base64,(.+)$/);
+    if (!match) throw new Error("Invalid image upload format");
+    let ext = String(match[1] || "png").toLowerCase();
+    if (ext === "jpeg") ext = "jpg";
+    if (!["png", "jpg", "webp", "gif"].includes(ext)) ext = "jpg";
+    const rel = `assets/products/${productId}.${ext}`;
+    const abs = path.join(__dirname, rel);
+    try {
+        fs.mkdirSync(path.dirname(abs), { recursive: true });
+        fs.writeFileSync(abs, Buffer.from(match[2], "base64"));
+    } catch (err) {
+        throw new Error(`Could not save image file: ${err.message}`);
+    }
+    return rel;
+}
+
+async function uploadProductImage(productId, imageData) {
+    if (typeof imageData !== "string" || !imageData.startsWith("data:image/")) {
+        throw new Error("Invalid product image format");
+    }
+    const publicId = cloudinarySafeProductId(productId);
+    if (!publicId) throw new Error("Invalid product id for image upload");
+
+    if (isCloudinaryConfigured()) {
+        const result = await cloudinary.uploader.upload(imageData, {
+            folder: "products",
+            public_id: publicId,
+            overwrite: true,
+            resource_type: "image",
+        });
+        if (!result?.secure_url) {
+            throw new Error("Cloudinary upload did not return a URL");
         }
-        return rel;
+        return result.secure_url;
+    }
+
+    console.warn("Cloudinary not configured — saving product image to local disk. Set CLOUDINARY_* in .env for production.");
+    return saveProductImageLocal(productId, imageData);
+}
+
+async function deleteProductImageAsset(productId, imageUrl) {
+    if (!imageUrl) return;
+    const publicId = `products/${cloudinarySafeProductId(productId)}`;
+
+    if (String(imageUrl).includes("res.cloudinary.com") && isCloudinaryConfigured()) {
+        try {
+            await cloudinary.uploader.destroy(publicId, { resource_type: "image" });
+        } catch (err) {
+            console.warn("Cloudinary product image delete failed:", err?.message || err);
+        }
+        return;
+    }
+
+    if (String(imageUrl).startsWith("assets/products/")) {
+        const abs = path.join(__dirname, imageUrl);
+        try {
+            if (fs.existsSync(abs)) fs.unlinkSync(abs);
+        } catch (err) {
+            console.warn("Local product image delete failed:", err?.message || err);
+        }
+    }
+}
+
+async function resolveProductImage(productId, imagePath, imageData) {
+    if (typeof imageData === "string" && imageData.startsWith("data:image/")) {
+        return uploadProductImage(productId, imageData);
     }
     if (typeof imagePath === "string" && imagePath.trim()) return imagePath.trim();
     return "";
@@ -1110,9 +1169,27 @@ app.patch("/api/dashboard/products/:productId/stock", requireRole(["employee", "
             update.specs = flat;
             update.specSections = flat.length ? [{ title: "1. المواصفات الفنية", items: flat }] : [];
         }
-        const savedImage = saveProductImage(productId, image, imageData);
-        if (savedImage) update.image = savedImage;
-        else if (typeof image === "string" && image.trim()) update.image = image.trim();
+        const existing = await Product.findOne({ productId }).lean();
+        if (!existing) return res.status(404).json({ error: "Product not found" });
+
+        let savedImage = "";
+        try {
+            savedImage = await resolveProductImage(productId, image, imageData);
+        } catch (imgErr) {
+            return res.status(400).json({ error: imgErr.message || "Failed to save product image" });
+        }
+        if (savedImage) {
+            if (existing.image && savedImage !== existing.image) {
+                await deleteProductImageAsset(productId, existing.image);
+            }
+            update.image = savedImage;
+        } else if (typeof image === "string" && image.trim()) {
+            const trimmed = image.trim();
+            if (existing.image && trimmed !== existing.image) {
+                await deleteProductImageAsset(productId, existing.image);
+            }
+            update.image = trimmed;
+        }
 
         const product = await Product.findOneAndUpdate(
             { productId },
@@ -1122,7 +1199,8 @@ app.patch("/api/dashboard/products/:productId/stock", requireRole(["employee", "
         if (!product) return res.status(404).json({ error: "Product not found" });
         res.json({ product });
     } catch (error) {
-        res.status(500).json({ error: "Internal server error" });
+        console.error("Update product failed:", error);
+        res.status(500).json({ error: error?.message || "Internal server error" });
     }
 });
 
@@ -1151,7 +1229,7 @@ app.post("/api/dashboard/products", requireRole(["manager", "primary"]), async (
 
         let image = "";
         try {
-            image = saveProductImage(productId, body.image, body.imageData);
+            image = await resolveProductImage(productId, body.image, body.imageData);
         } catch (imgErr) {
             return res.status(400).json({ error: imgErr.message || "Failed to save product image" });
         }
@@ -1200,6 +1278,7 @@ app.delete("/api/dashboard/products/:productId", requireRole(["manager", "primar
         if (!existing) return res.status(404).json({ error: "Product not found" });
 
         if (permanent) {
+            await deleteProductImageAsset(productId, existing.image);
             await Product.deleteOne({ productId });
             return res.json({ message: "Product permanently deleted", productId, permanent: true });
         }

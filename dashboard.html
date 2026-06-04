@@ -172,6 +172,112 @@
             border: 1px solid #e2e8f0;
             background: #f8fafc;
         }
+        .product-image-upload-zone {
+            display: grid;
+            gap: .5rem;
+        }
+        .product-image-input {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+        .product-image-dropzone {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: .35rem;
+            padding: 1.1rem 1rem;
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            background: #f8fafc;
+            cursor: pointer;
+            text-align: center;
+            transition: border-color .15s, background .15s;
+        }
+        .product-image-dropzone:hover,
+        .product-image-dropzone.dragover {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+        .product-image-dropzone i {
+            font-size: 1.5rem;
+            color: #2563eb;
+        }
+        .product-image-dropzone-title {
+            font-weight: 600;
+            color: #0f172a;
+            font-size: .9rem;
+        }
+        .product-image-dropzone-sub {
+            color: #64748b;
+            font-size: .78rem;
+        }
+        .product-image-dropzone.hidden { display: none; }
+        .product-image-upload-preview {
+            display: none;
+        }
+        .product-image-upload-preview.visible {
+            display: block;
+        }
+        .product-image-preview-card {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            flex-wrap: wrap;
+            padding: .65rem .75rem;
+            border: 1px solid #dbe3ee;
+            border-radius: 10px;
+            background: #fff;
+        }
+        .product-image-preview-card img {
+            width: 72px;
+            height: 72px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .product-image-preview-meta strong {
+            display: block;
+            color: #0f172a;
+            font-size: .88rem;
+        }
+        .product-image-preview-meta .product-image-file-name {
+            color: #64748b;
+            font-size: .78rem;
+        }
+        .product-image-preview-actions {
+            display: flex;
+            gap: .4rem;
+            margin-left: auto;
+        }
+        .product-image-change-btn,
+        .product-image-remove-btn {
+            font-size: .78rem;
+            padding: .35rem .55rem;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background: #fff;
+            cursor: pointer;
+        }
+        .product-image-change-btn:hover { background: #f1f5f9; }
+        .product-image-remove-btn {
+            border-color: #fecaca;
+            color: #991b1b;
+            background: #fef2f2;
+        }
+        .product-image-upload-error {
+            margin: 0;
+            font-size: .82rem;
+            color: #b91c1c;
+            display: none;
+        }
+        .product-image-upload-error.visible { display: block; }
         .product-create-hint { margin: 0; color: #64748b; font-size: .82rem; }
         .spec-sections-builder { display: grid; gap: .65rem; }
         .spec-builder-head { display: flex; justify-content: space-between; align-items: center; gap: .5rem; flex-wrap: wrap; }
@@ -1077,7 +1183,7 @@
                 <div class="section-head">
                     <h3>Add New Product</h3>
                 </div>
-                <p class="product-create-hint">New products appear on the Our Products page and can be ordered by customers. Image: upload a file or enter a path like <code>assets/products/item.png</code>.</p>
+                <p class="product-create-hint">New products appear on the Our Products page and can be ordered by customers. Image: upload a file (saved to Cloudinary when configured) or enter a path like <code>assets/products/item.png</code>.</p>
                 <form id="add-product-form" class="product-create-form">
                     <label>Product ID (optional)
                         <input id="new-product-id" placeholder="auto-generated from name">
@@ -1107,11 +1213,27 @@
                     <label>Image path (optional if uploading)
                         <input id="new-product-image-path" placeholder="assets/products/my-item.png">
                     </label>
-                    <label class="full">Upload image
-                        <input id="new-product-image-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
-                    </label>
-                    <div class="full" id="new-product-image-preview-wrap" style="display:none;">
-                        <img id="new-product-image-preview" class="product-image-preview" alt="Preview">
+                    <div class="full product-image-upload-zone" id="new-product-image-zone">
+                        <input id="new-product-image-file" class="product-image-input" type="file" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif" aria-label="Upload product image">
+                        <label class="product-image-dropzone" id="new-product-image-dropzone" for="new-product-image-file" tabindex="0">
+                            <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                            <span class="product-image-dropzone-title">Tap to upload or drag image here</span>
+                            <span class="product-image-dropzone-sub">PNG, JPG or WEBP · max 15 MB · or use path above</span>
+                        </label>
+                        <div class="product-image-upload-preview" id="new-product-image-preview-wrap">
+                            <div class="product-image-preview-card">
+                                <img id="new-product-image-preview" alt="Upload preview">
+                                <div class="product-image-preview-meta">
+                                    <strong><i class="fas fa-check-circle"></i> Image ready</strong>
+                                    <span class="product-image-file-name" id="new-product-image-file-name"></span>
+                                </div>
+                                <div class="product-image-preview-actions">
+                                    <button type="button" class="product-image-change-btn" id="new-product-image-change">Change</button>
+                                    <button type="button" class="product-image-remove-btn" id="new-product-image-remove">Remove</button>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="product-image-upload-error" id="new-product-image-error" role="alert"></p>
                     </div>
                     <label class="full">Description (English)
                         <textarea id="new-product-desc-en" placeholder="Short product description for the catalog"></textarea>
@@ -1349,9 +1471,28 @@
                                 <label>Image path
                                     <input id="edit-product-image-path" placeholder="assets/products/item.png">
                                 </label>
-                                <label>Upload new image (optional)
-                                    <input id="edit-product-image-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
-                                </label>
+                                <div class="product-image-upload-zone" id="edit-product-image-zone">
+                                    <input id="edit-product-image-file" class="product-image-input" type="file" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif" aria-label="Upload new product image">
+                                    <label class="product-image-dropzone" id="edit-product-image-dropzone" for="edit-product-image-file" tabindex="0">
+                                        <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                                        <span class="product-image-dropzone-title">Tap to upload or drag image here</span>
+                                        <span class="product-image-dropzone-sub">Replaces current image on save · PNG, JPG or WEBP</span>
+                                    </label>
+                                    <div class="product-image-upload-preview" id="edit-product-image-upload-preview">
+                                        <div class="product-image-preview-card">
+                                            <img id="edit-product-image-upload-thumb" alt="New upload preview">
+                                            <div class="product-image-preview-meta">
+                                                <strong><i class="fas fa-check-circle"></i> New image ready</strong>
+                                                <span class="product-image-file-name" id="edit-product-image-file-name"></span>
+                                            </div>
+                                            <div class="product-image-preview-actions">
+                                                <button type="button" class="product-image-change-btn" id="edit-product-image-change">Change</button>
+                                                <button type="button" class="product-image-remove-btn" id="edit-product-image-remove">Remove</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="product-image-upload-error" id="edit-product-image-error" role="alert"></p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2054,6 +2195,7 @@
             }
 
             pendingEditImageData = '';
+            resetProductImageZone('edit-product-image-zone', 'edit');
             document.getElementById('edit-product-id-hidden').value = product.productId;
             document.getElementById('edit-product-id-display').value = product.productId;
             document.getElementById('edit-product-category').value = product.category || 'gps';
@@ -2095,8 +2237,7 @@
             }
             document.body.style.overflow = document.getElementById('dash-dialog')?.classList.contains('open') ? 'hidden' : '';
             pendingEditImageData = '';
-            const fileInput = document.getElementById('edit-product-image-file');
-            if (fileInput) fileInput.value = '';
+            resetProductImageZone('edit-product-image-zone', 'edit');
         }
 
         async function saveEditProduct(e) {
@@ -2166,6 +2307,118 @@
                 reader.onload = () => resolve(String(reader.result || ""));
                 reader.onerror = () => reject(new Error("Failed to read image"));
                 reader.readAsDataURL(file);
+            });
+        }
+
+        function resetProductImageZone(zoneId, clearPending) {
+            const zone = document.getElementById(zoneId);
+            if (!zone) return;
+            const input = zone.querySelector('.product-image-input');
+            const dropzone = zone.querySelector('.product-image-dropzone');
+            const previewWrap = zone.querySelector('.product-image-upload-preview');
+            const err = zone.querySelector('.product-image-upload-error');
+            if (input) input.value = '';
+            if (dropzone) dropzone.classList.remove('hidden');
+            if (previewWrap) previewWrap.classList.remove('visible');
+            if (err) {
+                err.textContent = '';
+                err.classList.remove('visible');
+            }
+            if (clearPending === 'new') pendingProductImageData = '';
+            if (clearPending === 'edit') pendingEditImageData = '';
+        }
+
+        function showProductImageZoneError(zoneId, message) {
+            const err = document.getElementById(zoneId)?.querySelector('.product-image-upload-error');
+            if (!err) return;
+            err.textContent = message || '';
+            err.classList.toggle('visible', !!message);
+        }
+
+        function setProductImageZonePreview(zoneId, dataUrl, fileName, pendingKey) {
+            const zone = document.getElementById(zoneId);
+            if (!zone) return;
+            const dropzone = zone.querySelector('.product-image-dropzone');
+            const previewWrap = zone.querySelector('.product-image-upload-preview');
+            const previewImg = zone.querySelector('.product-image-upload-preview img')
+                || (zoneId === 'new-product-image-zone' ? document.getElementById('new-product-image-preview') : document.getElementById('edit-product-image-upload-thumb'));
+            const fileNameEl = zone.querySelector('.product-image-file-name');
+            const err = zone.querySelector('.product-image-upload-error');
+            if (pendingKey === 'new') pendingProductImageData = dataUrl;
+            if (pendingKey === 'edit') pendingEditImageData = dataUrl;
+            if (previewImg) previewImg.src = dataUrl;
+            if (fileNameEl) fileNameEl.textContent = fileName || '';
+            if (previewWrap) previewWrap.classList.add('visible');
+            if (dropzone) dropzone.classList.add('hidden');
+            if (err) {
+                err.textContent = '';
+                err.classList.remove('visible');
+            }
+        }
+
+        async function handleProductImageFile(file, zoneId, pendingKey, statusEl) {
+            const zone = document.getElementById(zoneId);
+            if (!file || !zone) return;
+            const input = zone.querySelector('.product-image-input');
+            if (!file.type.startsWith('image/')) {
+                if (input) input.value = '';
+                showProductImageZoneError(zoneId, 'Please choose an image file (PNG, JPG, or WEBP).');
+                return;
+            }
+            if (file.size > 15 * 1024 * 1024) {
+                if (input) input.value = '';
+                showProductImageZoneError(zoneId, 'Image must be under 15 MB.');
+                return;
+            }
+            try {
+                if (statusEl) statusEl.textContent = 'Preparing image...';
+                const dataUrl = await prepareProductImageFile(file);
+                setProductImageZonePreview(zoneId, dataUrl, file.name, pendingKey);
+                if (statusEl) statusEl.textContent = pendingKey === 'new' ? 'Image ready.' : '';
+                if (pendingKey === 'edit') showToast('New image ready. Click Save changes.', 'success');
+            } catch (err) {
+                if (pendingKey === 'new') pendingProductImageData = '';
+                if (pendingKey === 'edit') pendingEditImageData = '';
+                resetProductImageZone(zoneId, pendingKey);
+                const msg = err?.message || 'Could not load image.';
+                showProductImageZoneError(zoneId, msg);
+                if (statusEl) statusEl.textContent = msg;
+                if (pendingKey === 'edit') showToast(msg, 'error');
+            }
+        }
+
+        function initProductImageZone(zoneId, pendingKey, statusElId) {
+            const zone = document.getElementById(zoneId);
+            if (!zone) return;
+            const input = zone.querySelector('.product-image-input');
+            const dropzone = zone.querySelector('.product-image-dropzone');
+            const changeBtn = zone.querySelector('.product-image-change-btn');
+            const removeBtn = zone.querySelector('.product-image-remove-btn');
+            const statusEl = statusElId ? document.getElementById(statusElId) : null;
+
+            input?.addEventListener('change', (e) => {
+                handleProductImageFile(e.target.files?.[0], zoneId, pendingKey, statusEl);
+            });
+            changeBtn?.addEventListener('click', () => input?.click());
+            removeBtn?.addEventListener('click', () => {
+                resetProductImageZone(zoneId, pendingKey);
+            });
+            dropzone?.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropzone.classList.add('dragover');
+            });
+            dropzone?.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+            dropzone?.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropzone.classList.remove('dragover');
+                const file = e.dataTransfer?.files?.[0];
+                if (file) handleProductImageFile(file, zoneId, pendingKey, statusEl);
+            });
+            dropzone?.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    input?.click();
+                }
             });
         }
 
@@ -2292,7 +2545,7 @@
                 statusEl.textContent = `Added: ${data.product?.productId || ''}`;
                 document.getElementById('add-product-form').reset();
                 pendingProductImageData = "";
-                document.getElementById('new-product-image-preview-wrap').style.display = 'none';
+                resetProductImageZone('new-product-image-zone', 'new');
                 const specList = document.getElementById('spec-sections-list');
                 if (specList) {
                     specList.innerHTML = '';
@@ -2652,54 +2905,19 @@
             const n = list.querySelectorAll('.spec-section-block').length + 1;
             list.appendChild(createSpecSectionBlock(`${n}. المواصفات الفنية`, []));
         });
-        document.getElementById('edit-product-image-file')?.addEventListener('change', async (e) => {
-            const file = e.target.files?.[0];
-            const preview = document.getElementById('edit-product-image-preview');
-            const statusEl = document.getElementById('edit-product-status');
-            if (!file) {
-                pendingEditImageData = '';
-                return;
-            }
-            try {
-                if (statusEl) statusEl.textContent = 'Preparing image...';
-                pendingEditImageData = await prepareProductImageFile(file);
-                if (preview) preview.src = pendingEditImageData;
-                if (statusEl) statusEl.textContent = '';
-                showToast('New image ready. Click Save changes.', 'success');
-            } catch (err) {
-                pendingEditImageData = '';
-                if (statusEl) statusEl.textContent = err?.message || 'Could not load image.';
-                showToast(err?.message || 'Could not load image.', 'error');
-            }
-        });
         document.getElementById('edit-product-image-path')?.addEventListener('input', (e) => {
             const preview = document.getElementById('edit-product-image-preview');
             const path = e.target.value.trim();
-            if (preview && path) preview.src = path;
+            if (preview && path && !pendingEditImageData) preview.src = path;
         });
-        initSpecSectionsBuilder();
-        document.getElementById('new-product-image-file')?.addEventListener('change', async (e) => {
-            const file = e.target.files?.[0];
-            const wrap = document.getElementById('new-product-image-preview-wrap');
+        document.getElementById('new-product-image-path')?.addEventListener('input', (e) => {
             const preview = document.getElementById('new-product-image-preview');
-            const statusEl = document.getElementById('add-product-status');
-            if (!file) {
-                pendingProductImageData = "";
-                if (wrap) wrap.style.display = 'none';
-                return;
-            }
-            try {
-                if (statusEl) statusEl.textContent = 'Preparing image...';
-                pendingProductImageData = await prepareProductImageFile(file);
-                if (preview) preview.src = pendingProductImageData;
-                if (wrap) wrap.style.display = 'block';
-                if (statusEl) statusEl.textContent = 'Image ready.';
-            } catch (err) {
-                pendingProductImageData = "";
-                if (wrap) wrap.style.display = 'none';
-                if (statusEl) statusEl.textContent = err?.message || 'Could not load image.';
-            }
+            const path = e.target.value.trim();
+            if (preview && path && !pendingProductImageData) preview.src = path;
         });
+        initProductImageZone('new-product-image-zone', 'new', 'add-product-status');
+        initProductImageZone('edit-product-image-zone', 'edit', 'edit-product-status');
+        initSpecSectionsBuilder();
         document.getElementById('create-user-btn').addEventListener('click', createUser);
         document.getElementById('dash-logout-btn').addEventListener('click', async () => {
             await fetch('/api/logout', { method: 'POST', credentials: 'include' });
