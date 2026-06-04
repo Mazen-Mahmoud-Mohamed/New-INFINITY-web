@@ -96,8 +96,8 @@ Customers choose a payment method, review the order summary (optional 14% VAT), 
 - Drag-and-drop or tap-to-upload zone with image preview
 - Client-side compression before upload (JPEG, max ~1400px)
 - **Required** before order submission for these methods
-- Saved on the server at `assets/orders/receipts/{orderId}.jpg` (or png/webp)
-- Stored on the order as `paymentReceiptImage` (path)
+- Saved to **Cloudinary** (`payment-receipts/{orderId}`) when configured; URL stored in MongoDB (`paymentReceiptImage`)
+- Falls back to `assets/orders/receipts/` locally only if Cloudinary env vars are missing (dev)
 
 **Payment page UI:**
 
@@ -115,7 +115,7 @@ Customers choose a payment method, review the order summary (optional 14% VAT), 
 | `amount` / `currency` | Order total (EGP) |
 | `orderItems` | Line items from cart |
 | `paymentMethod` | `visa`, `bank`, `instapay`, or `cash` |
-| `paymentReceiptImage` | Relative path to uploaded receipt (bank / instapay only) |
+| `paymentReceiptImage` | Cloudinary URL (or local path) for uploaded receipt (bank / instapay only) |
 | `status` | `pending`, `processing`, `completed`, `cancelled`, `failed` |
 | `vatApplied` | Whether 14% VAT was included |
 | Customer profile fields | Name, email, phone, company, billing address (visa), etc. |
@@ -318,7 +318,7 @@ Refresh **`team.html`** after adding files. SVG placeholders show if JPG is miss
 - **Passport** + **bcrypt** for OAuth and passwords
 - **PDFKit** for order PDFs
 - Product images → `assets/products/` (base64 upload from dashboard)
-- Payment receipts → `assets/orders/receipts/` (base64 upload from checkout)
+- Payment receipts → **Cloudinary** (`CLOUDINARY_*` in `.env`) or local `assets/orders/receipts/` fallback
 
 ---
 
@@ -363,6 +363,9 @@ http://localhost:3000/
 | `EMPLOYEE_EMAILS` | Comma-separated employee emails |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Optional Google OAuth |
 | `FACEBOOK_APP_ID` / `FACEBOOK_APP_SECRET` | Optional Facebook OAuth |
+| `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name (payment receipt uploads) |
+| `CLOUDINARY_API_KEY` | Cloudinary API key |
+| `CLOUDINARY_API_SECRET` | Cloudinary API secret |
 | `STRIPE_API_KEY_BASE64` | Optional payment config |
 
 ---
@@ -383,7 +386,8 @@ http://localhost:3000/
 | `mazen.css` | Global styles |
 | `assets/products/` | Product images |
 | `assets/images/team/` | Team member photos |
-| `assets/orders/receipts/` | Uploaded payment receipts |
+| `cloudinary.js` | Cloudinary SDK config |
+| `assets/orders/receipts/` | Local receipt fallback (when Cloudinary not configured) |
 | `package.json` | Dependencies and `npm start` |
 
 ---
@@ -394,6 +398,7 @@ http://localhost:3000/
 - `express-session`, `connect-mongo`
 - `passport`, `passport-google-oauth20`, `passport-facebook`
 - `pdfkit`
+- `cloudinary`
 
 ---
 
@@ -407,7 +412,7 @@ http://localhost:3000/
 | Product hidden after Active = No | Expected on website; still visible in staff Inventory |
 | Analytics tab missing | Only **manager** and **primary** see Business Analytics |
 | “Receipt required” on checkout | Select Bank Transfer or InstaPay and upload an image before Submit |
-| Receipt not visible in dashboard | Confirm order used bank/instapay; check `assets/orders/receipts/` on server |
+| Receipt not visible in dashboard | Confirm bank/instapay order; check `paymentReceiptImage` URL in DB; verify Cloudinary env vars |
 | Team photo not showing | Add `assets/images/team/{name}.jpg` and hard refresh |
 
 ---

@@ -14,6 +14,8 @@ const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const FacebookStrategy = require("passport-facebook").Strategy;
 const PDFDocument = require("pdfkit");
+const cloudinary = require("./cloudinary");
+const { isCloudinaryConfigured } = cloudinary;
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
@@ -414,6 +416,53 @@ function savePaymentReceipt(orderId, imageData) {
     return rel;
 }
 
+async function uploadPaymentReceipt(orderId, imageData) {
+    if (typeof imageData !== "string" || !imageData.startsWith("data:image/")) {
+        throw new Error("Invalid payment receipt image format");
+    }
+    const safeId = String(orderId || "").replace(/[^a-fA-F0-9]/g, "");
+    if (!safeId) throw new Error("Invalid order id for receipt upload");
+
+    if (isCloudinaryConfigured()) {
+        const result = await cloudinary.uploader.upload(imageData, {
+            folder: "payment-receipts",
+            public_id: safeId,
+            overwrite: true,
+            resource_type: "image",
+        });
+        if (!result?.secure_url) {
+            throw new Error("Cloudinary upload did not return a URL");
+        }
+        return result.secure_url;
+    }
+
+    console.warn("Cloudinary not configured — saving receipt to local disk. Set CLOUDINARY_* in .env for production.");
+    return savePaymentReceipt(safeId, imageData);
+}
+
+async function deletePaymentReceiptAsset(orderId, receiptImage) {
+    const safeId = String(orderId || "").replace(/[^a-fA-F0-9]/g, "");
+    if (!safeId || !receiptImage) return;
+
+    if (String(receiptImage).includes("res.cloudinary.com") && isCloudinaryConfigured()) {
+        try {
+            await cloudinary.uploader.destroy(`payment-receipts/${safeId}`, { resource_type: "image" });
+        } catch (err) {
+            console.warn("Cloudinary receipt delete failed:", err?.message || err);
+        }
+        return;
+    }
+
+    if (String(receiptImage).startsWith("assets/orders/receipts/")) {
+        const abs = path.join(__dirname, receiptImage);
+        try {
+            if (fs.existsSync(abs)) fs.unlinkSync(abs);
+        } catch (err) {
+            console.warn("Local receipt delete failed:", err?.message || err);
+        }
+    }
+}
+
 function saveProductImage(productId, imagePath, imageData) {
     if (typeof imageData === "string" && imageData.startsWith("data:image/")) {
         const match = imageData.match(/^data:image\/(\w+);base64,(.+)$/);
@@ -503,6 +552,19 @@ async function ensurePrimaryAdmin() {
     if (existing.role !== "primary") {
         existing.role = "primary";
         await existing.save();
+    }
+}
+
+async function releaseStock(orderItems = []) {
+    const cleanItems = (Array.isArray(orderItems) ? orderItems : [])
+        .filter(i => i && i.id && Number(i.quantity) > 0)
+        .map(i => ({ id: String(i.id), quantity: Number(i.quantity) }));
+
+    for (const item of cleanItems) {
+        await Product.findOneAndUpdate(
+            { productId: item.id },
+            { $inc: { stock: item.quantity } }
+        );
     }
 }
 
@@ -755,9 +817,18 @@ app.post("/api/orders", requireAuth, async (req, res) => {
         });
 
         if (needsReceipt) {
-            const receiptPath = savePaymentReceipt(String(order._id), paymentReceiptData);
-            order.paymentReceiptImage = receiptPath;
-            await order.save();
+            try {
+                const receiptUrl = await uploadPaymentReceipt(String(order._id), paymentReceiptData);
+                order.paymentReceiptImage = receiptUrl;
+                await order.save();
+            } catch (uploadErr) {
+                await releaseStock(orderItems);
+                await Order.deleteOne({ _id: order._id });
+                console.error("Payment receipt upload failed:", uploadErr);
+                return res.status(500).json({
+                    error: uploadErr?.message || "Could not upload payment receipt. Please try again."
+                });
+            }
         }
 
         res.json({ success: true, orderId: order._id });
@@ -1418,6 +1489,7 @@ app.delete("/api/orders/:id", requireAuth, async (req, res) => {
         if (!order) return res.status(404).json({ error: "Order not found" });
         if (order.status !== "pending") return res.status(400).json({ error: "Only pending orders can be deleted" });
 
+        await deletePaymentReceiptAsset(String(order._id), order.paymentReceiptImage);
         await Order.deleteOne({ _id: orderId, userId });
         res.json({ message: "Order deleted" });
     } catch (error) {
