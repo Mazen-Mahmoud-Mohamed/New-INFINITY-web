@@ -1325,6 +1325,34 @@ footer#contact:not(.contact-footer-enhanced) .contact-info i {
     margin: 0 auto 2rem;
 }
 
+.team-page .team-category-block {
+    margin-bottom: clamp(2.75rem, 6vw, 4rem);
+}
+
+.team-page .team-category-block:last-child {
+    margin-bottom: 0;
+}
+
+.team-page #team-sections-root {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(2.5rem, 5vw, 3.5rem);
+    margin-top: clamp(0.5rem, 2vw, 1rem);
+}
+
+.team-page .team-loading,
+.team-page .team-empty {
+    text-align: center;
+    color: var(--text-light);
+    margin: clamp(1.25rem, 4vw, 2rem) auto clamp(2rem, 5vw, 3rem);
+    padding: 0 1rem;
+}
+
+.team-page .team-intro--page {
+    margin-bottom: clamp(2rem, 5vw, 3rem);
+    padding-bottom: 0.25rem;
+}
+
 .team-page .team-intro h2 {
     color: var(--primary-color);
     font-size: clamp(1.5rem, 4vw, 2rem);
@@ -8581,20 +8609,38 @@ nav {
 
     .team-page .team-section,
     .team-page .values-section {
-        padding: clamp(2.1rem, 7vw, 3rem) 0;
+        padding: clamp(2.5rem, 8vw, 3.5rem) 0;
     }
 
     .team-page .team-section .container,
     .team-page .values-section .container,
     .team-page footer .container {
-        padding-left: 0.8rem;
-        padding-right: 0.8rem;
+        padding-left: max(1rem, env(safe-area-inset-left));
+        padding-right: max(1rem, env(safe-area-inset-right));
+    }
+
+    .team-page .team-intro--page {
+        margin-bottom: clamp(1.75rem, 6vw, 2.5rem);
+    }
+
+    .team-page #team-sections-root {
+        gap: clamp(2.25rem, 6vw, 3rem);
+    }
+
+    .team-page .team-category-block {
+        margin-bottom: 0;
     }
 
     .team-page .team-grid {
         grid-template-columns: 1fr;
-        gap: 0.85rem;
-        padding: 0.5rem 0;
+        gap: clamp(1.1rem, 4vw, 1.5rem);
+        padding: 0.35rem 0 0.75rem;
+        max-width: 100%;
+    }
+
+    .team-page .team-cta {
+        margin-top: clamp(2.5rem, 7vw, 3.25rem);
+        margin-bottom: 0.5rem;
     }
 
     .team-page .team-member {
@@ -8647,7 +8693,7 @@ nav {
     position: relative;
     overflow: hidden;
     margin-bottom: 0;
-    padding: clamp(7rem, 16vw, 9rem) 1.25rem clamp(3.5rem, 9vw, 5rem);
+    padding: clamp(7rem, 16vw, 9rem) clamp(1rem, 4vw, 1.5rem) clamp(3.75rem, 9vw, 5.25rem);
     background: linear-gradient(145deg, #004d66 0%, #0099cc 42%, #006699 100%);
 }
 
@@ -8756,11 +8802,16 @@ nav {
 }
 
 .team-page .team-section {
-    padding: clamp(3rem, 8vw, 5rem) 0 clamp(2.5rem, 6vw, 4rem);
+    padding: clamp(3.25rem, 8vw, 5.5rem) 0 clamp(3rem, 7vw, 4.5rem);
     background:
         radial-gradient(circle at 10% 0%, rgba(0, 153, 204, 0.06) 0%, transparent 42%),
         radial-gradient(circle at 90% 100%, rgba(0, 102, 153, 0.05) 0%, transparent 40%),
         var(--light-gray);
+}
+
+.team-page .team-section > .container {
+    padding-left: clamp(1rem, 4vw, 1.5rem);
+    padding-right: clamp(1rem, 4vw, 1.5rem);
 }
 
 .team-page .team-section-label {
@@ -8775,7 +8826,16 @@ nav {
 
 .team-page .team-intro {
     max-width: 680px;
-    margin: 0 auto clamp(2rem, 5vw, 3rem);
+    margin: 0 auto clamp(1.75rem, 4vw, 2.5rem);
+}
+
+.team-page .team-category-block .team-intro {
+    margin-bottom: clamp(1.25rem, 3vw, 1.75rem);
+    text-align: center;
+}
+
+.team-page .team-category-block .team-intro h2 {
+    margin-bottom: 0.35rem;
 }
 
 .team-page .team-intro h2 {
@@ -8795,10 +8855,10 @@ nav {
 .team-page .team-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: clamp(1.25rem, 3vw, 2rem);
+    gap: clamp(1.5rem, 3.5vw, 2.25rem);
     max-width: 1100px;
     margin: 0 auto;
-    padding: 0;
+    padding: 0.25rem 0 0.5rem;
 }
 
 .team-page .team-member {
@@ -8964,8 +9024,8 @@ nav {
 }
 
 .team-page .team-cta {
-    margin-top: clamp(2.5rem, 6vw, 3.5rem);
-    padding: clamp(1.5rem, 4vw, 2rem);
+    margin-top: clamp(3rem, 7vw, 4.5rem);
+    padding: clamp(1.75rem, 4vw, 2.25rem);
     text-align: center;
     border-radius: 18px;
     background: linear-gradient(135deg, rgba(0, 153, 204, 0.08), rgba(0, 102, 153, 0.06));
@@ -9102,7 +9162,8 @@ nav {
 @media (max-width: 899px) {
     .team-page .team-grid {
         grid-template-columns: 1fr;
-        max-width: 480px;
+        max-width: min(480px, 100%);
+        margin-inline: auto;
     }
 
     .team-page .team-values .values-grid {

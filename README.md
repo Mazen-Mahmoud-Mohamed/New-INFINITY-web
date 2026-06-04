@@ -128,6 +128,7 @@ Tabbed interface for staff operations:
 |-----|-------------|--------------|
 | **Inventory** | technical, employee, manager, primary | View all products (including inactive). Edit price, install, stock inline. **Save All**. **Edit** opens full product modal. |
 | **Add Product** | manager, primary | Create products with image upload/path, descriptions, categorized spec sections |
+| **Our Team** | manager, primary | Add/edit/hide/delete team members shown on `team.html` (categories: Leadership, Technical, Employees, Operations, Sales) |
 | **Orders** | all staff roles | List, search, filter by status, update status, export PDF, **view payment receipt** thumbnail |
 | **Customers** | all staff roles | Customer profiles and contact info |
 | **Analytics** | **manager, primary only** | Business analytics: KPIs, charts (revenue, top items, status, payment methods, top customers), date range |
@@ -164,14 +165,16 @@ Available only to **manager** and **primary** roles:
 
 ### 10. Our Team Page (`team.html`)
 
-Public page showcasing INFINITY leadership and values:
+Public page loaded from MongoDB (`GET /api/team/public`):
 
-- **Hero** with company intro and quick stats
-- **Leadership** section with team member cards (photo, role, bio, skill tags)
+- **Hero** with company intro and live member count
+- **Category sections** — Leadership, Technical Team, Employees, Operations, Sales & Support (only categories with active members are shown)
+- Member cards: photo, job title, bio, skill tags, optional featured highlight and badge
 - **Our Team Values** — six value cards (Creativity, Team Work, Collaboration, Compassion, Passion, Happiness)
 - **Contact CTA** linking to home contact section
-- Responsive layout: team cards stack on mobile; values show **2 per row** on phones (matching home page style)
-- Team photos: `assets/images/team/{slug}.jpg` with SVG placeholder fallback
+- Staff manage members in dashboard **Our Team** tab (manager / primary): upload photo (Cloudinary `team/{memberId}` or local path), comma-separated skills, display order, hide or permanent delete
+- Default seed members: Mohamed Zidan (Leadership), Mazen Mahmoud Mohamed (Technical)
+- Photos: `assets/images/team/{memberId}.jpg` or Cloudinary URL; SVG placeholder fallback
 
 ### 11. General UI/UX
 
@@ -222,6 +225,7 @@ OAuth: `/auth/google`, `/auth/facebook` (+ callbacks) when configured.
 |--------|------|--------|-------------|
 | GET | `/api/products/public` | Public | Active products catalog |
 | GET | `/api/products/public/:productId` | Public | Single active product (incl. specs) |
+| GET | `/api/team/public` | Public | Active team members grouped by category |
 | GET | `/api/cart` | Auth | Get cart |
 | PUT | `/api/cart` | Auth | Update cart |
 | DELETE | `/api/cart` | Auth | Clear cart |
@@ -253,6 +257,10 @@ OAuth: `/auth/google`, `/auth/facebook` (+ callbacks) when configured.
 | GET | `/api/dashboard/users` | staff | Staff users |
 | POST | `/api/dashboard/users` | manager, primary | Create staff user |
 | DELETE | `/api/dashboard/users/:id` | employee, manager, primary | Delete user (role rules apply) |
+| GET | `/api/dashboard/team` | manager, primary | All team members (incl. hidden) |
+| POST | `/api/dashboard/team` | manager, primary | Create team member |
+| PATCH | `/api/dashboard/team/:memberId` | manager, primary | Update member |
+| DELETE | `/api/dashboard/team/:memberId` | manager, primary | Hide (`active: false`); `?permanent=1` removes from DB |
 
 ---
 

@@ -36,6 +36,41 @@ const revealObserver = new IntersectionObserver((entries) => {
     });
 }, observerOptions);
 
+/** Bind scroll-reveal to team cards (including members injected after fetch on team.html). */
+function bindScrollReveal(root) {
+    const scope = root || document;
+    scope.querySelectorAll('.team-member').forEach((member, index) => {
+        if (member.dataset.revealBound) return;
+        member.dataset.revealBound = '1';
+        if (!member.classList.contains('slide-in-left') && !member.classList.contains('slide-in-right')) {
+            member.classList.add(index % 2 === 0 ? 'slide-in-left' : 'slide-in-right');
+            member.dataset.delay = index * 120;
+        }
+        revealObserver.observe(member);
+        requestAnimationFrame(() => {
+            const rect = member.getBoundingClientRect();
+            if (rect.top < window.innerHeight && rect.bottom > 0) {
+                member.classList.add('visible');
+            }
+        });
+    });
+    scope.querySelectorAll('.team-category-block').forEach((block, index) => {
+        if (block.dataset.revealBound) return;
+        block.dataset.revealBound = '1';
+        block.classList.add('fade-in');
+        block.dataset.delay = index * 80;
+        revealObserver.observe(block);
+        requestAnimationFrame(() => {
+            const rect = block.getBoundingClientRect();
+            if (rect.top < window.innerHeight && rect.bottom > 0) {
+                block.classList.add('visible');
+            }
+        });
+    });
+}
+
+window.bindScrollReveal = bindScrollReveal;
+
 // Add animation classes with faster staggered delays
 document.addEventListener('DOMContentLoaded', () => {
     // Faster initial paint for images (lazy load offscreen)
@@ -80,12 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         revealObserver.observe(card);
     });
 
-    // Team members with faster alternating slide-in
-    document.querySelectorAll('.team-member').forEach((member, index) => {
-        member.classList.add(index % 2 === 0 ? 'slide-in-left' : 'slide-in-right');
-        member.dataset.delay = index * 120; // Reduced from 250
-        revealObserver.observe(member);
-    });
+    bindScrollReveal(document);
 
     // Value cards with faster scale-in
     document.querySelectorAll('.value-card').forEach((card, index) => {

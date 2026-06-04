@@ -278,6 +278,211 @@
             display: none;
         }
         .product-image-upload-error.visible { display: block; }
+        .team-dash-thumb {
+            width: 44px;
+            height: 44px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+        .team-category-pill {
+            display: inline-block;
+            padding: .15rem .45rem;
+            border-radius: 999px;
+            background: #e0f2fe;
+            color: #0369a1;
+            font-size: .75rem;
+            font-weight: 600;
+        }
+        /* —— Staff dashboard: Our Team tab —— */
+        .team-dash { display: grid; gap: 1rem; }
+        .team-dash-card {
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05);
+        }
+        .team-dash-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: .85rem 1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e8eef4;
+        }
+        .team-dash-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: #0891b2;
+            margin-bottom: .35rem;
+        }
+        .team-dash-header h3 {
+            margin: 0 0 .35rem;
+            font-size: 1.2rem;
+            color: #0f172a;
+        }
+        .team-dash-lead {
+            margin: 0;
+            max-width: 52ch;
+            font-size: .88rem;
+            line-height: 1.55;
+            color: #64748b;
+            font-weight: 400;
+        }
+        .team-dash-lead a { color: #0891b2; font-weight: 600; }
+        .team-dash-preview-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            white-space: nowrap;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+        .team-dash-categories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .4rem;
+            margin-bottom: 1.1rem;
+        }
+        .team-dash-cat-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: .3rem;
+            padding: .28rem .55rem;
+            border-radius: 999px;
+            font-size: .72rem;
+            font-weight: 600;
+            color: #0f4c6e;
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+        }
+        .team-dash-cat-chip i { font-size: .68rem; opacity: .85; }
+        .team-create-form { gap: .85rem; }
+        .team-form-panel {
+            padding: .85rem .9rem;
+            border-radius: 12px;
+            background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
+            border: 1px solid #e8eef4;
+        }
+        .team-form-panel-title {
+            display: flex;
+            align-items: center;
+            gap: .45rem;
+            margin: 0 0 .7rem;
+            font-size: .92rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .team-form-panel-title i {
+            width: 1.65rem;
+            height: 1.65rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: #e0f2fe;
+            color: #0891b2;
+            font-size: .8rem;
+        }
+        .team-form-panel-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: .65rem;
+        }
+        .team-form-panel-grid .full { grid-column: 1 / -1; }
+        .team-form-panel--photo .product-image-upload-zone {
+            margin-top: .15rem;
+        }
+        .team-dash-card--roster .section-head {
+            margin-bottom: .75rem;
+        }
+        .team-roster-meta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: .5rem;
+            margin-bottom: .65rem;
+        }
+        .team-roster-count {
+            font-size: .82rem;
+            font-weight: 600;
+            color: #64748b;
+            padding: .2rem .55rem;
+            background: #f1f5f9;
+            border-radius: 999px;
+        }
+        .team-roster-table-wrap {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .team-roster-empty {
+            text-align: center;
+            padding: 1.5rem 1rem;
+            color: #64748b;
+            font-size: .9rem;
+            background: #f8fafc;
+            border-radius: 10px;
+            border: 1px dashed #cbd5e1;
+        }
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+        .team-dash-lead code {
+            font-size: .8rem;
+            padding: .1rem .35rem;
+            border-radius: 4px;
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+        #team-table .team-dash-thumb {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+        }
+        #team-table td[data-label="Actions"] .inventory-actions {
+            flex-wrap: wrap;
+        }
+        @media (max-width: 900px) {
+            .team-form-panel-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 680px) {
+            .team-dash-header { flex-direction: column; align-items: stretch; }
+            .team-dash-preview-btn { width: 100%; justify-content: center; }
+            .team-dash-categories { gap: .35rem; }
+            .team-dash-cat-chip { font-size: .68rem; }
+            .team-form-panel { padding: .75rem .7rem; }
+            .team-create-form .product-create-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .team-create-form .product-create-actions .dash-btn {
+                width: 100%;
+                justify-content: center;
+                padding: .72rem 1rem;
+            }
+            #team-table td[data-label="Actions"] .inventory-action-btn {
+                flex: 1 1 calc(50% - .2rem);
+                min-width: 0;
+                text-align: center;
+            }
+            #team-table td[data-label="Actions"] .inventory-action-btn:last-child {
+                flex: 1 1 100%;
+            }
+        }
         .product-create-hint { margin: 0; color: #64748b; font-size: .82rem; }
         .spec-sections-builder { display: grid; gap: .65rem; }
         .spec-builder-head { display: flex; justify-content: space-between; align-items: center; gap: .5rem; flex-wrap: wrap; }
@@ -984,13 +1189,15 @@
             #inventory-section .dash-card,
             #users-section .dash-card,
             #customers-section .dash-card,
-            #orders-section .dash-card {
+            #orders-section .dash-card,
+            #team-section .dash-card {
                 overflow-x: visible;
             }
             #products-table.dash-table,
             #users-table.dash-table,
             #customers-table.dash-table,
-            #orders-table.dash-table {
+            #orders-table.dash-table,
+            #team-table.dash-table {
                 min-width: 0 !important;
                 width: 100%;
                 border-collapse: separate;
@@ -999,7 +1206,8 @@
             #products-table thead,
             #users-table thead,
             #customers-table thead,
-            #orders-table thead {
+            #orders-table thead,
+            #team-table thead {
                 display: none;
             }
             #users-table tbody,
@@ -1010,7 +1218,10 @@
             #customers-table td,
             #orders-table tbody,
             #orders-table tr,
-            #orders-table td {
+            #orders-table td,
+            #team-table tbody,
+            #team-table tr,
+            #team-table td {
                 display: block;
                 width: 100%;
                 box-sizing: border-box;
@@ -1073,17 +1284,65 @@
             #products-table tr,
             #users-table tr,
             #customers-table tr,
-            #orders-table tr {
+            #orders-table tr,
+            #team-table tr {
                 border: 1px solid #e2e8f0;
                 border-radius: 12px;
                 margin-bottom: 0.75rem;
                 padding: 0.65rem 0.75rem;
                 background: #f8fafc;
             }
+            #team-table tr {
+                display: grid;
+                grid-template-columns: 56px minmax(0, 1fr);
+                gap: 0.35rem 0.65rem;
+                align-items: start;
+            }
+            #team-table td[data-label="Photo"] {
+                grid-column: 1;
+                grid-row: 1 / span 3;
+                padding: 0 !important;
+            }
+            #team-table td[data-label="Photo"]::before { display: none !important; }
+            #team-table td[data-label="Photo"] .team-dash-thumb {
+                width: 52px;
+                height: 52px;
+            }
+            #team-table td[data-label="Name"] {
+                grid-column: 2;
+                padding-top: 0 !important;
+            }
+            #team-table td[data-label="Name"]::before { display: none !important; }
+            #team-table td[data-label="Title"],
+            #team-table td[data-label="Category"] {
+                grid-column: 2;
+            }
+            #team-table td[data-label="Order"],
+            #team-table td[data-label="Visible"] {
+                grid-column: 2;
+                display: inline-block;
+                width: auto;
+                padding: 0.25rem 0 !important;
+            }
+            #team-table td[data-label="Order"]::before,
+            #team-table td[data-label="Visible"]::before {
+                display: inline;
+                margin-right: 0.35rem;
+                margin-bottom: 0;
+                text-transform: none;
+                font-size: 0.78rem;
+            }
+            #team-table td[data-label="Actions"] {
+                grid-column: 1 / -1;
+                padding-top: 0.65rem !important;
+                margin-top: 0.35rem;
+                border-top: 1px solid #e2e8f0;
+            }
             #products-table td,
             #users-table td,
             #customers-table td,
-            #orders-table td {
+            #orders-table td,
+            #team-table td {
                 border: none;
                 padding: 0.45rem 0;
                 text-align: left;
@@ -1091,7 +1350,8 @@
             #products-table td::before,
             #users-table td::before,
             #customers-table td::before,
-            #orders-table td::before {
+            #orders-table td::before,
+            #team-table td::before {
                 content: attr(data-label);
                 display: block;
                 font-size: 0.72rem;
@@ -1156,6 +1416,7 @@
         <div class="dash-tabs">
             <button class="dash-tab active" data-section="inventory-section">Inventory</button>
             <button class="dash-tab" data-section="add-product-section" id="add-product-tab" style="display:none;">Add Product</button>
+            <button class="dash-tab" data-section="team-section" id="team-tab" style="display:none;">Our Team</button>
             <button class="dash-tab" data-section="orders-section">Orders</button>
             <button class="dash-tab" data-section="customers-section">Customers</button>
             <button class="dash-tab" data-section="analytics-section" id="analytics-tab" style="display:none;">Analytics</button>
@@ -1254,6 +1515,128 @@
                         <span id="add-product-status" class="muted"></span>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <div id="team-section" class="dash-section team-dash">
+            <div class="dash-card team-dash-card team-dash-card--form">
+                <div class="team-dash-header">
+                    <div class="team-dash-header-text">
+                        <span class="team-dash-eyebrow"><i class="fas fa-globe" aria-hidden="true"></i> Public page</span>
+                        <h3>Our Team — Add Members</h3>
+                        <p class="team-dash-lead">Profiles appear on <a href="/team.html" target="_blank" rel="noopener">Our Team</a>, grouped by category. Upload a photo or use a path under <code>assets/images/team/</code>.</p>
+                    </div>
+                    <a href="/team.html" target="_blank" rel="noopener" class="dash-btn ghost team-dash-preview-btn">
+                        <i class="fas fa-external-link-alt" aria-hidden="true"></i> View live page
+                    </a>
+                </div>
+                <div class="team-dash-categories" aria-label="Team categories on website">
+                    <span class="team-dash-cat-chip"><i class="fas fa-crown" aria-hidden="true"></i> Leadership</span>
+                    <span class="team-dash-cat-chip"><i class="fas fa-microchip" aria-hidden="true"></i> Technical</span>
+                    <span class="team-dash-cat-chip"><i class="fas fa-user-tie" aria-hidden="true"></i> Employees</span>
+                    <span class="team-dash-cat-chip"><i class="fas fa-screwdriver-wrench" aria-hidden="true"></i> Operations</span>
+                    <span class="team-dash-cat-chip"><i class="fas fa-handshake" aria-hidden="true"></i> Sales</span>
+                </div>
+                <form id="add-team-form" class="product-create-form team-create-form">
+                    <div class="team-form-panel full">
+                        <h4 class="team-form-panel-title"><i class="fas fa-id-card" aria-hidden="true"></i> Profile</h4>
+                        <div class="team-form-panel-grid">
+                            <label>Full name *
+                                <input id="new-team-name" required placeholder="Ahmed Hassan" autocomplete="name">
+                            </label>
+                            <label>Job title *
+                                <input id="new-team-position" required placeholder="Field Engineer">
+                            </label>
+                            <label>Category *
+                                <select id="new-team-category" required>
+                                    <option value="leadership">Leadership</option>
+                                    <option value="technical">Technical Team</option>
+                                    <option value="employees">Employees</option>
+                                    <option value="operations">Operations</option>
+                                    <option value="sales">Sales &amp; Support</option>
+                                </select>
+                            </label>
+                            <label>Member ID (optional)
+                                <input id="new-team-id" placeholder="auto-generated from name">
+                            </label>
+                            <label class="full">Skills (comma-separated)
+                                <input id="new-team-skills" placeholder="GPS Systems, Fleet Management, CCTV">
+                            </label>
+                        </div>
+                    </div>
+                    <div class="team-form-panel full">
+                        <h4 class="team-form-panel-title"><i class="fas fa-sliders-h" aria-hidden="true"></i> Display options</h4>
+                        <div class="team-form-panel-grid">
+                            <label>Display order
+                                <input id="new-team-sort" type="number" min="0" step="1" value="0" title="Lower numbers appear first within a category">
+                            </label>
+                            <label>Featured on page
+                                <select id="new-team-featured">
+                                    <option value="false">No</option>
+                                    <option value="true">Yes — highlight card</option>
+                                </select>
+                            </label>
+                            <label class="full">Badge (optional)
+                                <input id="new-team-badge" placeholder="e.g. Platform builder">
+                            </label>
+                        </div>
+                    </div>
+                    <div class="team-form-panel full team-form-panel--photo">
+                        <h4 class="team-form-panel-title"><i class="fas fa-camera" aria-hidden="true"></i> Photo</h4>
+                        <label>Photo path (optional if uploading)
+                            <input id="new-team-image-path" placeholder="assets/images/team/ahmed-hassan.jpg">
+                        </label>
+                        <div class="product-image-upload-zone" id="new-team-image-zone">
+                            <input id="new-team-image-file" class="product-image-input" type="file" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif" aria-label="Upload team photo">
+                            <label class="product-image-dropzone" for="new-team-image-file" tabindex="0">
+                                <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                                <span class="product-image-dropzone-title">Tap to upload or drag photo here</span>
+                                <span class="product-image-dropzone-sub">PNG, JPG or WEBP · max 15 MB</span>
+                            </label>
+                            <div class="product-image-upload-preview" id="new-team-image-preview-wrap">
+                                <div class="product-image-preview-card">
+                                    <img id="new-team-image-preview" alt="Photo preview">
+                                    <div class="product-image-preview-meta">
+                                        <strong><i class="fas fa-check-circle"></i> Photo ready</strong>
+                                        <span class="product-image-file-name" id="new-team-image-file-name"></span>
+                                    </div>
+                                    <div class="product-image-preview-actions">
+                                        <button type="button" class="product-image-change-btn">Change</button>
+                                        <button type="button" class="product-image-remove-btn">Remove</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="product-image-upload-error" role="alert"></p>
+                        </div>
+                    </div>
+                    <div class="team-form-panel full">
+                        <h4 class="team-form-panel-title"><i class="fas fa-align-left" aria-hidden="true"></i> Bio</h4>
+                        <label class="full" style="margin:0;">
+                            <span class="visually-hidden">Bio</span>
+                            <textarea id="new-team-bio" placeholder="Short introduction shown on the team page" rows="4"></textarea>
+                        </label>
+                    </div>
+                    <div class="product-create-actions">
+                        <button type="submit" class="dash-btn primary" id="create-team-btn"><i class="fas fa-user-plus" aria-hidden="true"></i> Add Team Member</button>
+                        <span id="add-team-status" class="muted"></span>
+                    </div>
+                </form>
+            </div>
+            <div class="dash-card team-dash-card team-dash-card--roster">
+                <div class="section-head">
+                    <h3>Team roster</h3>
+                    <input id="team-search" class="dash-search" placeholder="Search name, title, category…" aria-label="Search team roster">
+                </div>
+                <div class="team-roster-meta">
+                    <span id="team-roster-count" class="team-roster-count">0 members</span>
+                </div>
+                <div class="team-roster-table-wrap">
+                    <table class="dash-table" id="team-table">
+                        <thead><tr><th>Photo</th><th>Name</th><th>Title</th><th>Category</th><th>Order</th><th>Visible</th><th>Actions</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                    <p id="team-roster-empty" class="team-roster-empty" hidden>No team members yet. Add one above.</p>
+                </div>
             </div>
         </div>
 
@@ -1525,10 +1908,114 @@
         </div>
     </div>
 
+    <div id="edit-team-modal" class="product-edit-modal" aria-hidden="true">
+        <div class="product-edit-backdrop" id="edit-team-backdrop"></div>
+        <div class="product-edit-dialog" role="dialog" aria-labelledby="edit-team-title">
+            <div class="product-edit-head">
+                <div>
+                    <h3 id="edit-team-title">Edit Team Member</h3>
+                    <p id="edit-team-subtitle" class="muted">Updates the Our Team page</p>
+                </div>
+                <button type="button" class="product-edit-close" id="edit-team-close" aria-label="Close">×</button>
+            </div>
+            <form id="edit-team-form" class="edit-product-form">
+                <input type="hidden" id="edit-team-id-hidden">
+                <div class="edit-form-body">
+                    <div class="edit-form-section">
+                        <div class="edit-form-grid">
+                            <label class="full">Member ID
+                                <input id="edit-team-id-display" readonly>
+                            </label>
+                            <label>Full name *
+                                <input id="edit-team-name" required>
+                            </label>
+                            <label>Job title *
+                                <input id="edit-team-position" required>
+                            </label>
+                            <label>Category *
+                                <select id="edit-team-category" required>
+                                    <option value="leadership">Leadership</option>
+                                    <option value="technical">Technical Team</option>
+                                    <option value="employees">Employees</option>
+                                    <option value="operations">Operations</option>
+                                    <option value="sales">Sales &amp; Support</option>
+                                </select>
+                            </label>
+                            <label>Display order
+                                <input id="edit-team-sort" type="number" min="0" step="1">
+                            </label>
+                            <label>Visible on Our Team
+                                <select id="edit-team-active">
+                                    <option value="true">Yes</option>
+                                    <option value="false">No — hidden</option>
+                                </select>
+                            </label>
+                            <label>Featured
+                                <select id="edit-team-featured">
+                                    <option value="false">No</option>
+                                    <option value="true">Yes</option>
+                                </select>
+                            </label>
+                            <label>Badge (optional)
+                                <input id="edit-team-badge">
+                            </label>
+                            <label class="full">Skills (comma-separated)
+                                <input id="edit-team-skills">
+                            </label>
+                            <label class="full">Photo path
+                                <input id="edit-team-image-path" placeholder="assets/images/team/name.jpg">
+                            </label>
+                            <div class="full product-image-upload-zone" id="edit-team-image-zone">
+                                <input id="edit-team-image-file" class="product-image-input" type="file" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif">
+                                <label class="product-image-dropzone" for="edit-team-image-file" tabindex="0">
+                                    <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                                    <span class="product-image-dropzone-title">Upload new photo (optional)</span>
+                                    <span class="product-image-dropzone-sub">Leave empty to keep current photo</span>
+                                </label>
+                                <div class="product-image-upload-preview" id="edit-team-upload-preview">
+                                    <div class="product-image-preview-card">
+                                        <img id="edit-team-upload-thumb" alt="New photo preview">
+                                        <div class="product-image-preview-meta">
+                                            <strong><i class="fas fa-check-circle"></i> New photo ready</strong>
+                                            <span class="product-image-file-name" id="edit-team-image-file-name"></span>
+                                        </div>
+                                        <div class="product-image-preview-actions">
+                                            <button type="button" class="product-image-change-btn" id="edit-team-image-change">Change</button>
+                                            <button type="button" class="product-image-remove-btn" id="edit-team-image-remove">Remove</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="product-image-upload-error" role="alert"></p>
+                            </div>
+                            <label class="full">Bio
+                                <textarea id="edit-team-bio"></textarea>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="edit-form-footer">
+                    <span id="edit-team-status" class="muted"></span>
+                    <button type="button" class="dash-btn ghost" id="edit-team-cancel-btn">Cancel</button>
+                    <button type="submit" class="dash-btn primary" id="save-edit-team-btn">Save changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         let currentRole = "customer";
         let currentUserId = "";
         let allProducts = [];
+        let allTeamMembers = [];
+        let pendingTeamImageData = "";
+        let pendingEditTeamImageData = "";
+        const TEAM_CATEGORY_LABELS = {
+            leadership: "Leadership",
+            technical: "Technical Team",
+            employees: "Employees",
+            operations: "Operations",
+            sales: "Sales & Support",
+        };
         let allOrders = [];
         let allCustomers = [];
         let allUsers = [];
@@ -1538,6 +2025,7 @@
         function canEditInventory() { return ['employee','manager','primary'].includes(currentRole); }
         function canViewAnalytics() { return ['manager','primary'].includes(currentRole); }
         function canAddProducts() { return ['manager','primary'].includes(currentRole); }
+        function canManageTeam() { return canAddProducts(); }
         function canEditOrders() { return ['employee','manager','primary'].includes(currentRole); }
         function canManageUsers() { return ['employee','manager','primary'].includes(currentRole); }
         function canDeleteUserRole(targetRole) {
@@ -1683,7 +2171,9 @@
                 dialog.classList.remove('open');
                 dialog.setAttribute('aria-hidden', 'true');
             }
-            document.body.style.overflow = document.getElementById('edit-product-modal')?.classList.contains('open') ? 'hidden' : '';
+            const modalOpen = document.getElementById('edit-product-modal')?.classList.contains('open')
+                || document.getElementById('edit-team-modal')?.classList.contains('open');
+            document.body.style.overflow = modalOpen ? 'hidden' : '';
             const resolve = dashDialogResolver;
             dashDialogResolver = null;
             if (typeof resolve === 'function') resolve(result);
@@ -2235,7 +2725,9 @@
                 modal.classList.remove('open');
                 modal.setAttribute('aria-hidden', 'true');
             }
-            document.body.style.overflow = document.getElementById('dash-dialog')?.classList.contains('open') ? 'hidden' : '';
+            const anyEditModalOpen = document.getElementById('edit-product-modal')?.classList.contains('open')
+                || document.getElementById('edit-team-modal')?.classList.contains('open');
+            document.body.style.overflow = document.getElementById('dash-dialog')?.classList.contains('open') || anyEditModalOpen ? 'hidden' : '';
             pendingEditImageData = '';
             resetProductImageZone('edit-product-image-zone', 'edit');
         }
@@ -2326,6 +2818,8 @@
             }
             if (clearPending === 'new') pendingProductImageData = '';
             if (clearPending === 'edit') pendingEditImageData = '';
+            if (clearPending === 'team-new') pendingTeamImageData = '';
+            if (clearPending === 'team-edit') pendingEditTeamImageData = '';
         }
 
         function showProductImageZoneError(zoneId, message) {
@@ -2346,6 +2840,8 @@
             const err = zone.querySelector('.product-image-upload-error');
             if (pendingKey === 'new') pendingProductImageData = dataUrl;
             if (pendingKey === 'edit') pendingEditImageData = dataUrl;
+            if (pendingKey === 'team-new') pendingTeamImageData = dataUrl;
+            if (pendingKey === 'team-edit') pendingEditTeamImageData = dataUrl;
             if (previewImg) previewImg.src = dataUrl;
             if (fileNameEl) fileNameEl.textContent = fileName || '';
             if (previewWrap) previewWrap.classList.add('visible');
@@ -2379,6 +2875,8 @@
             } catch (err) {
                 if (pendingKey === 'new') pendingProductImageData = '';
                 if (pendingKey === 'edit') pendingEditImageData = '';
+                if (pendingKey === 'team-new') pendingTeamImageData = '';
+                if (pendingKey === 'team-edit') pendingEditTeamImageData = '';
                 resetProductImageZone(zoneId, pendingKey);
                 const msg = err?.message || 'Could not load image.';
                 showProductImageZoneError(zoneId, msg);
@@ -2741,6 +3239,309 @@
             renderUsers();
         }
 
+        function escapeHtml(text) {
+            return String(text ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;");
+        }
+
+        async function loadTeamMembers() {
+            if (!canManageTeam()) return;
+            const res = await fetch('/api/dashboard/team', { credentials: 'include' });
+            const data = await res.json();
+            if (!res.ok) {
+                showToast(data?.error || 'Could not load team members.', 'error');
+                return;
+            }
+            allTeamMembers = Array.isArray(data.members) ? data.members : [];
+            renderTeamMembers();
+        }
+
+        function renderTeamMembers() {
+            const tbody = document.querySelector('#team-table tbody');
+            const table = document.getElementById('team-table');
+            const emptyEl = document.getElementById('team-roster-empty');
+            const countEl = document.getElementById('team-roster-count');
+            if (!tbody) return;
+            const keyword = (document.getElementById('team-search')?.value || '').trim().toLowerCase();
+            tbody.innerHTML = '';
+            const visible = allTeamMembers.filter((m) => {
+                if (!keyword) return true;
+                const hay = [
+                    m.name, m.positionTitle, m.memberId, m.category,
+                    TEAM_CATEGORY_LABELS[m.category], m.badge,
+                ].filter(Boolean).join(' ').toLowerCase();
+                return hay.includes(keyword);
+            });
+
+            const total = allTeamMembers.length;
+            const shown = visible.length;
+            if (countEl) {
+                countEl.textContent = keyword
+                    ? `${shown} of ${total} shown`
+                    : `${total} member${total === 1 ? '' : 's'}`;
+            }
+            if (emptyEl && table) {
+                const isEmpty = total === 0;
+                emptyEl.hidden = !isEmpty;
+                table.hidden = isEmpty;
+            }
+
+            visible.forEach((m) => {
+                const tr = document.createElement('tr');
+                if (!m.active) tr.classList.add('inventory-row-inactive');
+                const imgSrc = m.image || 'assets/images/infinity-logo1.png';
+                const catLabel = TEAM_CATEGORY_LABELS[m.category] || m.category;
+                tr.innerHTML = `
+                    <td data-label="Photo"><img class="team-dash-thumb" src="${escapeHtml(imgSrc)}" alt=""></td>
+                    <td data-label="Name"><strong>${escapeHtml(m.name)}</strong><br><small class="muted">${escapeHtml(m.memberId)}</small></td>
+                    <td data-label="Title">${escapeHtml(m.positionTitle || '-')}</td>
+                    <td data-label="Category"><span class="team-category-pill">${escapeHtml(catLabel)}</span></td>
+                    <td data-label="Order">${m.sortOrder ?? 0}</td>
+                    <td data-label="Visible">${m.active !== false ? 'Yes' : 'Hidden'}</td>
+                    <td data-label="Actions" class="inventory-actions">
+                        <button type="button" class="dash-btn ghost inventory-action-btn" data-edit-team="${escapeHtml(m.memberId)}">Edit</button>
+                        <button type="button" class="dash-btn danger ghost inventory-action-btn" data-hide-team="${escapeHtml(m.memberId)}">Hide</button>
+                        <button type="button" class="dash-btn danger inventory-action-btn" data-delete-team="${escapeHtml(m.memberId)}">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            tbody.querySelectorAll('[data-edit-team]').forEach((btn) => {
+                btn.addEventListener('click', () => openEditTeamModal(btn.getAttribute('data-edit-team')));
+            });
+            tbody.querySelectorAll('[data-hide-team]').forEach((btn) => {
+                btn.addEventListener('click', () => hideTeamMember(btn.getAttribute('data-hide-team')));
+            });
+            tbody.querySelectorAll('[data-delete-team]').forEach((btn) => {
+                btn.addEventListener('click', () => permanentDeleteTeamMember(btn.getAttribute('data-delete-team')));
+            });
+        }
+
+        function openEditTeamModal(memberId) {
+            const member = allTeamMembers.find((m) => m.memberId === memberId);
+            if (!member) {
+                showToast('Team member not found.', 'error');
+                return;
+            }
+            pendingEditTeamImageData = '';
+            resetProductImageZone('edit-team-image-zone', 'team-edit');
+            document.getElementById('edit-team-id-hidden').value = member.memberId;
+            document.getElementById('edit-team-id-display').value = member.memberId;
+            document.getElementById('edit-team-name').value = member.name || '';
+            document.getElementById('edit-team-position').value = member.positionTitle || '';
+            document.getElementById('edit-team-category').value = member.category || 'employees';
+            document.getElementById('edit-team-sort').value = member.sortOrder ?? 0;
+            document.getElementById('edit-team-active').value = member.active === false ? 'false' : 'true';
+            document.getElementById('edit-team-featured').value = member.featured ? 'true' : 'false';
+            document.getElementById('edit-team-badge').value = member.badge || '';
+            document.getElementById('edit-team-skills').value = (member.skills || []).join(', ');
+            document.getElementById('edit-team-image-path').value = member.image || '';
+            document.getElementById('edit-team-bio').value = member.bio || '';
+            document.getElementById('edit-team-status').textContent = '';
+            document.getElementById('edit-team-subtitle').textContent = `${member.name} · ${member.memberId}`;
+
+            const modal = document.getElementById('edit-team-modal');
+            modal?.classList.add('open');
+            modal?.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeEditTeamModal() {
+            const modal = document.getElementById('edit-team-modal');
+            modal?.classList.remove('open');
+            modal?.setAttribute('aria-hidden', 'true');
+            const anyEditModalOpen = document.getElementById('edit-product-modal')?.classList.contains('open')
+                || document.getElementById('edit-team-modal')?.classList.contains('open');
+            document.body.style.overflow = document.getElementById('dash-dialog')?.classList.contains('open') || anyEditModalOpen ? 'hidden' : '';
+            pendingEditTeamImageData = '';
+            resetProductImageZone('edit-team-image-zone', 'team-edit');
+        }
+
+        async function createTeamMember(e) {
+            e.preventDefault();
+            if (!canManageTeam()) return;
+
+            const statusEl = document.getElementById('add-team-status');
+            const btn = document.getElementById('create-team-btn');
+            const name = document.getElementById('new-team-name').value.trim();
+            const positionTitle = document.getElementById('new-team-position').value.trim();
+            const imagePath = document.getElementById('new-team-image-path').value.trim();
+
+            if (!name || !positionTitle) {
+                statusEl.textContent = 'Name and job title are required.';
+                return;
+            }
+            if (!imagePath && !pendingTeamImageData) {
+                statusEl.textContent = 'Upload a photo or provide an image path.';
+                return;
+            }
+
+            const payload = {
+                memberId: document.getElementById('new-team-id').value.trim(),
+                name,
+                positionTitle,
+                category: document.getElementById('new-team-category').value,
+                bio: document.getElementById('new-team-bio').value.trim(),
+                skills: document.getElementById('new-team-skills').value.trim(),
+                badge: document.getElementById('new-team-badge').value.trim(),
+                featured: document.getElementById('new-team-featured').value === 'true',
+                sortOrder: Number(document.getElementById('new-team-sort').value || 0),
+                image: imagePath,
+                imageData: pendingTeamImageData || undefined,
+                active: true,
+            };
+
+            btn.disabled = true;
+            statusEl.textContent = 'Saving...';
+            try {
+                const res = await fetch('/api/dashboard/team', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                const { data, raw } = await parseApiResponse(res);
+                if (!res.ok) {
+                    const msg = apiErrorMessage(res, data, raw);
+                    statusEl.textContent = msg;
+                    showToast(msg, 'error');
+                    return;
+                }
+                showToast(`"${data.member?.name || name}" added to Our Team.`, 'success');
+                document.getElementById('add-team-form').reset();
+                pendingTeamImageData = '';
+                resetProductImageZone('new-team-image-zone', 'team-new');
+                statusEl.textContent = `Added: ${data.member?.memberId || ''}`;
+                await loadTeamMembers();
+            } catch (err) {
+                const msg = err?.message || 'Failed to add team member.';
+                statusEl.textContent = msg;
+                showToast(msg, 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function saveEditTeamMember(e) {
+            e.preventDefault();
+            if (!canManageTeam()) return;
+
+            const memberId = document.getElementById('edit-team-id-hidden').value;
+            const statusEl = document.getElementById('edit-team-status');
+            const btn = document.getElementById('save-edit-team-btn');
+            const name = document.getElementById('edit-team-name').value.trim();
+            const positionTitle = document.getElementById('edit-team-position').value.trim();
+            if (!name || !positionTitle) {
+                statusEl.textContent = 'Name and job title are required.';
+                return;
+            }
+
+            const payload = {
+                name,
+                positionTitle,
+                category: document.getElementById('edit-team-category').value,
+                bio: document.getElementById('edit-team-bio').value.trim(),
+                skills: document.getElementById('edit-team-skills').value.trim(),
+                badge: document.getElementById('edit-team-badge').value.trim(),
+                featured: document.getElementById('edit-team-featured').value === 'true',
+                active: document.getElementById('edit-team-active').value === 'true',
+                sortOrder: Number(document.getElementById('edit-team-sort').value || 0),
+                image: document.getElementById('edit-team-image-path').value.trim() || undefined,
+                imageData: pendingEditTeamImageData || undefined,
+            };
+
+            btn.disabled = true;
+            statusEl.textContent = 'Saving...';
+            try {
+                const res = await fetch(`/api/dashboard/team/${encodeURIComponent(memberId)}`, {
+                    method: 'PATCH',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                const { data, raw } = await parseApiResponse(res);
+                if (!res.ok) {
+                    const msg = apiErrorMessage(res, data, raw);
+                    statusEl.textContent = msg;
+                    showToast(msg, 'error');
+                    return;
+                }
+                showToast(`"${data.member?.name || name}" saved.`, 'success');
+                closeEditTeamModal();
+                await loadTeamMembers();
+            } catch (err) {
+                const msg = err?.message || 'Failed to save team member.';
+                statusEl.textContent = msg;
+                showToast(msg, 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function hideTeamMember(memberId) {
+            if (!canManageTeam()) return;
+            const member = allTeamMembers.find((m) => m.memberId === memberId);
+            const confirmed = await dashConfirm({
+                title: 'Hide from Our Team?',
+                message: 'Hide from the public team page:',
+                productLabel: `${member?.name || memberId}`,
+                detail: 'You can show them again by editing and setting Visible to Yes.',
+                confirmText: 'Hide',
+                cancelText: 'Cancel',
+                variant: 'warning',
+            });
+            if (!confirmed) return;
+            try {
+                const res = await fetch(`/api/dashboard/team/${encodeURIComponent(memberId)}`, {
+                    method: 'DELETE',
+                    credentials: 'include',
+                });
+                const { data, raw } = await parseApiResponse(res);
+                if (!res.ok) {
+                    showToast(apiErrorMessage(res, data, raw), 'error');
+                    return;
+                }
+                showToast(data.message || 'Team member hidden.', 'success');
+                await loadTeamMembers();
+            } catch (err) {
+                showToast(err?.message || 'Failed to hide team member.', 'error');
+            }
+        }
+
+        async function permanentDeleteTeamMember(memberId) {
+            if (!canManageTeam()) return;
+            const member = allTeamMembers.find((m) => m.memberId === memberId);
+            const confirmed = await dashConfirm({
+                title: 'Permanently delete?',
+                message: 'Remove from the database:',
+                productLabel: `${member?.name || memberId}`,
+                detail: 'This cannot be undone. Their photo may also be removed.',
+                confirmText: 'Delete permanently',
+                cancelText: 'Cancel',
+                variant: 'danger',
+            });
+            if (!confirmed) return;
+            try {
+                const res = await fetch(`/api/dashboard/team/${encodeURIComponent(memberId)}?permanent=1`, {
+                    method: 'DELETE',
+                    credentials: 'include',
+                });
+                const { data, raw } = await parseApiResponse(res);
+                if (!res.ok) {
+                    showToast(apiErrorMessage(res, data, raw), 'error');
+                    return;
+                }
+                showToast(data.message || 'Team member deleted.', 'success');
+                await loadTeamMembers();
+            } catch (err) {
+                showToast(err?.message || 'Failed to delete team member.', 'error');
+            }
+        }
+
         async function loadCustomers() {
             const res = await fetch('/api/dashboard/customers', { credentials: 'include' });
             const data = await res.json();
@@ -2917,6 +3718,14 @@
         });
         initProductImageZone('new-product-image-zone', 'new', 'add-product-status');
         initProductImageZone('edit-product-image-zone', 'edit', 'edit-product-status');
+        initProductImageZone('new-team-image-zone', 'team-new', 'add-team-status');
+        initProductImageZone('edit-team-image-zone', 'team-edit', 'edit-team-status');
+        document.getElementById('add-team-form')?.addEventListener('submit', createTeamMember);
+        document.getElementById('edit-team-form')?.addEventListener('submit', saveEditTeamMember);
+        document.getElementById('edit-team-close')?.addEventListener('click', closeEditTeamModal);
+        document.getElementById('edit-team-cancel-btn')?.addEventListener('click', closeEditTeamModal);
+        document.getElementById('edit-team-backdrop')?.addEventListener('click', closeEditTeamModal);
+        document.getElementById('team-search')?.addEventListener('input', renderTeamMembers);
         initSpecSectionsBuilder();
         document.getElementById('create-user-btn').addEventListener('click', createUser);
         document.getElementById('dash-logout-btn').addEventListener('click', async () => {
@@ -2950,13 +3759,21 @@
             } else {
                 document.getElementById('spec-sections-list')?.closest('.spec-sections-builder')?.remove();
             }
+            if (canManageTeam()) {
+                const teamTab = document.getElementById('team-tab');
+                if (teamTab) teamTab.style.display = '';
+            } else {
+                document.getElementById('team-section')?.remove();
+            }
             applyAnalyticsAccess();
             document.getElementById('save-all-inventory-btn').disabled = !canEditInventory();
             if (currentRole === 'technical') {
                 document.getElementById('user-mgmt-note').textContent = 'Technical role: view-only access.';
             }
 
-            await Promise.all([loadProducts(), loadOrders(), loadCustomers(), loadUsers()]);
+            const loads = [loadProducts(), loadOrders(), loadCustomers(), loadUsers()];
+            if (canManageTeam()) loads.push(loadTeamMembers());
+            await Promise.all(loads);
             renderAnalytics();
         })();
     </script>

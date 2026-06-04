@@ -265,6 +265,29 @@ const ProductSpecSectionSchema = new mongoose.Schema({
     items: { type: [ProductSpecSchema], default: [] }
 }, { _id: false });
 
+const TEAM_CATEGORIES = ["leadership", "technical", "employees", "operations", "sales"];
+const TEAM_CATEGORY_LABELS = {
+    leadership: "Leadership",
+    technical: "Technical Team",
+    employees: "Employees",
+    operations: "Operations",
+    sales: "Sales & Support",
+};
+
+const TeamMemberSchema = new mongoose.Schema({
+    memberId: { type: String, required: true, unique: true, index: true },
+    name: { type: String, required: true, trim: true },
+    positionTitle: { type: String, default: "", trim: true },
+    bio: { type: String, default: "" },
+    category: { type: String, enum: TEAM_CATEGORIES, default: "employees" },
+    skills: { type: [String], default: [] },
+    image: { type: String, default: "" },
+    badge: { type: String, default: "", trim: true },
+    featured: { type: Boolean, default: false },
+    sortOrder: { type: Number, default: 0 },
+    active: { type: Boolean, default: true },
+}, { timestamps: true });
+
 const ProductSchema = new mongoose.Schema({
     productId: { type: String, required: true, unique: true, index: true },
     name: { type: String, required: true },
@@ -291,6 +314,42 @@ function slugifyProductId(value) {
         .replace(/^-+|-+$/g, "")
         .slice(0, 48);
     return slug || `product-${Date.now()}`;
+}
+
+function slugifyMemberId(value) {
+    const slug = String(value || "")
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 48);
+    return slug || `member-${Date.now()}`;
+}
+
+function parseTeamSkills(raw) {
+    if (Array.isArray(raw)) {
+        return raw.map((s) => String(s).trim()).filter(Boolean).slice(0, 12);
+    }
+    if (typeof raw === "string") {
+        return raw.split(",").map((s) => s.trim()).filter(Boolean).slice(0, 12);
+    }
+    return [];
+}
+
+function groupTeamMembersByCategory(members = []) {
+    const byCategory = {};
+    TEAM_CATEGORIES.forEach((id) => { byCategory[id] = []; });
+    members.forEach((m) => {
+        const cat = TEAM_CATEGORIES.includes(m.category) ? m.category : "employees";
+        byCategory[cat].push(m);
+    });
+    return TEAM_CATEGORIES
+        .map((id) => ({
+            id,
+            label: TEAM_CATEGORY_LABELS[id] || id,
+            members: (byCategory[id] || []).sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.name.localeCompare(b.name)),
+        }))
+        .filter((section) => section.members.length > 0);
 }
 
 function parseSpecLine(line) {
@@ -543,10 +602,132 @@ async function resolveProductImage(productId, imagePath, imageData) {
     return "";
 }
 
+function saveTeamMemberImageLocal(memberId, imageData) {
+    const match = imageData.match(/^data:image\/(\w+);base64,(.+)$/);
+    if (!match) throw new Error("Invalid image upload format");
+    let ext = String(match[1] || "png").toLowerCase();
+    if (ext === "jpeg") ext = "jpg";
+    if (!["png", "jpg", "webp", "gif"].includes(ext)) ext = "jpg";
+    const rel = `assets/images/team/${memberId}.${ext}`;
+    const abs = path.join(__dirname, rel);
+    try {
+        fs.mkdirSync(path.dirname(abs), { recursive: true });
+        fs.writeFileSync(abs, Buffer.from(match[2], "base64"));
+    } catch (err) {
+        throw new Error(`Could not save image file: ${err.message}`);
+    }
+    return rel;
+}
+
+async function uploadTeamMemberImage(memberId, imageData) {
+    if (typeof imageData !== "string" || !imageData.startsWith("data:image/")) {
+        throw new Error("Invalid team member image format");
+    }
+    const publicId = cloudinarySafeProductId(memberId);
+    if (!publicId) throw new Error("Invalid member id for image upload");
+
+    if (isCloudinaryConfigured()) {
+        const result = await cloudinary.uploader.upload(imageData, {
+            folder: "team",
+            public_id: publicId,
+            overwrite: true,
+            resource_type: "image",
+        });
+        if (!result?.secure_url) {
+            throw new Error("Cloudinary upload did not return a URL");
+        }
+        return result.secure_url;
+    }
+
+    console.warn("Cloudinary not configured — saving team photo to local disk.");
+    return saveTeamMemberImageLocal(memberId, imageData);
+}
+
+async function deleteTeamMemberImageAsset(memberId, imageUrl) {
+    if (!imageUrl) return;
+    const publicId = `team/${cloudinarySafeProductId(memberId)}`;
+
+    if (String(imageUrl).includes("res.cloudinary.com") && isCloudinaryConfigured()) {
+        try {
+            await cloudinary.uploader.destroy(publicId, { resource_type: "image" });
+        } catch (err) {
+            console.warn("Cloudinary team image delete failed:", err?.message || err);
+        }
+        return;
+    }
+
+    if (String(imageUrl).startsWith("assets/images/team/")) {
+        const abs = path.join(__dirname, imageUrl);
+        try {
+            if (fs.existsSync(abs)) fs.unlinkSync(abs);
+        } catch (err) {
+            console.warn("Local team image delete failed:", err?.message || err);
+        }
+    }
+}
+
+async function resolveTeamMemberImage(memberId, imagePath, imageData) {
+    if (typeof imageData === "string" && imageData.startsWith("data:image/")) {
+        return uploadTeamMemberImage(memberId, imageData);
+    }
+    if (typeof imagePath === "string" && imagePath.trim()) return imagePath.trim();
+    return "";
+}
+
 const User = mongoose.model("User", UserSchema);
 const Order = mongoose.model("Order", OrderSchema);
 const Cart = mongoose.model("Cart", CartSchema);
 const Product = mongoose.model("Product", ProductSchema);
+const TeamMember = mongoose.model("TeamMember", TeamMemberSchema);
+
+async function seedDefaultTeamMembers() {
+    const defaults = [
+        {
+            memberId: "mohamed-zidan",
+            name: "Mohamed Zidan",
+            positionTitle: "Managing Director",
+            bio: "Leads INFINITY in delivering GPS tracking, fleet management, and security solutions for businesses across Egypt.",
+            category: "leadership",
+            skills: ["GPS Systems", "Fleet Management", "CCTV Systems"],
+            image: "assets/images/team/mohamed-zidan.jpg",
+            featured: false,
+            sortOrder: 0,
+            active: true,
+        },
+        {
+            memberId: "mazen-mahmoud",
+            name: "Mazen Mahmoud Mohamed",
+            positionTitle: "Communication & Computer Engineer",
+            bio: "Designed and built this website and its online store, staff dashboard, and customer portal — connecting our catalog, orders, and team tools in one platform.",
+            category: "technical",
+            skills: ["Web Development", "Full-Stack", "Node.js", "Communication Systems", "Computer Engineering"],
+            image: "assets/images/team/mazen-mahmoud.jpg",
+            badge: "Platform builder",
+            featured: true,
+            sortOrder: 0,
+            active: true,
+        },
+    ];
+    for (const m of defaults) {
+        const existing = await TeamMember.findOne({ memberId: m.memberId }).lean();
+        if (!existing) {
+            await TeamMember.create(m);
+            continue;
+        }
+        const patch = {};
+        if (!existing.name) patch.name = m.name;
+        if (!existing.positionTitle) patch.positionTitle = m.positionTitle;
+        if (!existing.bio) patch.bio = m.bio;
+        if (!existing.image) patch.image = m.image;
+        if (!existing.skills?.length) patch.skills = m.skills;
+        if (!TEAM_CATEGORIES.includes(existing.category)) patch.category = m.category;
+        if (typeof existing.active !== "boolean") patch.active = m.active;
+        if (Object.keys(patch).length) {
+            await TeamMember.updateOne({ memberId: m.memberId }, { $set: patch });
+        }
+    }
+    await TeamMember.updateMany({ active: { $exists: false } }, { $set: { active: true } });
+}
 
 async function seedDefaultProducts() {
     const defaults = [
@@ -740,6 +921,7 @@ async function start() {
         });
         await ensurePrimaryAdmin();
         await seedDefaultProducts();
+        await seedDefaultTeamMembers();
         console.log("Connected to MongoDB");
 
         app.listen(PORT, () => {
@@ -918,6 +1100,24 @@ app.get("/api/products/public/:productId", async (req, res) => {
         if (!product) return res.status(404).json({ error: "Product not found" });
         res.json({ product });
     } catch (error) {
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+app.get("/api/team/public", async (_req, res) => {
+    try {
+        const members = await TeamMember.find({ active: { $ne: false } })
+            .select("memberId name positionTitle bio category skills image badge featured sortOrder -_id")
+            .sort({ sortOrder: 1, name: 1 })
+            .lean();
+        const categories = groupTeamMembersByCategory(members);
+        res.json({
+            categories,
+            categoryLabels: TEAM_CATEGORY_LABELS,
+            total: members.length,
+        });
+    } catch (error) {
+        console.error("Public team list failed:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 });
@@ -1534,6 +1734,155 @@ app.delete("/api/dashboard/users/:id", requireRole(["employee", "manager", "prim
         res.json({ message: "User deleted" });
     } catch (error) {
         res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+app.get("/api/dashboard/team", requireRole(["manager", "primary"]), async (_req, res) => {
+    try {
+        const members = await TeamMember.find({})
+            .sort({ category: 1, sortOrder: 1, name: 1 })
+            .lean();
+        res.json({
+            members,
+            categories: TEAM_CATEGORIES,
+            categoryLabels: TEAM_CATEGORY_LABELS,
+        });
+    } catch (error) {
+        console.error("Dashboard team list failed:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+app.post("/api/dashboard/team", requireRole(["manager", "primary"]), async (req, res) => {
+    try {
+        const body = req.body || {};
+        const name = typeof body.name === "string" ? body.name.trim() : "";
+        if (!name) return res.status(400).json({ error: "Name is required" });
+
+        const category = typeof body.category === "string" ? body.category.trim() : "employees";
+        if (!TEAM_CATEGORIES.includes(category)) {
+            return res.status(400).json({ error: "Invalid team category" });
+        }
+
+        const memberId = slugifyMemberId(body.memberId || name);
+        const existing = await TeamMember.findOne({ memberId }).lean();
+        if (existing) return res.status(409).json({ error: "Member ID already exists. Choose a different ID." });
+
+        let image = "";
+        try {
+            image = await resolveTeamMemberImage(memberId, body.image, body.imageData);
+        } catch (imgErr) {
+            return res.status(400).json({ error: imgErr.message || "Failed to save team photo" });
+        }
+        if (!image) {
+            return res.status(400).json({ error: "Photo is required (upload a file or provide an image path)" });
+        }
+
+        const member = await TeamMember.create({
+            memberId,
+            name,
+            positionTitle: typeof body.positionTitle === "string" ? body.positionTitle.trim() : "",
+            bio: typeof body.bio === "string" ? body.bio.trim() : "",
+            category,
+            skills: parseTeamSkills(body.skills),
+            image,
+            badge: typeof body.badge === "string" ? body.badge.trim() : "",
+            featured: body.featured === true,
+            sortOrder: Number.isFinite(Number(body.sortOrder)) ? Math.floor(Number(body.sortOrder)) : 0,
+            active: body.active !== false,
+        });
+
+        res.status(201).json({ member });
+    } catch (error) {
+        console.error("Create team member failed:", error);
+        if (error && error.code === 11000) {
+            return res.status(409).json({ error: "Member ID already exists" });
+        }
+        res.status(500).json({ error: error?.message || "Internal server error" });
+    }
+});
+
+app.patch("/api/dashboard/team/:memberId", requireRole(["manager", "primary"]), async (req, res) => {
+    try {
+        const { memberId } = req.params;
+        const body = req.body || {};
+        const existing = await TeamMember.findOne({ memberId }).lean();
+        if (!existing) return res.status(404).json({ error: "Team member not found" });
+
+        const update = {};
+        if (typeof body.name === "string" && body.name.trim()) update.name = body.name.trim();
+        if (typeof body.positionTitle === "string") update.positionTitle = body.positionTitle.trim();
+        if (typeof body.bio === "string") update.bio = body.bio.trim();
+        if (typeof body.category === "string") {
+            if (!TEAM_CATEGORIES.includes(body.category)) {
+                return res.status(400).json({ error: "Invalid team category" });
+            }
+            update.category = body.category;
+        }
+        if (body.skills !== undefined) update.skills = parseTeamSkills(body.skills);
+        if (typeof body.badge === "string") update.badge = body.badge.trim();
+        if (typeof body.featured === "boolean") update.featured = body.featured;
+        if (typeof body.active === "boolean") update.active = body.active;
+        if (Number.isFinite(Number(body.sortOrder))) update.sortOrder = Math.floor(Number(body.sortOrder));
+
+        let savedImage = "";
+        try {
+            savedImage = await resolveTeamMemberImage(memberId, body.image, body.imageData);
+        } catch (imgErr) {
+            return res.status(400).json({ error: imgErr.message || "Failed to save team photo" });
+        }
+        if (savedImage) {
+            if (existing.image && savedImage !== existing.image) {
+                await deleteTeamMemberImageAsset(memberId, existing.image);
+            }
+            update.image = savedImage;
+        } else if (typeof body.image === "string" && body.image.trim()) {
+            const trimmed = body.image.trim();
+            if (existing.image && trimmed !== existing.image) {
+                await deleteTeamMemberImageAsset(memberId, existing.image);
+            }
+            update.image = trimmed;
+        }
+
+        const member = await TeamMember.findOneAndUpdate(
+            { memberId },
+            { $set: update },
+            { new: true }
+        );
+        res.json({ member });
+    } catch (error) {
+        console.error("Update team member failed:", error);
+        res.status(500).json({ error: error?.message || "Internal server error" });
+    }
+});
+
+app.delete("/api/dashboard/team/:memberId", requireRole(["manager", "primary"]), async (req, res) => {
+    try {
+        const { memberId } = req.params;
+        const permanent = String(req.query.permanent || "") === "1";
+        const existing = await TeamMember.findOne({ memberId }).lean();
+        if (!existing) return res.status(404).json({ error: "Team member not found" });
+
+        if (permanent) {
+            await deleteTeamMemberImageAsset(memberId, existing.image);
+            await TeamMember.deleteOne({ memberId });
+            return res.json({ message: "Team member permanently deleted", memberId, permanent: true });
+        }
+
+        const member = await TeamMember.findOneAndUpdate(
+            { memberId },
+            { $set: { active: false } },
+            { new: true }
+        );
+        res.json({
+            message: "Team member hidden from Our Team page",
+            memberId,
+            permanent: false,
+            member,
+        });
+    } catch (error) {
+        console.error("Delete team member failed:", error);
+        res.status(500).json({ error: error?.message || "Internal server error" });
     }
 });
 

@@ -6,7 +6,7 @@
     <title>Our Team - INFINITY Total-Com Solutions</title>
     <link rel="icon" href="assets/images/infinity-logo1.png" type="image/png">
     <link rel="apple-touch-icon" href="assets/images/infinity-logo1.png">
-    <link rel="stylesheet" href="mazen.css?v=20260603-7">
+    <link rel="stylesheet" href="mazen.css?v=20260603-team-ui">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -62,8 +62,8 @@
             <p class="hero-text">Leaders and engineers delivering fleet technology, security systems, and the digital platform powering our store and operations.</p>
             <div class="team-hero-stats">
                 <div class="team-hero-stat">
-                    <span class="team-hero-stat-value">2+</span>
-                    <span class="team-hero-stat-label">Core specialists</span>
+                    <span class="team-hero-stat-value" id="team-stat-count">—</span>
+                    <span class="team-hero-stat-label">Team members</span>
                 </div>
                 <div class="team-hero-stat">
                     <span class="team-hero-stat-value">GPS</span>
@@ -77,76 +77,17 @@
         </div>
     </section>
 
-    <section class="team-section" aria-labelledby="team-section-title">
+    <section class="team-section" aria-labelledby="team-page-heading">
         <div class="container">
-            <header class="team-intro">
+            <header class="team-intro team-intro--page">
                 <span class="team-section-label">Meet the team</span>
-                <h2 id="team-section-title">Leadership</h2>
+                <h2 id="team-page-heading">Our people</h2>
                 <p>Experienced professionals united to serve our clients across Egypt.</p>
             </header>
 
-            <div class="team-grid">
-                <article class="team-member">
-                    <div class="member-photo-wrap">
-                        <img
-                            src="assets/images/team/mohamed-zidan.jpg"
-                            alt="Portrait of Mohamed Zidan"
-                            class="member-image"
-                            width="400"
-                            height="480"
-                            loading="lazy"
-                            onerror="this.onerror=null;this.src='assets/images/team/mohamed-zidan.svg';">
-                        <div class="member-photo-shade" aria-hidden="true"></div>
-                    </div>
-                    <div class="member-info">
-                        <div class="member-head">
-                            <h3>Mohamed Zidan</h3>
-                            <p class="position">
-                                <i class="fas fa-briefcase" aria-hidden="true"></i>
-                                <span>Managing Director</span>
-                            </p>
-                        </div>
-                        <p class="bio">Leads INFINITY in delivering GPS tracking, fleet management, and security solutions for businesses across Egypt.</p>
-                        <div class="skills" aria-label="Areas of expertise">
-                            <span class="skill-tag"><i class="fas fa-satellite-dish" aria-hidden="true"></i> GPS Systems</span>
-                            <span class="skill-tag"><i class="fas fa-truck" aria-hidden="true"></i> Fleet Management</span>
-                            <span class="skill-tag"><i class="fas fa-video" aria-hidden="true"></i> CCTV Systems</span>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="team-member team-member--featured">
-                    <span class="member-featured-badge"><i class="fas fa-code" aria-hidden="true"></i> Platform builder</span>
-                    <div class="member-photo-wrap">
-                        <img
-                            src="assets/images/team/mazen-mahmoud.jpg"
-                            alt="Portrait of Mazen Mahmoud Mohamed"
-                            class="member-image"
-                            width="400"
-                            height="480"
-                            loading="lazy"
-                            onerror="this.onerror=null;this.src='assets/images/team/mazen-mahmoud.svg';">
-                        <div class="member-photo-shade" aria-hidden="true"></div>
-                    </div>
-                    <div class="member-info">
-                        <div class="member-head">
-                            <h3>Mazen Mahmoud Mohamed</h3>
-                            <p class="position">
-                                <i class="fas fa-microchip" aria-hidden="true"></i>
-                                <span>Communication &amp; Computer Engineer</span>
-                            </p>
-                        </div>
-                        <p class="bio">Designed and built this website and its online store, staff dashboard, and customer portal — connecting our catalog, orders, and team tools in one platform.</p>
-                        <div class="skills" aria-label="Areas of expertise">
-                            <span class="skill-tag"><i class="fas fa-laptop-code" aria-hidden="true"></i> Web Development</span>
-                            <span class="skill-tag"><i class="fas fa-layer-group" aria-hidden="true"></i> Full-Stack</span>
-                            <span class="skill-tag"><i class="fas fa-server" aria-hidden="true"></i> Node.js</span>
-                            <span class="skill-tag"><i class="fas fa-broadcast-tower" aria-hidden="true"></i> Communication Systems</span>
-                            <span class="skill-tag"><i class="fas fa-cogs" aria-hidden="true"></i> Computer Engineering</span>
-                        </div>
-                    </div>
-                </article>
-            </div>
+            <p id="team-loading" class="team-loading muted">Loading team…</p>
+            <p id="team-empty" class="team-empty" hidden>No team members to display yet. Check back soon.</p>
+            <div id="team-sections-root"></div>
 
             <div class="team-cta">
                 <p>Want to work with our team or explore our solutions?</p>
@@ -238,6 +179,144 @@
         </div>
     </footer>
 
-    <script src="script.js?v=20260429-3"></script>
+    <script src="script.js?v=20260603-team"></script>
+    <script>
+        (function loadPublicTeam() {
+            const root = document.getElementById('team-sections-root');
+            const loadingEl = document.getElementById('team-loading');
+            const emptyEl = document.getElementById('team-empty');
+            const countEl = document.getElementById('team-stat-count');
+            if (!root) return;
+
+            const POSITION_ICONS = {
+                leadership: 'fa-briefcase',
+                technical: 'fa-microchip',
+                employees: 'fa-user-tie',
+                operations: 'fa-screwdriver-wrench',
+                sales: 'fa-handshake',
+            };
+
+            function escapeHtml(text) {
+                return String(text ?? '')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;');
+            }
+
+            function skillIcon(skill) {
+                const s = String(skill).toLowerCase();
+                if (s.includes('gps') || s.includes('satellite')) return 'fa-satellite-dish';
+                if (s.includes('fleet') || s.includes('truck')) return 'fa-truck';
+                if (s.includes('cctv') || s.includes('video')) return 'fa-video';
+                if (s.includes('web') || s.includes('code')) return 'fa-laptop-code';
+                if (s.includes('node')) return 'fa-server';
+                if (s.includes('communication')) return 'fa-broadcast-tower';
+                if (s.includes('engineer')) return 'fa-cogs';
+                return 'fa-circle-check';
+            }
+
+            function fallbackPhoto(memberId) {
+                return `assets/images/team/${memberId}.svg`;
+            }
+
+            function renderMember(member) {
+                const featured = member.featured ? ' team-member--featured' : '';
+                const badge = member.badge
+                    ? `<span class="member-featured-badge"><i class="fas fa-star" aria-hidden="true"></i> ${escapeHtml(member.badge)}</span>`
+                    : '';
+                const posIcon = POSITION_ICONS[member.category] || 'fa-user';
+                const skills = (member.skills || []).map((skill) => (
+                    `<span class="skill-tag"><i class="fas ${skillIcon(skill)}" aria-hidden="true"></i> ${escapeHtml(skill)}</span>`
+                )).join('');
+                const bio = member.bio
+                    ? `<p class="bio">${escapeHtml(member.bio)}</p>`
+                    : '';
+                const img = member.image || fallbackPhoto(member.memberId);
+                const fallback = fallbackPhoto(member.memberId);
+
+                return `
+                    <article class="team-member${featured}">
+                        ${badge}
+                        <div class="member-photo-wrap">
+                            <img
+                                src="${escapeHtml(img)}"
+                                alt="Portrait of ${escapeHtml(member.name)}"
+                                class="member-image"
+                                width="400"
+                                height="480"
+                                loading="lazy"
+                                onerror="this.onerror=null;this.src='${escapeHtml(fallback)}';">
+                            <div class="member-photo-shade" aria-hidden="true"></div>
+                        </div>
+                        <div class="member-info">
+                            <div class="member-head">
+                                <h3>${escapeHtml(member.name)}</h3>
+                                <p class="position">
+                                    <i class="fas ${posIcon}" aria-hidden="true"></i>
+                                    <span>${escapeHtml(member.positionTitle || '')}</span>
+                                </p>
+                            </div>
+                            ${bio}
+                            ${skills ? `<div class="skills" aria-label="Areas of expertise">${skills}</div>` : ''}
+                        </div>
+                    </article>
+                `;
+            }
+
+            function finishTeamRender() {
+                document.querySelector('.team-section')?.classList.add('visible');
+                if (typeof window.bindScrollReveal === 'function') {
+                    window.bindScrollReveal(root);
+                } else {
+                    root.querySelectorAll('.team-member, .team-category-block').forEach((el) => {
+                        el.classList.add('visible');
+                    });
+                }
+            }
+
+            fetch('/api/team/public')
+                .then(async (res) => {
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok) {
+                        throw new Error(data.error || `HTTP ${res.status}`);
+                    }
+                    return data;
+                })
+                .then((data) => {
+                    if (loadingEl) loadingEl.hidden = true;
+                    const categories = Array.isArray(data.categories) ? data.categories : [];
+                    const total = data.total ?? categories.reduce((n, c) => n + (c.members?.length || 0), 0);
+                    if (countEl) countEl.textContent = total > 0 ? String(total) : '—';
+
+                    if (!categories.length) {
+                        if (emptyEl) emptyEl.hidden = false;
+                        return;
+                    }
+
+                    root.innerHTML = categories.map((section) => `
+                        <section class="team-category-block" aria-labelledby="team-cat-${escapeHtml(section.id)}">
+                            <header class="team-intro">
+                                <span class="team-section-label">${escapeHtml(section.label)}</span>
+                                <h2 id="team-cat-${escapeHtml(section.id)}">${escapeHtml(section.label)}</h2>
+                            </header>
+                            <div class="team-grid">
+                                ${(section.members || []).map(renderMember).join('')}
+                            </div>
+                        </section>
+                    `).join('');
+                    finishTeamRender();
+                })
+                .catch((err) => {
+                    if (loadingEl) {
+                        loadingEl.hidden = false;
+                        const hint = window.location.protocol === 'file:'
+                            ? ' Open this site with npm start at http://localhost:3000/team.html (not Live Server).'
+                            : ' Restart the server (npm start) and refresh.';
+                        loadingEl.textContent = `Could not load team.${hint} ${err?.message || ''}`.trim();
+                    }
+                });
+        })();
+    </script>
 </body>
 </html>
