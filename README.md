@@ -6,14 +6,15 @@ Full-stack web application for INFINITY Total-Com Solutions, built with **Node.j
 
 - Customer storefront (catalog, cart, checkout, order history)
 - Multi-method checkout with **payment receipt upload** (Bank Transfer & InstaPay)
-- Staff dashboard (inventory, orders with receipt review, customers, analytics, user management)
+- Staff dashboard (inventory, orders with receipt review, customers, analytics, user management, **team management**)
 - Role-based access for customers, technical staff, employees, managers, and primary admin
-- Public **Our Team** page with leadership and company values
-- MongoDB-backed users, products, carts, orders, and sessions
+- Public **Our Team** page (dynamic roster from MongoDB) with company values
+- **Cloudinary** image hosting for product photos, team photos, and payment receipts (with local fallbacks)
+- MongoDB-backed users, products, team members, carts, orders, and sessions
 
 > Payment processor implementation details are intentionally excluded from this README.
 
-**Important:** Run the app with `npm start` and open **`http://localhost:3000`**. Opening HTML files directly or via Live Server will break API calls (cart, dashboard, product management).
+**Important:** Run the app with `npm start` and open **`http://localhost:3000`**. Opening HTML files directly or via Live Server will break API calls (cart, dashboard, products, team page, etc.).
 
 ---
 
@@ -31,13 +32,13 @@ Full-stack web application for INFINITY Total-Com Solutions, built with **Node.j
 
 ### 2. Role-Based Access
 
-| Role | Storefront | Staff dashboard | Edit inventory | Add / delete products | Business analytics | Create staff users |
-|------|------------|-----------------|----------------|----------------------|--------------------|------------------|
-| `customer` | Yes | No | — | — | — | — |
-| `technical` | Yes | Yes (view) | No | No | No | No |
-| `employee` | Yes | Yes | Yes | No | No | No |
-| `manager` | Yes | Yes | Yes | Yes | Yes | Yes |
-| `primary` | Yes | Yes | Yes | Yes | Yes | Yes |
+| Role | Storefront | Staff dashboard | Edit inventory | Add / delete products | Manage Our Team | Business analytics | Create staff users |
+|------|------------|-----------------|----------------|----------------------|-----------------|--------------------|------------------|
+| `customer` | Yes | No | — | — | — | — | — |
+| `technical` | Yes | Yes (view) | No | No | No | No | No |
+| `employee` | Yes | Yes | Yes | No | No | No | No |
+| `manager` | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
+| `primary` | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
 
 - Route guards on API endpoints enforce these rules server-side.
 - Customers see only their own orders; staff see broader order and customer data.
@@ -127,8 +128,8 @@ Tabbed interface for staff operations:
 | Tab | Who sees it | Capabilities |
 |-----|-------------|--------------|
 | **Inventory** | technical, employee, manager, primary | View all products (including inactive). Edit price, install, stock inline. **Save All**. **Edit** opens full product modal. |
-| **Add Product** | manager, primary | Create products with image upload/path, descriptions, categorized spec sections |
-| **Our Team** | manager, primary | Add/edit/hide/delete team members shown on `team.html` (categories: Leadership, Technical, Employees, Operations, Sales) |
+| **Add Product** | manager, primary | Create products with drag-and-drop image upload or image path, descriptions, categorized spec sections |
+| **Our Team** | manager, primary | Add, edit, hide, or delete team members for the public Our Team page |
 | **Orders** | all staff roles | List, search, filter by status, update status, export PDF, **view payment receipt** thumbnail |
 | **Customers** | all staff roles | Customer profiles and contact info |
 | **Analytics** | **manager, primary only** | Business analytics: KPIs, charts (revenue, top items, status, payment methods, top customers), date range |
@@ -136,13 +137,22 @@ Tabbed interface for staff operations:
 
 **Inventory actions (manager / primary):**
 
-- **Edit** — Modal with product details, image, descriptions, and spec sections (separate English / Arabic fields per line)
+- **Edit** — Modal with product details, image upload/path, descriptions, and spec sections (separate English / Arabic fields per line)
 - **Delete** — Permanent removal from database and website (custom confirmation dialog)
 - **Active on website = No** — Hides from Our Products only; product stays in inventory for editing
 
 **Inventory actions (employee):**
 
 - Inline stock/price/install edits, **Edit** modal, **Save All** (no add/delete product)
+
+**Our Team tab (manager / primary):**
+
+- Grouped form: **Profile**, **Display options**, **Photo**, **Bio**
+- Category chips (Leadership, Technical, Employees, Operations, Sales)
+- Drag-and-drop photo upload or path (e.g. `assets/images/team/name.jpg`)
+- **Team roster** table with search, member count, edit/hide/delete
+- **Hide** removes from public page; **Delete** removes permanently from DB
+- Mobile-friendly: stacked form, card-style roster rows, full-width actions
 
 **Orders — payment receipts:**
 
@@ -153,7 +163,7 @@ Tabbed interface for staff operations:
 
 - Custom confirm/alert dialogs (no browser `confirm()` popups)
 - Toast notifications for save/delete feedback
-- Mobile-friendly tables and analytics layout
+- Mobile-friendly tables (card layout on phones/tablets) and analytics layout
 
 ### 9. Business Analytics
 
@@ -165,22 +175,47 @@ Available only to **manager** and **primary** roles:
 
 ### 10. Our Team Page (`team.html`)
 
-Public page loaded from MongoDB (`GET /api/team/public`):
+Public page loaded from MongoDB via `GET /api/team/public`:
 
 - **Hero** with company intro and live member count
-- **Category sections** — Leadership, Technical Team, Employees, Operations, Sales & Support (only categories with active members are shown)
+- **Category sections** — Leadership, Technical Team, Employees, Operations, Sales & Support (empty categories are hidden)
 - Member cards: photo, job title, bio, skill tags, optional featured highlight and badge
 - **Our Team Values** — six value cards (Creativity, Team Work, Collaboration, Compassion, Passion, Happiness)
 - **Contact CTA** linking to home contact section
-- Staff manage members in dashboard **Our Team** tab (manager / primary): upload photo (Cloudinary `team/{memberId}` or local path), comma-separated skills, display order, hide or permanent delete
-- Default seed members: Mohamed Zidan (Leadership), Mazen Mahmoud Mohamed (Technical)
-- Photos: `assets/images/team/{memberId}.jpg` or Cloudinary URL; SVG placeholder fallback
+- Responsive spacing and card layout on mobile (values: 2 per row on phones)
+- Scroll-reveal animations applied after dynamic load (members fetched from API)
 
-### 11. General UI/UX
+**Default seed members** (created on server startup if missing):
+
+| Member | Category | Role |
+|--------|----------|------|
+| Mohamed Zidan | Leadership | Managing Director |
+| Mazen Mahmoud Mohamed | Technical | Communication & Computer Engineer (featured) |
+
+### 11. Team Member Data Model
+
+Each team member in MongoDB includes:
+
+| Field | Description |
+|-------|-------------|
+| `memberId` | Unique slug (auto-generated from name if omitted) |
+| `name` | Full display name |
+| `positionTitle` | Job title on the card |
+| `bio` | Short introduction |
+| `category` | `leadership`, `technical`, `employees`, `operations`, or `sales` |
+| `skills` | Array of skill tag strings |
+| `image` | Cloudinary URL or path under `assets/images/team/` |
+| `badge` | Optional label (e.g. “Platform builder”) |
+| `featured` | Highlight card styling when `true` |
+| `sortOrder` | Display order within category (lower first) |
+| `active` | `true` = on public page; `false` = hidden |
+
+### 12. General UI/UX
 
 - Responsive layout (`mazen.css`), mobile nav, lazy-loaded images
-- Scroll reveal animations on marketing pages (modals excluded)
-- Accessible forms and keyboard support (Escape closes edit modal / dialogs)
+- Scroll reveal animations on marketing pages (modals excluded; team cards bound after API load)
+- Enhanced contact footer on key pages (phone, email, address EN/AR, Google Maps link)
+- Accessible forms and keyboard support (Escape closes edit modals / dialogs)
 
 ---
 
@@ -188,7 +223,7 @@ Public page loaded from MongoDB (`GET /api/team/public`):
 
 | Page | Purpose |
 |------|---------|
-| `index.html` | Home / landing |
+| `index.html` | Home / landing (services, clients, contact + map) |
 | `products.html` | Product catalog (Our Products) |
 | `product-details.html` | Product specifications (`?id=`) |
 | `auth.html` | Sign in / sign up |
@@ -197,7 +232,7 @@ Public page loaded from MongoDB (`GET /api/team/public`):
 | `dashboard.html` | Staff dashboard |
 | `payment.html` | Checkout (Visa, Bank Transfer, InstaPay, COD + receipt upload) |
 | `order-success.html` | Order confirmation |
-| `team.html` | Our Team (leadership & values) |
+| `team.html` | Our Team (dynamic roster + values) |
 | `terms.html` | Terms of service |
 | `privacy.html` | Privacy policy |
 | `delete-account.html` | Account deletion info |
@@ -219,7 +254,7 @@ Public page loaded from MongoDB (`GET /api/team/public`):
 
 OAuth: `/auth/google`, `/auth/facebook` (+ callbacks) when configured.
 
-### Products & Cart (Storefront)
+### Products, Team & Cart (Storefront)
 
 | Method | Path | Access | Description |
 |--------|------|--------|-------------|
@@ -247,7 +282,7 @@ OAuth: `/auth/google`, `/auth/facebook` (+ callbacks) when configured.
 | Method | Path | Roles | Description |
 |--------|------|-------|-------------|
 | GET | `/api/dashboard/products` | technical, employee, manager, primary | All products |
-| POST | `/api/dashboard/products` | manager, primary | Create product |
+| POST | `/api/dashboard/products` | manager, primary | Create product (`image`, `imageData` base64 upload) |
 | PATCH | `/api/dashboard/products/:productId/stock` | employee, manager, primary | Update stock, price, names, specs, image, active, etc. |
 | DELETE | `/api/dashboard/products/:productId` | manager, primary | `?permanent=1` removes from DB; without it, soft-hides (`active: false`). Dashboard delete uses permanent by default |
 | GET | `/api/dashboard/orders` | staff | Orders list (includes `paymentReceiptImage` when set) |
@@ -258,7 +293,7 @@ OAuth: `/auth/google`, `/auth/facebook` (+ callbacks) when configured.
 | POST | `/api/dashboard/users` | manager, primary | Create staff user |
 | DELETE | `/api/dashboard/users/:id` | employee, manager, primary | Delete user (role rules apply) |
 | GET | `/api/dashboard/team` | manager, primary | All team members (incl. hidden) |
-| POST | `/api/dashboard/team` | manager, primary | Create team member |
+| POST | `/api/dashboard/team` | manager, primary | Create team member (`image`, `imageData`) |
 | PATCH | `/api/dashboard/team/:memberId` | manager, primary | Update member |
 | DELETE | `/api/dashboard/team/:memberId` | manager, primary | Hide (`active: false`); `?permanent=1` removes from DB |
 
@@ -296,25 +331,25 @@ OAuth: `/auth/google`, `/auth/facebook` (+ callbacks) when configured.
 5. Use **Customers** for customer profiles
 6. **Manager / primary:** use **Analytics** for business reports
 7. **Manager / primary:** use **User Management** to add staff accounts
+8. **Manager / primary:** use **Our Team** to manage the public team page
 
 ### Adding a Product (Manager / Primary)
 
 1. Dashboard → **Add Product**
 2. Fill English/Arabic names, category, price, installation, stock
-3. Upload an image (Cloudinary) or set path `assets/products/your-file.png` (no upload needed)
+3. Upload an image (saved to Cloudinary when configured) **or** set path `assets/products/your-file.png` without uploading
 4. Add **Specification sections** with a title and English / Arabic lines
 5. Submit — product appears on **Our Products** when **Active** is Yes
 
-### Updating Team Photos
+### Adding a Team Member (Manager / Primary)
 
-Place portrait images in:
-
-```text
-assets/images/team/mohamed-zidan.jpg
-assets/images/team/mazen-mahmoud.jpg
-```
-
-Refresh **`team.html`** after adding files. SVG placeholders show if JPG is missing.
+1. Dashboard → **Our Team**
+2. Fill **Profile**: name, job title, category, optional skills
+3. Set **Display options**: sort order, featured flag, optional badge
+4. Upload a photo **or** enter path `assets/images/team/your-file.jpg`
+5. Add a short **Bio**
+6. Click **Add Team Member** — member appears on **`team.html`** when **Visible** is Yes
+7. Use **Team roster** to **Edit**, **Hide**, or **Delete** existing members
 
 ---
 
@@ -322,11 +357,19 @@ Refresh **`team.html`** after adding files. SVG placeholders show if JPG is miss
 
 - **Express** server with `compression`, `cors`, JSON body parser (12MB limit for image uploads)
 - Static files from project root; HTML served with no-cache headers
-- **Mongoose** models: User, Product, Cart, Order, Session (MongoStore)
+- **Mongoose** models: User, Product, **TeamMember**, Cart, Order, Session (MongoStore)
 - **Passport** + **bcrypt** for OAuth and passwords
 - **PDFKit** for order PDFs
-- Product images → **Cloudinary** (`products/{productId}`) when configured, or `assets/products/` local fallback; optional image path without upload
-- Payment receipts → **Cloudinary** (`payment-receipts/{orderId}`) when configured, or local `assets/orders/receipts/` fallback
+- **Cloudinary** (via `cloudinary.js`) when `CLOUDINARY_*` env vars are set:
+
+| Asset | Cloudinary folder | Local fallback |
+|-------|-------------------|----------------|
+| Product images | `products/{productId}` | `assets/products/` |
+| Team photos | `team/{memberId}` | `assets/images/team/` |
+| Payment receipts | `payment-receipts/{orderId}` | `assets/orders/receipts/` |
+
+- Upload wins over image path when both are provided on create/edit
+- Default products and team members are **seeded on server startup** if missing
 
 ---
 
@@ -356,9 +399,13 @@ Open:
 http://localhost:3000/
 ```
 
+After code changes that add models or routes, **restart the server** so seeds and new endpoints load.
+
 ---
 
 ## Environment Variables
+
+Copy `.env.example` to `.env` and fill in values:
 
 | Variable | Description |
 |----------|-------------|
@@ -371,7 +418,7 @@ http://localhost:3000/
 | `EMPLOYEE_EMAILS` | Comma-separated employee emails |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Optional Google OAuth |
 | `FACEBOOK_APP_ID` / `FACEBOOK_APP_SECRET` | Optional Facebook OAuth |
-| `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name (product images & payment receipts) |
+| `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name (products, team, receipts) |
 | `CLOUDINARY_API_KEY` | Cloudinary API key |
 | `CLOUDINARY_API_SECRET` | Cloudinary API secret |
 | `STRIPE_API_KEY_BASE64` | Optional payment config |
@@ -382,20 +429,20 @@ http://localhost:3000/
 
 | Path | Role |
 |------|------|
-| `server.js` | API, auth, models, product CRUD, orders, receipt storage |
-| `dashboard.html` | Staff dashboard (inventory, orders, analytics, users) |
+| `server.js` | API, auth, models, product/team CRUD, orders, image storage |
+| `cloudinary.js` | Cloudinary SDK config |
+| `dashboard.html` | Staff dashboard (inventory, team, orders, analytics, users) |
 | `products.html` | Storefront catalog + cart |
 | `product-details.html` | Product specs page |
 | `payment.html` | Checkout + receipt upload |
-| `team.html` | Our Team page |
+| `team.html` | Our Team page (API-driven roster) |
 | `auth.html` | Login / register |
 | `user-dashboard.html` | Customer orders |
-| `script.js` | Shared frontend helpers, animations |
-| `mazen.css` | Global styles |
-| `assets/products/` | Product images |
-| `assets/images/team/` | Team member photos |
-| `cloudinary.js` | Cloudinary SDK config |
-| `assets/orders/receipts/` | Local receipt fallback (when Cloudinary not configured) |
+| `script.js` | Shared frontend helpers, scroll reveal, cart |
+| `mazen.css` | Global + team + contact styles |
+| `assets/products/` | Product images (local fallback) |
+| `assets/images/team/` | Team photos (local fallback) + SVG placeholders |
+| `assets/orders/receipts/` | Receipt fallback (when Cloudinary not configured) |
 | `package.json` | Dependencies and `npm start` |
 
 ---
@@ -414,14 +461,18 @@ http://localhost:3000/
 
 | Issue | Fix |
 |-------|-----|
-| API / cart / dashboard not working | Use `npm start` and `http://localhost:3000`, not Live Server |
-| “Failed to add product” | Restart server after code changes; check manager/primary role |
+| API / cart / dashboard / team not working | Use `npm start` and `http://localhost:3000`, not Live Server or `file://` |
+| Our Team page empty or “Could not load team” | Restart server (`npm start`); open `http://localhost:3000/team.html`; hard refresh (`Ctrl+F5`) |
+| Team members in dashboard but not on website | Check **Visible = Yes** in roster; hidden members have `active: false` |
+| Team cards invisible on page | Hard refresh — scroll-reveal runs after API load; ensure latest `script.js` |
+| “Failed to add product” / team member | Restart server; confirm manager/primary role; check image size (max ~15 MB) |
 | Edit modal empty | Hard refresh (`Ctrl+F5`) — fade-in animation conflict was fixed |
 | Product hidden after Active = No | Expected on website; still visible in staff Inventory |
-| Analytics tab missing | Only **manager** and **primary** see Business Analytics |
+| Analytics / Our Team tab missing | Only **manager** and **primary** see those tabs |
 | “Receipt required” on checkout | Select Bank Transfer or InstaPay and upload an image before Submit |
-| Receipt not visible in dashboard | Confirm bank/instapay order; check `paymentReceiptImage` URL in DB; verify Cloudinary env vars |
-| Team photo not showing | Add `assets/images/team/{name}.jpg` and hard refresh |
+| Receipt not visible in dashboard | Confirm bank/instapay order; check `paymentReceiptImage` in DB; verify Cloudinary env vars |
+| Cloudinary upload fails | Verify `CLOUDINARY_*` in `.env`; restart server; check Cloudinary dashboard quotas |
+| Team / product photo not showing | Confirm URL in DB; for local paths use `assets/images/team/...` or `assets/products/...`; SVG placeholder used on error |
 
 ---
 
