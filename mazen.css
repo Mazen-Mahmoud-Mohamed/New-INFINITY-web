@@ -8273,8 +8273,8 @@ nav {
 /* Home page mobile polish (index.html only) */
 @media (max-width: 768px) {
     .home-page .hero {
-        min-height: calc(100vh + 1.2rem);
-        padding: clamp(6rem, 14vw, 8rem) 0 clamp(3rem, 8vw, 4rem);
+        min-height: 100dvh;
+        padding: max(1rem, env(safe-area-inset-top, 0px)) 0 clamp(2.25rem, 7vw, 3.25rem);
     }
 
     .home-page .hero-content {

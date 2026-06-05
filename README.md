@@ -1,4 +1,4 @@
-﻿# INFINITY Total-Com Solutions Web App
+# INFINITY Total-Com Solutions Web App
 
 ## Overview
 

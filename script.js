@@ -209,7 +209,7 @@ document.head.appendChild(style);
 document.addEventListener('DOMContentLoaded', function() {
     // Get existing menu toggle button and menu
     const menuToggle = document.querySelector('.menu-toggle');
-    const menu = document.querySelector('nav ul');
+    const menu = document.querySelector('nav:not(.home-quick-nav) ul');
     if (!menuToggle || !menu) return;
 
     // Handle menu toggle (stopPropagation so document/outside handlers never eat the tap; icon uses pointer-events:none in CSS)
@@ -263,73 +263,276 @@ document.addEventListener('DOMContentLoaded', function() {
     // Reveal animations already handled by shared observer above
 });
 
-// Auth UI (show first name + logout icon)
+// Auth UI (nav link on inner pages; dropdown on homepage)
+function setAuthNavItemVisible(el, visible) {
+    if (!el) return;
+    if (visible) {
+        el.removeAttribute('hidden');
+    } else {
+        el.setAttribute('hidden', '');
+    }
+    el.style.removeProperty('display');
+}
+
 async function initAuthUI() {
     const authLink = document.querySelector('a.account-link');
-    if (!authLink) return;
+    const homeMenu = document.getElementById('home-account-menu');
+    const homeToggleLabel = document.querySelector('.home-account-toggle-label');
+    const homePanelTitle = document.querySelector('.home-account-panel-title');
+    const homeSignInItem = document.querySelector('.home-account-signin-item');
+    const homeSignOutItem = document.querySelector('.home-account-signout-item');
+    const homeSignOutBtn = document.getElementById('home-account-signout');
+    const isHomeDropdown = !!homeMenu;
 
-    try {
-        const res = await fetch('/api/user', { credentials: 'include' });
-        if (!res.ok) {
-            document.querySelectorAll('.user-orders-link').forEach((el) => {
-                el.style.display = 'none';
-            });
-            document.querySelectorAll('.staff-dashboard-link').forEach((el) => {
-                el.style.display = 'none';
-            });
+    if (!authLink && !isHomeDropdown) return;
+
+    function setHomeGuestMode(isGuest) {
+        if (!homeMenu) return;
+        homeMenu.classList.toggle('is-guest', isGuest);
+        homeMenu.dataset.authState = isGuest ? 'guest' : 'signed-in';
+    }
+
+    function applyLoggedOut() {
+        document.querySelectorAll('.user-orders-link').forEach((el) => {
+            setAuthNavItemVisible(el, false);
+        });
+        document.querySelectorAll('.staff-dashboard-link').forEach((el) => {
+            setAuthNavItemVisible(el, false);
+        });
+        if (authLink && !isHomeDropdown) {
             authLink.href = 'auth.html';
             authLink.innerHTML = '<i class="fas fa-user"></i> Sign In';
-            return;
         }
-
-        const data = await res.json();
-        const fullName = (data?.user?.name || '').trim();
-        const firstName = (fullName.split(/\s+/)[0] || 'Account').slice(0, 20);
-        const role = data?.user?.role || 'customer';
-        // Show dashboard shortcut for staff roles only.
-        const canSeeDashboard = ['employee', 'manager', 'primary', 'technical'].includes(role);
-        const canSeeMyOrders = !canSeeDashboard;
-
-        document.querySelectorAll('.user-orders-link').forEach((el) => {
-            el.style.display = canSeeMyOrders ? '' : 'none';
-        });
-        if (canSeeDashboard) {
-            // Reveal static dashboard links in nav (more reliable than injecting only).
-            document.querySelectorAll('.staff-dashboard-link').forEach((el) => {
-                el.style.display = '';
-            });
-            document.querySelectorAll('.dashboard-nav-link').forEach((link) => {
-                link.innerHTML = '<i class="fas fa-chart-line"></i> Dashboard';
-            });
-        } else {
-            document.querySelectorAll('.staff-dashboard-link').forEach((el) => {
-                el.style.display = 'none';
-            });
+        if (isHomeDropdown) {
+            setHomeGuestMode(true);
+            if (homeToggleLabel) homeToggleLabel.textContent = 'Sign In';
+            if (homePanelTitle) homePanelTitle.textContent = '';
+            setAuthNavItemVisible(homeSignInItem, false);
+            setAuthNavItemVisible(homeSignOutItem, false);
         }
+    }
 
-        authLink.href = '#';
-        authLink.innerHTML = `<i class="fas fa-user"></i> <span class="auth-name">${firstName}</span> <i class="fas fa-sign-out-alt auth-logout-icon" aria-hidden="true"></i>`;
-        authLink.addEventListener('click', async (e) => {
+    function wireSignOut(handlerTarget) {
+        const runLogout = async (e) => {
             e.preventDefault();
             try {
                 await fetch('/api/logout', { method: 'POST', credentials: 'include' });
             } finally {
                 window.location.href = '/index.html';
             }
-        }, { once: true });
-    } catch (e) {
+        };
+        if (handlerTarget && !handlerTarget.dataset.logoutWired) {
+            handlerTarget.dataset.logoutWired = '1';
+            handlerTarget.addEventListener('click', runLogout);
+        }
+        if (homeSignOutBtn && !homeSignOutBtn.dataset.logoutWired) {
+            homeSignOutBtn.dataset.logoutWired = '1';
+            homeSignOutBtn.addEventListener('click', runLogout);
+        }
+    }
+
+    function applyLoggedIn(data) {
+        const fullName = (data?.user?.name || '').trim();
+        const firstName = (fullName.split(/\s+/)[0] || 'Account').slice(0, 20);
+        const role = data?.user?.role || 'customer';
+        const canSeeDashboard = ['employee', 'manager', 'primary', 'technical'].includes(role);
+        const canSeeMyOrders = !canSeeDashboard;
+
         document.querySelectorAll('.user-orders-link').forEach((el) => {
-            el.style.display = 'none';
+            setAuthNavItemVisible(el, canSeeMyOrders);
         });
         document.querySelectorAll('.staff-dashboard-link').forEach((el) => {
-            el.style.display = 'none';
+            setAuthNavItemVisible(el, canSeeDashboard);
         });
-        authLink.href = 'auth.html';
-        authLink.innerHTML = '<i class="fas fa-user"></i> Sign In';
+        document.querySelectorAll('.dashboard-nav-link').forEach((link) => {
+            if (canSeeDashboard && link.closest('.home-account-list')) {
+                link.innerHTML = '<i class="fas fa-chart-line" aria-hidden="true"></i> Dashboard';
+            } else if (canSeeDashboard) {
+                link.innerHTML = '<i class="fas fa-chart-line"></i> Dashboard';
+            }
+        });
+
+        if (isHomeDropdown) {
+            setHomeGuestMode(false);
+            if (homeToggleLabel) homeToggleLabel.textContent = firstName;
+            if (homePanelTitle) homePanelTitle.textContent = `Signed in as ${firstName}`;
+            setAuthNavItemVisible(homeSignInItem, false);
+            setAuthNavItemVisible(homeSignOutItem, true);
+            wireSignOut(null);
+        }
+
+        if (authLink && !isHomeDropdown) {
+            authLink.href = '#';
+            authLink.innerHTML = `<i class="fas fa-user"></i> <span class="auth-name">${firstName}</span> <i class="fas fa-sign-out-alt auth-logout-icon" aria-hidden="true"></i>`;
+            wireSignOut(authLink);
+        }
+    }
+
+    try {
+        const res = await fetch('/api/user', { credentials: 'include' });
+        if (!res.ok) {
+            applyLoggedOut();
+            return;
+        }
+        const data = await res.json();
+        applyLoggedIn(data);
+    } catch (_e) {
+        applyLoggedOut();
     }
 }
 
 document.addEventListener('DOMContentLoaded', initAuthUI);
+
+function initSiteAccountDropdown() {
+    const root = document.getElementById('home-account-menu');
+    const toggle = document.getElementById('home-account-toggle');
+    const panel = document.getElementById('home-account-panel');
+    const quickNav = document.querySelector('.home-quick-nav');
+    if (!root || !toggle || !panel) return;
+
+    function closePanel() {
+        toggle.setAttribute('aria-expanded', 'false');
+        panel.setAttribute('hidden', '');
+    }
+
+    function openPanel() {
+        toggle.setAttribute('aria-expanded', 'true');
+        panel.removeAttribute('hidden');
+    }
+
+    toggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (root.classList.contains('is-guest')) {
+            window.location.href = 'auth.html';
+            return;
+        }
+        if (panel.hasAttribute('hidden')) openPanel();
+        else closePanel();
+    });
+
+    panel.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+
+    document.addEventListener('click', () => {
+        closePanel();
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closePanel();
+    });
+
+    panel.querySelectorAll('a.home-account-item').forEach((link) => {
+        link.addEventListener('click', () => {
+            closePanel();
+        });
+    });
+
+    if (quickNav && 'IntersectionObserver' in window) {
+        const hero = document.querySelector('.hero, .products-hero, .team-hero');
+        if (quickNav.classList.contains('site-top-nav')) {
+            const onScroll = () => {
+                quickNav.classList.toggle('is-stuck', window.scrollY > 6);
+            };
+            onScroll();
+            window.addEventListener('scroll', onScroll, { passive: true });
+
+            const activeLink = quickNav.querySelector('.home-quick-links .home-quick-link.is-active');
+            if (activeLink) {
+                requestAnimationFrame(() => {
+                    activeLink.scrollIntoView({ inline: 'nearest', block: 'nearest' });
+                });
+            }
+        } else if (hero) {
+            const obs = new IntersectionObserver((entries) => {
+                quickNav.classList.toggle('is-stuck', !entries[0].isIntersecting);
+            }, { threshold: 0, rootMargin: '-1px 0px 0px 0px' });
+            obs.observe(hero);
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', initSiteAccountDropdown);
+
+function initHomeQuickMobileNav() {
+    document.querySelectorAll('nav.home-quick-nav').forEach((nav) => {
+        const inner = nav.querySelector('.home-quick-nav-inner');
+        if (!inner) return;
+
+        if (inner.querySelector('.home-quick-nav-cart')) {
+            nav.classList.add('has-mobile-cart');
+        }
+
+        let toggle = inner.querySelector('.site-nav-menu-toggle');
+        if (!toggle) {
+            toggle = document.createElement('button');
+            toggle.type = 'button';
+            toggle.className = 'site-nav-menu-toggle menu-toggle';
+            toggle.setAttribute('aria-label', 'Open navigation menu');
+            toggle.setAttribute('aria-expanded', 'false');
+            toggle.innerHTML = '<i class="fas fa-bars" aria-hidden="true"></i>';
+            inner.appendChild(toggle);
+        }
+
+        function closeMobileNav() {
+            inner.classList.remove('is-mobile-open');
+            nav.classList.remove('is-mobile-menu-open');
+            toggle.setAttribute('aria-expanded', 'false');
+            toggle.innerHTML = '<i class="fas fa-bars" aria-hidden="true"></i>';
+        }
+
+        function openMobileNav() {
+            inner.classList.add('is-mobile-open');
+            nav.classList.add('is-mobile-menu-open');
+            toggle.setAttribute('aria-expanded', 'true');
+            toggle.innerHTML = '<i class="fas fa-times" aria-hidden="true"></i>';
+        }
+
+        if (!toggle.dataset.bound) {
+            toggle.dataset.bound = '1';
+            toggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (inner.classList.contains('is-mobile-open')) closeMobileNav();
+                else openMobileNav();
+            });
+        }
+
+        inner.querySelectorAll('.home-quick-links a.home-quick-link').forEach((link) => {
+            if (link.dataset.mobileNavBound) return;
+            link.dataset.mobileNavBound = '1';
+            link.addEventListener('click', closeMobileNav);
+        });
+
+        if (!nav.dataset.mobileOutsideBound) {
+            nav.dataset.mobileOutsideBound = '1';
+            document.addEventListener('click', (e) => {
+                if (!inner.classList.contains('is-mobile-open')) return;
+                if (nav.contains(e.target)) return;
+                closeMobileNav();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeMobileNav();
+            });
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', initHomeQuickMobileNav);
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 992) {
+        document.querySelectorAll('nav.home-quick-nav .home-quick-nav-inner.is-mobile-open').forEach((inner) => {
+            inner.classList.remove('is-mobile-open');
+            const nav = inner.closest('nav.home-quick-nav');
+            if (nav) nav.classList.remove('is-mobile-menu-open');
+            const toggle = inner.querySelector('.site-nav-menu-toggle');
+            if (toggle) {
+                toggle.setAttribute('aria-expanded', 'false');
+                toggle.innerHTML = '<i class="fas fa-bars" aria-hidden="true"></i>';
+            }
+        });
+    }
+});
 
 // Database API Functions
 const API_URL = 'http://localhost:3000/api';

@@ -7,16 +7,46 @@
     <link rel="icon" href="assets/images/infinity-logo1.png" type="image/png">
     <link rel="apple-touch-icon" href="assets/images/infinity-logo1.png">
     <link rel="stylesheet" href="mazen.css?v=20260603-7">
+    <link rel="stylesheet" href="home.css?v=20260603-home8">
+    <link rel="stylesheet" href="home-nav-index.css?v=20260603-nav3">
+    <link rel="stylesheet" href="home-nav-mobile.css?v=20260603-m3">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="home-page">
-    <!-- Navigation -->
-    <nav>
-        <div class="container">
-            <a href="index.html" class="logo">
-                <img src="assets/images/infinity-logo.png" alt="INFINITY Total-Com Solutions Logo" class="logo-image">
-                <svg viewBox="0 0 600 180" xmlns="http://www.w3.org/2000/svg" class="nav-logo-svg">
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-main">
+                <div class="hero-logo">
+                    <img src="assets/images/infinity-logo.png" alt="INFINITY Logo" class="hero-logo-image">
+                </div>
+                <div class="hero-text-content">
+                    <p class="hero-eyebrow"><i class="fas fa-certificate" aria-hidden="true"></i> Authorized ETIT GPS partner · Est. 2016</p>
+                    <h1><span class="hero-company-name">INFINITY</span></h1>
+                    <p class="hero-subtitle">Total-Com Solutions</p>
+                    <p class="hero-text">GPS tracking, fleet management, in-vehicle CCTV, and temperature monitoring — trusted by leading companies across Egypt.</p>
+                    <div class="cta-buttons">
+                        <a href="products.html" class="cta-primary"><i class="fas fa-box-open" aria-hidden="true"></i> Our Products</a>
+                        <a href="#contact" class="cta-secondary"><i class="fas fa-phone" aria-hidden="true"></i> Contact Us</a>
+                        <a href="#services" class="cta-secondary"><i class="fas fa-cogs" aria-hidden="true"></i> Services</a>
+                    </div>
+                    <div class="hero-trust-row" aria-label="Company highlights">
+                        <div class="hero-trust-item"><strong>2016</strong><span>Founded</span></div>
+                        <div class="hero-trust-item"><strong>ETIT</strong><span>NTRA authorized</span></div>
+                        <div class="hero-trust-item"><strong>24/7</strong><span>Fleet visibility</span></div>
+                    </div>
+                </div>
+            </div>
+            <a href="#about" class="hero-scroll-hint"><span>Explore</span><i class="fas fa-chevron-down" aria-hidden="true"></i></a>
+        </div>
+    </section>
+
+    <nav class="home-quick-nav" aria-label="Site navigation">
+        <div class="container home-quick-nav-inner">
+            <a href="index.html" class="logo home-quick-logo">
+                <img src="assets/images/infinity-logo.png" alt="" class="logo-image" width="48" height="48">
+                <svg viewBox="0 0 600 180" xmlns="http://www.w3.org/2000/svg" class="nav-logo-svg" aria-hidden="true">
                     <defs>
                         <linearGradient id="infinityGrad" x1="0%" y1="0%" x2="0%" y2="100%">
                             <stop offset="0%" style="stop-color:#0f3d52;stop-opacity:1" />
@@ -29,58 +59,100 @@
                     <text x="10" y="100" font-family="Montserrat, Arial, sans-serif" font-weight="800" font-size="130" letter-spacing="6" fill="url(#infinityGrad)">INFINITY</text>
                     <text x="300" y="145" font-family="Montserrat, Arial, sans-serif" font-weight="500" font-size="25" letter-spacing="1" fill="#3a7a95">Total-Com Solutions</text>
                 </svg>
+                <span class="visually-hidden">INFINITY Total-Com Solutions — Home</span>
             </a>
-            <ul>
-                <li><a href="index.html" class="active">Home</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#services">Services</a></li>
-                <li><a href="products.html">Products</a></li>
-                <li><a href="#clients">Clients</a></li>
-                <li><a href="team.html">Our Team</a></li>
-                <li><a href="#contact">Contact</a></li>
-                <li class="user-orders-link" style="display:none;"><a href="user-dashboard.html" class="auth-link my-orders-nav-link"><i class="fas fa-receipt"></i> My Orders</a></li>
-                <li class="staff-dashboard-link" style="display:none;"><a href="dashboard.html" class="auth-link dashboard-nav-link"><i class="fas fa-chart-line"></i> Dashboard</a></li>
-                <li><a href="auth.html" class="auth-link account-link"><i class="fas fa-user"></i> Sign In</a></li>
-            </ul>
-            <button class="menu-toggle" aria-label="Toggle navigation menu">
-                <i class="fas fa-bars"></i>
-            </button>
+            <div class="home-quick-links">
+                <a href="#about" class="home-quick-link"><i class="fas fa-building" aria-hidden="true"></i> About</a>
+                <a href="#mission" class="home-quick-link"><i class="fas fa-bullseye" aria-hidden="true"></i> Mission</a>
+                <a href="#services" class="home-quick-link"><i class="fas fa-wrench" aria-hidden="true"></i> Services</a>
+                <a href="products.html" class="home-quick-link"><i class="fas fa-shopping-bag" aria-hidden="true"></i> Products</a>
+                <a href="#clients" class="home-quick-link"><i class="fas fa-handshake" aria-hidden="true"></i> Clients</a>
+                <a href="team.html" class="home-quick-link"><i class="fas fa-users" aria-hidden="true"></i> Our Team</a>
+                <a href="#contact" class="home-quick-link"><i class="fas fa-map-marker-alt" aria-hidden="true"></i> Contact</a>
+            </div>
+            <div class="home-account-dropdown is-guest" id="home-account-menu">
+                <button type="button" class="home-account-toggle" id="home-account-toggle" aria-expanded="false" aria-controls="home-account-panel" aria-haspopup="true">
+                    <i class="fas fa-user home-account-toggle-icon" aria-hidden="true"></i>
+                    <span class="home-account-toggle-label">Sign In</span>
+                    <i class="fas fa-chevron-down home-account-chevron" aria-hidden="true"></i>
+                </button>
+                <div class="home-account-panel" id="home-account-panel" hidden>
+                    <p class="home-account-panel-title">Your account</p>
+                    <ul class="home-account-list">
+                        <li class="user-orders-link" hidden>
+                            <a href="user-dashboard.html" class="home-account-item my-orders-nav-link">
+                                <i class="fas fa-receipt" aria-hidden="true"></i> My Orders
+                            </a>
+                        </li>
+                        <li class="staff-dashboard-link" hidden>
+                            <a href="dashboard.html" class="home-account-item dashboard-nav-link">
+                                <i class="fas fa-chart-line" aria-hidden="true"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="home-account-signin-item" hidden>
+                            <a href="auth.html" class="home-account-item account-link">
+                                <i class="fas fa-sign-in-alt" aria-hidden="true"></i> Sign In
+                            </a>
+                        </li>
+                        <li class="home-account-signout-item" hidden>
+                            <button type="button" class="home-account-item home-account-signout-btn" id="home-account-signout">
+                                <i class="fas fa-sign-out-alt" aria-hidden="true"></i> Sign Out
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-content">
-            <div class="hero-main">
-                <div class="hero-logo">
-                    <img src="assets/images/infinity-logo.png" alt="INFINITY Logo" class="hero-logo-image">
+    <!-- About Section -->
+    <section id="about" class="features home-section">
+        <div class="container">
+            <header class="home-section-head">
+                <p class="home-section-eyebrow">Who we are</p>
+                <h2>About INFINITY</h2>
+                <p class="home-section-lead">Professional installation and support for legal GPS tracking solutions in Egypt.</p>
+            </header>
+            <div class="home-about-grid">
+                <div class="home-about-copy">
+                    <p>Infinity specializes in installing and maintaining GPS tracking systems provided by <strong>ETIT</strong> (Egyptian company for Tracking and Information Technology).</p>
+                    <p>We were established in <strong>2016</strong>, right after ETIT was authorized by the <strong>National Telecommunication Regulatory Authority (NTRA)</strong> as the Egyptian legal entity for GPS tracking nationwide.</p>
                 </div>
-                <div class="hero-text-content">
-                    <h1><span class="hero-company-name">INFINITY</span></h1>
-                    <p class="hero-subtitle">Total-Com Solutions</p>
-                    <p class="hero-text">Leading provider of GPS tracking and fleet management solutions in Egypt</p>
-                    <div class="cta-buttons">
-                        <a href="products.html" class="cta-primary">Our Products</a>
-                        <a href="#services" class="cta-secondary">Our Services</a>
-                    </div>
+                <div class="home-about-highlights">
+                    <article class="home-highlight-card">
+                        <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                        <div>
+                            <h3>Legal &amp; compliant</h3>
+                            <p>ETIT-powered tracking aligned with NTRA regulations.</p>
+                        </div>
+                    </article>
+                    <article class="home-highlight-card">
+                        <i class="fas fa-tools" aria-hidden="true"></i>
+                        <div>
+                            <h3>Install &amp; maintain</h3>
+                            <p>End-to-end device fitting, CCTV, and fleet support.</p>
+                        </div>
+                    </article>
+                    <article class="home-highlight-card">
+                        <i class="fas fa-headset" aria-hidden="true"></i>
+                        <div>
+                            <h3>Dedicated support</h3>
+                            <p>Responsive team for enterprises across Egypt.</p>
+                        </div>
+                    </article>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- About Section -->
-    <section id="about" class="features">
-        <div class="container">
-            <h2>About Company</h2>
-            <p>Infinity is a professional company specialized in providing the service of installation for GPS tracking system provided by ETIT (Egyptian company for Tracking and Information Technology).</p>
-            <p>Infinity was established on 2016 immediately after the authorization of ETIT to be Egyptian legal entity to provide GPS tracking system in Egypt by National Telecommunication Regulatory Authority (NTRA).</p>
-        </div>
-    </section>
-
     <!-- Mission Section -->
-    <section id="mission" class="features">
+    <section id="mission" class="features home-section home-section--alt">
         <div class="container">
-            <h2>Our Mission</h2>
+            <header class="home-section-head">
+                <p class="home-section-eyebrow">What we deliver</p>
+                <h2>Our Mission</h2>
+                <p class="home-section-lead">Technology that keeps your fleet safe, visible, and efficient.</p>
+            </header>
             <div class="features-grid mission-grid">
                 <div class="feature-card">
                     <i class="fas fa-truck-moving"></i>
@@ -97,19 +169,23 @@
                     <h3>CCTV Systems</h3>
                     <p>Installation and Maintenance of CCTV systems inside vehicles</p>
                 </div>
-            </div>
-            <div class="feature-card center-card">
-                <i class="fas fa-temperature-high"></i>
-                <h3>Temperature Control</h3>
-                <p>Full control of Goods through Temperature Sensors</p>
+                <div class="feature-card">
+                    <i class="fas fa-temperature-high"></i>
+                    <h3>Temperature Control</h3>
+                    <p>Full control of goods through temperature sensors</p>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- Values Section -->
-    <section id="values" class="values-section">
+    <section id="values" class="values-section home-section">
         <div class="container">
-            <h2>Our Values</h2>
+            <header class="home-section-head">
+                <p class="home-section-eyebrow">How we work</p>
+                <h2>Our Values</h2>
+                <p class="home-section-lead">The principles behind every installation and client partnership.</p>
+            </header>
             <div class="values-grid">
                 <div class="value-card">
                     <i class="fas fa-lightbulb"></i>
@@ -140,10 +216,13 @@
     </section>
 
     <!-- Goals Section -->
-    <section id="goals" class="features">
+    <section id="goals" class="features home-section home-section--alt">
         <div class="container">
-            <h2>Our Goals</h2>
-            <p>Improve the level of safety in all companies of EGYPT By providing all services of Fleet Management System</p>
+            <header class="home-section-head">
+                <p class="home-section-eyebrow">Our focus</p>
+                <h2>Our Goals</h2>
+                <p class="home-section-lead">Improve safety across Egyptian companies through complete fleet management services.</p>
+            </header>
             <div class="features-grid">
                 <div class="feature-card">
                     <i class="fas fa-map-marked-alt"></i>
@@ -174,21 +253,37 @@
     </section>
 
     <!-- Services Section -->
-    <section id="services" class="features">
+    <section id="services" class="features home-section">
         <div class="container">
-            <h2>Our Services</h2>
-            <h3>Legal GPS Tracking Solutions Powered BY ETIT</h3>
-            <div class="feature-card">
-                <p>As a fleet manager, it is crucial to your business to not only track your vehicles, but to have access to immediate, secure information about your fleet at all times. You need to monitor the locations and statuses of their vehicles and drivers, without incurring the complexity of a full fleet management system.</p>
-                <p>Fleet management solutions by ETIT present an effective offering which suits fleets of varying sizes and types - from trucks to light commercial vehicles, to motorcycles. Even the entry-level fleet management ETIT portal enables customers to always have direct control over their mobile assets and workforce.</p>
+            <header class="home-section-head">
+                <p class="home-section-eyebrow">Solutions</p>
+                <h2>Our Services</h2>
+                <p class="home-section-lead">Legal GPS tracking solutions powered by ETIT — scalable from motorcycles to heavy fleets.</p>
+            </header>
+            <div class="home-services-grid">
+                <div class="feature-card">
+                    <i class="fas fa-satellite-dish"></i>
+                    <h3>Real-time fleet visibility</h3>
+                    <p>Track vehicles and drivers with immediate, secure access to location and status — without unnecessary complexity.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-layer-group"></i>
+                    <h3>Scalable ETIT platform</h3>
+                    <p>From trucks and light commercial vehicles to motorcycles, ETIT&apos;s portal gives direct control over mobile assets and your workforce.</p>
+                </div>
             </div>
+            <p class="home-etit-badge"><i class="fas fa-check-circle" aria-hidden="true"></i> NTRA-authorized GPS tracking via ETIT</p>
         </div>
     </section>
 
     <!-- Contracts Section -->
-    <section id="contracts" class="features">
+    <section id="contracts" class="features home-section home-section--alt">
         <div class="container">
-            <h2>Contracts</h2>
+            <header class="home-section-head">
+                <p class="home-section-eyebrow">Engagement</p>
+                <h2>Contracts</h2>
+                <p class="home-section-lead">Flexible supply, installation, and maintenance agreements for your fleet.</p>
+            </header>
             <div class="features-grid">
                 <div class="feature-card">
                     <i class="fas fa-file-contract"></i>
@@ -207,9 +302,13 @@
     </section>
 
     <!-- Clients Section -->
-    <section id="clients" class="clients">
+    <section id="clients" class="clients home-section">
         <div class="container">
-            <h2>Our Trusted Clients</h2>
+            <header class="home-section-head">
+                <p class="home-section-eyebrow">Partnerships</p>
+                <h2>Our Trusted Clients</h2>
+                <p class="home-section-lead">Leading brands across telecom, FMCG, logistics, and industry trust INFINITY.</p>
+            </header>
             <!-- Featured Client -->
             <div class="client-logo featured" tabindex="0">
                 <div class="featured-media">
@@ -310,7 +409,7 @@
         </div>
     </footer>
 
-    <script src="script.js?v=20260429-3"></script>
+    <script src="script.js?v=20260603-6"></script>
     <script>
     (function initClientsMarquee() {
         function duplicateMarqueeGroup() {
