@@ -1120,6 +1120,98 @@
         .order-item { display: flex; align-items: center; gap: .5rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: .35rem .45rem; }
         .order-item img { width: 36px; height: 36px; object-fit: cover; border-radius: 8px; border: 1px solid #dbe3ee; background: #fff; }
         .order-item .item-meta { font-size: .8rem; color: #334155; line-height: 1.25; }
+        #orders-table td { vertical-align: top; }
+        .order-cell { min-width: 210px; max-width: 340px; }
+        .order-cell-meta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.3rem 0.55rem;
+            margin-bottom: 0.45rem;
+            font-size: 0.82rem;
+            color: #334155;
+        }
+        .order-meta-pill {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 0.12rem 0.5rem;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.72rem;
+            white-space: nowrap;
+        }
+        .order-meta-amount { color: #0f172a; font-size: 0.88rem; }
+        .order-meta-sub { font-size: 0.75rem; color: #64748b; }
+        .order-items-scroll {
+            max-height: 132px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.28rem;
+            padding-right: 0.2rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            background: #fff;
+        }
+        .order-items-scroll::-webkit-scrollbar { width: 5px; }
+        .order-items-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 999px;
+        }
+        .order-item-compact {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.28rem 0.4rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .order-item-compact:last-child { border-bottom: none; }
+        .order-item-compact img {
+            width: 28px;
+            height: 28px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            flex-shrink: 0;
+        }
+        .order-item-line {
+            font-size: 0.76rem;
+            color: #334155;
+            line-height: 1.25;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .order-extra-details {
+            margin-top: 0.45rem;
+            font-size: 0.78rem;
+            color: #334155;
+        }
+        .order-extra-details summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--dash-primary-dark);
+            user-select: none;
+        }
+        .order-extra-details summary:hover { text-decoration: underline; }
+        .order-extra-body { margin-top: 0.35rem; display: grid; gap: 0.45rem; }
+        .order-detail-block p {
+            margin: 0.2rem 0 0;
+            font-size: 0.78rem;
+            line-height: 1.45;
+            color: #475569;
+            word-break: break-word;
+        }
+        .order-receipt-box.compact {
+            margin-top: 0;
+            padding: 0.55rem;
+        }
+        .order-receipt-box.compact .order-receipt-thumb {
+            width: 88px;
+            height: 66px;
+        }
         .order-receipt-box {
             margin-top: 0.75rem;
             padding: 0.75rem;
@@ -1172,13 +1264,21 @@
         }
         .order-summary-box { margin-top: .35rem; font-size: .8rem; color: #334155; display: grid; gap: .15rem; }
         .order-action {
-            display: flex;
-            align-items: center;
-            gap: .4rem;
-            min-width: 170px;
-        }
-        .order-action select { flex: 1; }
-        .order-action button { white-space: nowrap; }
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    min-width: 130px;
+}
+.order-action select { 
+    width: 100%;
+}
+.order-action button { 
+    width: 100%;
+    white-space: nowrap;
+}
+.order-action button.pdf-btn {
+    margin-left: 0;  /* Override the global .pdf-btn margin */
+}
         .dash-table input[type="number"],
         .dash-table input[type="text"],
         .dash-table input[type="email"],
@@ -1708,6 +1808,14 @@
             #orders-table td[data-label="Actions"] .order-action button,
             #orders-table td[data-label="Actions"] .order-action select {
                 width: 100%;
+            }
+            #orders-table .order-cell {
+                min-width: 0;
+                max-width: none;
+                width: 100%;
+            }
+            #orders-table .order-items-scroll {
+                max-height: 180px;
             }
             #products-table td[data-label="Update"] {
                 padding-top: 0.65rem;
@@ -3879,6 +3987,61 @@
             renderAnalytics();
         }
 
+        function buildOrderItemsCellHtml(order, items) {
+            const itemCount = items.length;
+            const amount = Number(order.amount || 0).toFixed(2);
+            const payment = escapeHtml(order.paymentMethod || '-');
+            const vatLabel = order.vatApplied ? 'Yes' : 'No';
+
+            const itemsHtml = itemCount
+                ? items.map((item) => {
+                    const name = escapeHtml(item.name || '-');
+                    const qty = item.quantity || 1;
+                    const price = Number(item.price || 0).toFixed(2);
+                    const img = escapeHtml(item.image || 'assets/images/infinity-logo.png');
+                    return `
+                        <div class="order-item-compact">
+                            <img src="${img}" alt="">
+                            <span class="order-item-line"><strong>${name}</strong> ×${qty} · EGP ${price}</span>
+                        </div>`;
+                }).join('')
+                : '<span class="muted" style="padding:0.4rem;">No items</span>';
+
+            const billing = String(order.billingAddress || '').trim();
+            const billingHtml = billing
+                ? `<div class="order-detail-block"><strong>Billing address</strong><p dir="auto">${escapeHtml(billing)}</p></div>`
+                : '';
+
+            const receiptPath = String(order.paymentReceiptImage || '').trim();
+            const receiptHtml = receiptPath
+                ? `<div class="order-receipt-box compact">
+                        <span class="receipt-label"><i class="fas fa-receipt"></i> Payment receipt</span>
+                        <a class="order-receipt-thumb-wrap" href="${escapeHtml(receiptPath)}" target="_blank" rel="noopener noreferrer">
+                            <img class="order-receipt-thumb" src="${escapeHtml(receiptPath)}" alt="Payment receipt">
+                        </a>
+                        <br><a class="order-receipt-link" href="${escapeHtml(receiptPath)}" target="_blank" rel="noopener noreferrer"><i class="fas fa-external-link-alt"></i> Open full size</a>
+                   </div>`
+                : '';
+
+            const extraDetails = (billingHtml || receiptHtml)
+                ? `<details class="order-extra-details">
+                        <summary>Address &amp; receipt</summary>
+                        <div class="order-extra-body">${billingHtml}${receiptHtml}</div>
+                   </details>`
+                : '';
+
+            return `
+                <div class="order-cell">
+                    <div class="order-cell-meta">
+                        <span class="order-meta-pill">${itemCount} item${itemCount === 1 ? '' : 's'}</span>
+                        <strong class="order-meta-amount">EGP ${amount}</strong>
+                        <span class="order-meta-sub">${payment} · VAT: ${vatLabel}</span>
+                    </div>
+                    <div class="order-items-scroll" role="region" aria-label="Order line items">${itemsHtml}</div>
+                    ${extraDetails}
+                </div>`;
+        }
+
         function renderOrders() {
             const keyword = (document.getElementById('orders-search')?.value || '').trim().toLowerCase();
             const tbody = document.querySelector('#orders-table tbody');
@@ -3906,28 +4069,6 @@
                 const disabled = canEditOrders() ? '' : 'disabled';
                 const items = Array.isArray(o.orderItems) ? o.orderItems : [];
                 const statusClass = `status-${String(o.status || '').toLowerCase()}`;
-                const itemsHtml = items.length
-                    ? items.map((item) => `
-                        <div class="order-item">
-                            <img src="${item.image || 'assets/images/infinity-logo.png'}" alt="${item.name || 'item'}">
-                            <div class="item-meta">
-                                <div><strong>${item.name || '-'}</strong> x ${item.quantity || 1}</div>
-                                <div>Price: EGP ${Number(item.price || 0).toFixed(2)} | Install: EGP ${Number(item.installation || 0).toFixed(2)}</div>
-                            </div>
-                        </div>
-                    `).join('')
-                    : '<span class="muted">No items</span>';
-
-                const receiptPath = String(o.paymentReceiptImage || '').trim();
-                const receiptHtml = receiptPath
-                    ? `<div class="order-receipt-box">
-                            <span class="receipt-label"><i class="fas fa-receipt"></i> Payment receipt</span>
-                            <a class="order-receipt-thumb-wrap" href="${receiptPath}" target="_blank" rel="noopener noreferrer">
-                                <img class="order-receipt-thumb" src="${receiptPath}" alt="Payment receipt">
-                            </a>
-                            <br><a class="order-receipt-link" href="${receiptPath}" target="_blank" rel="noopener noreferrer"><i class="fas fa-external-link-alt"></i> Open full size</a>
-                       </div>`
-                    : '';
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -3935,16 +4076,7 @@
                     <td data-label="Customer">${o.customerName || '-'}<br><small class="muted">${o.customerEmail || '-'}</small></td>
                     <td data-label="Contact">${o.customerPhone || '-'}<br><small class="muted">${o.customerGender || '-'} | Age: ${o.customerAge || '-'}</small></td>
                     <td data-label="Location">${o.customerState || '-'}<br><small class="muted">${o.customerCompanyName || '-'} / ${o.customerCompanyLocation || '-'}</small></td>
-                    <td data-label="Items / Amount">
-                        <div class="order-items-list">${itemsHtml}</div>
-                        <div class="order-summary-box">
-                            <div><strong>Amount:</strong> EGP ${Number(o.amount || 0).toFixed(2)} ${o.currency || ''}</div>
-                            <div><strong>Payment:</strong> ${o.paymentMethod || '-'}</div>
-                            <div><strong>VAT:</strong> ${o.vatApplied ? 'Applied' : 'No'}</div>
-                            <div><strong>Billing Address:</strong> ${o.billingAddress || '-'}</div>
-                            ${receiptHtml}
-                        </div>
-                    </td>
+                    <td data-label="Items / Amount">${buildOrderItemsCellHtml(o, items)}</td>
                     <td data-label="Status"><span class="status-chip ${statusClass}">${o.status}</span></td>
                     <td data-label="Actions">
                         <div class="order-action">
@@ -4632,7 +4764,7 @@
                     steps: [
                         '<strong>Search</strong> by transaction ID, customer name, email, phone, payment method, status, or amount.',
                         '<strong>Filter</strong> by status: pending, processing, completed, cancelled, failed.',
-                        'Each row shows customer contact, location/company, line items with images, total amount, VAT, billing address, and payment method.',
+                        'Each row shows customer contact, location/company, a compact scrollable item list with total amount and payment, plus expandable billing address and receipt.',
                         'For <strong>bank transfer</strong> and <strong>InstaPay</strong> orders, a <strong>Payment receipt</strong> thumbnail may appear — open it to verify payment before marking completed.',
                         canEditOrders()
                             ? 'Change status with the dropdown, then click <strong>Update</strong>. Typical flow: <em>pending</em> → <em>processing</em> → <em>completed</em> after verification.'
@@ -4894,7 +5026,7 @@
                 tourStep(label, section, 'Orders overview', 'All customer orders appear here with customer info, items, payment method, and status.', '#orders-section .section-head', '#orders-table'),
                 tourStep(label, section, 'Search orders', 'Search by transaction ID, customer name, email, phone, payment method, status, or amount.', '#orders-search', '#orders-section .section-tools'),
                 tourStep(label, section, 'Status filter', 'Filter to pending, processing, completed, cancelled, or failed to focus on what needs action.', '#status-filter', '#orders-section .section-tools'),
-                tourStep(label, section, 'Order details', 'Each row lists items, total amount, VAT, billing address, and payment method. Bank transfer / InstaPay may show a <strong>payment receipt</strong> thumbnail — open it to verify payment.', orderRow ? `${orderRow} td[data-label="Items / Amount"]` : '#orders-table', '#orders-table'),
+                tourStep(label, section, 'Order details', 'Items appear in a compact scrollable list with total, payment, and VAT at the top. Expand <strong>Address &amp; receipt</strong> for billing details or bank transfer proof.', orderRow ? `${orderRow} td[data-label="Items / Amount"]` : '#orders-table', '#orders-table'),
             ];
             if (canEditOrders()) {
                 steps.push(tourStep(label, section, 'Update status', 'Choose a new status in the dropdown, then click <strong>Update</strong>. Typical flow: pending → processing → completed.', orderRow ? `${orderRow} .order-action select` : '#orders-table thead th:last-child', '#orders-table'));

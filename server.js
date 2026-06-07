@@ -14,6 +14,7 @@ const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const FacebookStrategy = require("passport-facebook").Strategy;
 const PDFDocument = require("pdfkit");
+const { ArabicShaper } = require("arabic-persian-reshaper");
 const cloudinary = require("./cloudinary");
 const { isCloudinaryConfigured } = cloudinary;
 
@@ -602,6 +603,210 @@ async function resolveProductImage(productId, imagePath, imageData) {
     return "";
 }
 
+const ARABIC_SCRIPT_RE = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+
+function findPdfFontPaths() {
+    const fontsDir = path.join(process.env.WINDIR || "C:\\Windows", "Fonts");
+    const pick = (names) => names.map((name) => path.join(fontsDir, name)).find((p) => fs.existsSync(p)) || null;
+    return {
+        latin: pick(["arial.ttf", "segoeui.ttf"]),
+        arabic: pick(["tahoma.ttf", "trado.ttf", "arabtype.ttf", "arial.ttf"]),
+    };
+}
+
+function normalizePdfText(text) {
+    if (text == null || text === "") return "";
+    return String(text).replace(/\s+/g, " ").trim();
+}
+
+function formatArabicWordsForPdf(words) {
+    return words.map((word) => ArabicShaper.convertArabic(word)).reverse().join(" ");
+}
+
+function measureArabicLineWidth(doc, words) {
+    if (!words.length) return 0;
+    return doc.widthOfString(formatArabicWordsForPdf(words));
+}
+
+function wrapArabicTextLines(doc, text, maxWidth) {
+    const words = normalizePdfText(text).split(" ").filter(Boolean);
+    if (!words.length) return [];
+
+    const lines = [];
+    let current = [];
+
+    for (const word of words) {
+        const trial = current.concat(word);
+        if (current.length && measureArabicLineWidth(doc, trial) > maxWidth) {
+            lines.push(current);
+            current = [word];
+        } else {
+            current = trial;
+        }
+    }
+    if (current.length) lines.push(current);
+    return lines;
+}
+
+function shapeTextForPdf(text) {
+    const str = normalizePdfText(text);
+    if (!str) return "-";
+    if (!ARABIC_SCRIPT_RE.test(str)) return str;
+    if (/[A-Za-z]/.test(str)) return ArabicShaper.convertArabic(str);
+
+    const words = str.split(" ").filter(Boolean);
+    return formatArabicWordsForPdf(words);
+}
+
+function writePdfMultilineField(doc, label, value, pageWidth) {
+    const str = normalizePdfText(value);
+    doc.text(`${label}:`);
+    if (!str) {
+        doc.text("-");
+        return;
+    }
+
+    if (!ARABIC_SCRIPT_RE.test(str) || /[A-Za-z]/.test(str)) {
+        doc.text(shapeTextForPdf(str), { width: pageWidth });
+        return;
+    }
+
+    const lines = wrapArabicTextLines(doc, str, pageWidth);
+    for (const lineWords of lines) {
+        doc.text(formatArabicWordsForPdf(lineWords), { width: pageWidth });
+    }
+}
+
+function registerPdfFonts(doc) {
+    const { latin, arabic } = findPdfFontPaths();
+    const fontName = arabic ? "PdfUI" : (latin ? "PdfUI" : null);
+    const fontPath = arabic || latin;
+    if (fontPath && fontName) {
+        doc.registerFont(fontName, fontPath);
+        doc.font(fontName);
+    }
+}
+
+function localImageAbs(rawPath) {
+    if (!rawPath || typeof rawPath !== "string") return null;
+    if (/^https?:\/\//i.test(rawPath)) return null;
+    const normalized = rawPath.replace(/^\/+/, "").replace(/\\/g, "/");
+    const abs = path.join(__dirname, normalized);
+    return fs.existsSync(abs) ? abs : null;
+}
+
+async function fetchImageBuffer(url) {
+    const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
+    if (!res.ok) throw new Error(`Image fetch failed (${res.status})`);
+    const buf = Buffer.from(await res.arrayBuffer());
+    if (!buf.length) throw new Error("Empty image response");
+    return buf;
+}
+
+async function resolvePdfImage(rawPath, defaultRel = "assets/images/infinity-logo.png") {
+    const candidates = [rawPath, defaultRel].filter(Boolean);
+    for (const candidate of candidates) {
+        const local = localImageAbs(candidate);
+        if (local) return { kind: "path", value: local };
+        if (/^https?:\/\//i.test(String(candidate))) {
+            try {
+                return { kind: "buffer", value: await fetchImageBuffer(candidate) };
+            } catch (err) {
+                console.warn("PDF image fetch failed:", candidate, err?.message || err);
+            }
+        }
+    }
+    return null;
+}
+
+function drawPdfImage(doc, source, x, y, options) {
+    if (!source) return;
+    try {
+        doc.image(source.value, x, y, options);
+    } catch (_err) {
+        // ignore unsupported/corrupt images
+    }
+}
+
+async function writeOrderPdf(order, doc, { title = "INFINITY - Order Report", detailed = false } = {}) {
+    registerPdfFonts(doc);
+
+    const pageWidth = doc.page.width - 72;
+    const defaultLogo = "assets/images/infinity-logo.png";
+    const items = Array.isArray(order.orderItems) ? order.orderItems : [];
+    const itemIds = items.map((i) => String(i?.id || "")).filter(Boolean);
+    const products = itemIds.length
+        ? await Product.find({ productId: { $in: itemIds } }).select("productId image nameAr -_id").lean()
+        : [];
+    const imageByProductId = {};
+    const nameArByProductId = {};
+    products.forEach((p) => {
+        imageByProductId[p.productId] = p.image;
+        nameArByProductId[p.productId] = p.nameAr;
+    });
+
+    doc.fillColor("#0f172a").fontSize(20).text(title, { align: "left" });
+    doc.moveDown(0.5);
+    doc.fontSize(11);
+    doc.text(`Order ID: ${order._id}`);
+    doc.text(`Transaction ID: ${order.transactionId || "-"}`);
+    doc.text(`Created At: ${new Date(order.createdAt).toLocaleString()}`);
+    doc.text(`Status: ${order.status || "-"}`);
+    doc.moveDown(0.5);
+
+    doc.fontSize(13).text("Customer");
+    doc.fontSize(11);
+    doc.text(`Name: ${shapeTextForPdf(order.customerName || "-")}`);
+    doc.text(`Email: ${order.customerEmail || "-"}`);
+    doc.text(`Phone: ${shapeTextForPdf(order.customerPhone || "-")}`);
+    doc.text(`State: ${shapeTextForPdf(order.customerState || "-")}`);
+    if (detailed) {
+        doc.text(`Company: ${shapeTextForPdf(order.customerCompanyName || "-")}`);
+        doc.text(`Company Location: ${shapeTextForPdf(order.customerCompanyLocation || "-")}`);
+        writePdfMultilineField(doc, "Billing Address", order.billingAddress, pageWidth);
+    }
+    doc.moveDown(0.5);
+
+    doc.fontSize(13).text("Payment");
+    doc.fontSize(11);
+    doc.text(`Method: ${order.paymentMethod || "-"}`);
+    doc.text(`Currency: ${order.currency || "EGP"}`);
+    doc.text(`Amount: ${Number(order.amount || 0).toFixed(2)}`);
+    if (detailed) {
+        doc.text(`VAT Applied: ${order.vatApplied ? "Yes" : "No"}`);
+    }
+    doc.moveDown(0.8);
+
+    doc.fontSize(13).text("Order Items");
+    doc.moveDown(0.4);
+
+    for (const item of items) {
+        if (doc.y > 720) doc.addPage();
+
+        const blockTop = doc.y;
+        const blockHeight = 70;
+        doc.roundedRect(36, blockTop - 2, pageWidth, blockHeight, 8).fillColor("#f8fafc").fill();
+        doc.fillColor("#0f172a");
+
+        const productId = String(item?.id || "");
+        const preferredImage = item?.image || imageByProductId[productId] || defaultLogo;
+        const imageSource = await resolvePdfImage(preferredImage, defaultLogo);
+        drawPdfImage(doc, imageSource, 44, blockTop + 6, { fit: [52, 52] });
+
+        const startX = 106;
+        const startY = blockTop + 6;
+        const nameAr = item.nameAr || nameArByProductId[productId] || "";
+        const lineName = nameAr
+            ? `${shapeTextForPdf(item.name || "Item")} / ${shapeTextForPdf(nameAr)} x ${item.quantity || 1}`
+            : `${shapeTextForPdf(item.name || "Item")} x ${item.quantity || 1}`;
+        doc.fontSize(11).text(lineName, startX, startY, { width: pageWidth - 120 });
+        doc.fontSize(10).fillColor("#334155").text(`Price: EGP ${Number(item.price || 0).toFixed(2)}`, startX, startY + 18);
+        doc.text(`Installation: EGP ${Number(item.installation || 0).toFixed(2)}`, startX, startY + 33);
+
+        doc.y = blockTop + blockHeight + 6;
+    }
+}
+
 function saveTeamMemberImageLocal(memberId, imageData) {
     const match = imageData.match(/^data:image\/(\w+);base64,(.+)$/);
     if (!match) throw new Error("Invalid image upload format");
@@ -1146,7 +1351,10 @@ app.put("/api/cart", requireAuth, async (req, res) => {
                 name: String(i.name).slice(0, 200),
                 price: Number(i.price || 0),
                 installation: Number(i.installation || 0),
-                quantity: Math.max(1, Number(i.quantity || 1))
+                quantity: Math.max(1, Number(i.quantity || 1)),
+                ...(typeof i.image === "string" && i.image.trim()
+                    ? { image: String(i.image).trim().slice(0, 500) }
+                    : {}),
             }));
 
         const cart = await Cart.findOneAndUpdate(
@@ -1269,67 +1477,16 @@ app.get("/api/orders/:id/pdf", requireAuth, async (req, res) => {
         res.setHeader("Content-Disposition", `attachment; filename="order-${order.transactionId || order._id}.pdf"`);
         const doc = new PDFDocument({ margin: 36, size: "A4" });
         doc.pipe(res);
-
-        const arialPath = "C:\\Windows\\Fonts\\arial.ttf";
-        if (fs.existsSync(arialPath)) {
-            doc.registerFont("UI", arialPath);
-            doc.font("UI");
-        }
-
-        const items = Array.isArray(order.orderItems) ? order.orderItems : [];
-        const itemIds = items.map(i => String(i?.id || "")).filter(Boolean);
-        const products = await Product.find({ productId: { $in: itemIds } }).select("productId image -_id").lean();
-        const imageByProductId = {};
-        products.forEach((p) => { imageByProductId[p.productId] = p.image; });
-        const defaultLogo = "assets/images/infinity-logo.png";
-        const resolveImagePath = (rawPath) => {
-            if (!rawPath || typeof rawPath !== "string") return null;
-            const normalized = rawPath.replace(/^\/+/, "");
-            const abs = path.join(__dirname, normalized);
-            return fs.existsSync(abs) ? abs : null;
-        };
-
-        doc.fillColor("#0f172a").fontSize(20).text("INFINITY - Customer Order", { align: "left" });
-        doc.moveDown(0.5);
-        doc.fontSize(11);
-        doc.text(`Order ID: ${order._id}`);
-        doc.text(`Transaction ID: ${order.transactionId || "-"}`);
-        doc.text(`Created At: ${new Date(order.createdAt).toLocaleString()}`);
-        doc.text(`Status: ${order.status || "-"}`);
-        doc.moveDown(0.5);
-        doc.text(`Customer: ${order.customerName || "-"}`);
-        doc.text(`Email: ${order.customerEmail || "-"}`);
-        doc.text(`Phone: ${order.customerPhone || "-"}`);
-        doc.text(`Location: ${order.customerState || "-"}`);
-        doc.text(`Payment Method: ${order.paymentMethod || "-"}`);
-        doc.text(`Amount: EGP ${Number(order.amount || 0).toFixed(2)}`);
-        doc.moveDown(0.8);
-        doc.fontSize(13).text("Order Items");
-        doc.moveDown(0.3);
-
-        const pageWidth = doc.page.width - 72;
-        for (const item of items) {
-            if (doc.y > 720) doc.addPage();
-            const blockTop = doc.y;
-            const blockHeight = 70;
-            doc.roundedRect(36, blockTop - 2, pageWidth, blockHeight, 8).fillColor("#f8fafc").fill();
-            doc.fillColor("#0f172a");
-            const preferredImage = item?.image || imageByProductId[String(item?.id || "")] || defaultLogo;
-            const imagePath = resolveImagePath(preferredImage);
-            if (imagePath) {
-                try { doc.image(imagePath, 44, blockTop + 6, { fit: [52, 52] }); } catch (_e) {}
-            }
-            const startX = 106;
-            const startY = blockTop + 6;
-            doc.fontSize(11).text(`${item.name || "Item"} x ${item.quantity || 1}`, startX, startY, { width: pageWidth - 120 });
-            doc.fontSize(10).fillColor("#334155").text(`Price: EGP ${Number(item.price || 0).toFixed(2)}`, startX, startY + 18);
-            doc.text(`Installation: EGP ${Number(item.installation || 0).toFixed(2)}`, startX, startY + 33);
-            doc.y = blockTop + blockHeight + 6;
-        }
-
+        await writeOrderPdf(order, doc, {
+            title: "INFINITY - Customer Order",
+            detailed: true,
+        });
         doc.end();
     } catch (error) {
-        res.status(500).json({ error: "Internal server error" });
+        console.error("Customer order PDF failed:", error);
+        if (!res.headersSent) {
+            res.status(500).json({ error: "Internal server error" });
+        }
     }
 });
 
@@ -1565,94 +1722,16 @@ app.get("/api/dashboard/orders/:id/pdf", requireRole(["technical", "employee", "
 
         const doc = new PDFDocument({ margin: 36, size: "A4" });
         doc.pipe(res);
-
-        // Use a Unicode-capable font when available (better Arabic/UTF-8 rendering)
-        const arialPath = "C:\\Windows\\Fonts\\arial.ttf";
-        if (fs.existsSync(arialPath)) {
-            doc.registerFont("UI", arialPath);
-            doc.font("UI");
-        }
-
-        const pageWidth = doc.page.width - 72;
-        doc.fillColor("#0f172a");
-        doc.fontSize(20).text("INFINITY - Order Report", { align: "left" });
-        doc.moveDown(0.5);
-        doc.fontSize(11);
-        doc.text(`Order ID: ${order._id}`);
-        doc.text(`Transaction ID: ${order.transactionId || "-"}`);
-        doc.text(`Created At: ${new Date(order.createdAt).toLocaleString()}`);
-        doc.text(`Status: ${order.status || "-"}`);
-        doc.moveDown(0.5);
-
-        doc.fontSize(13).text("Customer");
-        doc.fontSize(11);
-        doc.text(`Name: ${order.customerName || "-"}`);
-        doc.text(`Email: ${order.customerEmail || "-"}`);
-        doc.text(`Phone: ${order.customerPhone || "-"}`);
-        doc.text(`State: ${order.customerState || "-"}`);
-        doc.text(`Company: ${order.customerCompanyName || "-"}`);
-        doc.text(`Company Location: ${order.customerCompanyLocation || "-"}`);
-        doc.text(`Billing Address: ${order.billingAddress || "-"}`);
-        doc.moveDown(0.5);
-
-        doc.fontSize(13).text("Payment");
-        doc.fontSize(11);
-        doc.text(`Method: ${order.paymentMethod || "-"}`);
-        doc.text(`Currency: ${order.currency || "EGP"}`);
-        doc.text(`Amount: ${Number(order.amount || 0).toFixed(2)}`);
-        doc.text(`VAT Applied: ${order.vatApplied ? "Yes" : "No"}`);
-        doc.moveDown(0.8);
-
-        doc.fontSize(13).text("Order Items");
-        doc.moveDown(0.4);
-
-        const items = Array.isArray(order.orderItems) ? order.orderItems : [];
-
-        // Build fallback image map from current product catalog using item.id
-        const itemIds = items.map(i => String(i?.id || "")).filter(Boolean);
-        const products = await Product.find({ productId: { $in: itemIds } }).select("productId image -_id").lean();
-        const imageByProductId = {};
-        products.forEach((p) => { imageByProductId[p.productId] = p.image; });
-
-        const defaultLogo = "assets/images/infinity-logo.png";
-        const resolveImagePath = (rawPath) => {
-            if (!rawPath || typeof rawPath !== "string") return null;
-            const normalized = rawPath.replace(/^\/+/, "");
-            const abs = path.join(__dirname, normalized);
-            return fs.existsSync(abs) ? abs : null;
-        };
-        for (const item of items) {
-            if (doc.y > 720) doc.addPage();
-
-            const blockTop = doc.y;
-            const blockHeight = 70;
-            doc.roundedRect(36, blockTop - 2, pageWidth, blockHeight, 8).fillColor("#f8fafc").fill();
-            doc.fillColor("#0f172a");
-
-            const preferredImage = item?.image || imageByProductId[String(item?.id || "")] || defaultLogo;
-            const imagePath = resolveImagePath(preferredImage);
-            const imageX = 44;
-            const imageY = blockTop + 6;
-            if (imagePath) {
-                try {
-                    doc.image(imagePath, imageX, imageY, { fit: [52, 52] });
-                } catch (_e) {
-                    // ignore invalid image formats
-                }
-            }
-
-            const startX = 106;
-            const startY = blockTop + 6;
-            doc.fontSize(11).fillColor("#0f172a").text(`${item.name || "Item"}  x ${item.quantity || 1}`, startX, startY, { width: pageWidth - 120 });
-            doc.fontSize(10).fillColor("#334155").text(`Price: EGP ${Number(item.price || 0).toFixed(2)}`, startX, startY + 18);
-            doc.text(`Installation: EGP ${Number(item.installation || 0).toFixed(2)}`, startX, startY + 33);
-
-            doc.y = blockTop + blockHeight + 6;
-        }
-
+        await writeOrderPdf(order, doc, {
+            title: "INFINITY - Order Report",
+            detailed: true,
+        });
         doc.end();
     } catch (error) {
-        res.status(500).json({ error: "Internal server error" });
+        console.error("Dashboard order PDF failed:", error);
+        if (!res.headersSent) {
+            res.status(500).json({ error: "Internal server error" });
+        }
     }
 });
 
