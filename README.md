@@ -552,11 +552,19 @@ A preview of the INFINITY Total-Com Solutions website across key pages and flows
 
 ### Authentication
 
-<p align="center">
-  <img src="assets/screenshots/auth-Sign-in.png" alt="Sign in page" width="440">
-  &nbsp;&nbsp;
-  <img src="assets/screenshots/auth-Sign-up.png" alt="Sign up page with validation" width="440">
-</p>
+<table align="center">
+  <tr>
+    <td align="center" valign="top" width="49%">
+      <strong>Sign In</strong><br><br>
+      <img src="assets/screenshots/auth-Sign-in.png" alt="Sign in page — email and password form" width="100%">
+    </td>
+    <td width="2%"></td>
+    <td align="center" valign="top" width="49%">
+      <strong>Sign Up</strong><br><br>
+      <img src="assets/screenshots/auth-Sign-up.png" alt="Sign up page — registration form with password validation" width="100%">
+    </td>
+  </tr>
+</table>
 
 ---
 
