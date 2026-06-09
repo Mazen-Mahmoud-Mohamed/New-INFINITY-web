@@ -389,6 +389,7 @@ Client-side validation is centralized in **`form-validation.js`** and shared by 
 |-------|-------|
 | **Full Name** | Letters and spaces only; first and last name required; minimum length |
 | **Company Name** | Optional; letters, numbers, spaces, `&`, `-`, `.` only |
+| **Company Location** | Optional; maximum 200 characters |
 | **Phone (Egypt)** | Exactly 11 digits; must start with 010, 011, 012, or 015; digits-only input |
 | **Age** | Integer 18–100; required on Sign Up, optional on Complete Profile |
 | **Email** | Valid email format (`user@domain.tld`) |
@@ -499,19 +500,71 @@ Copy `.env.example` to `.env`:
 
 ## Screenshots
 
-> Screenshots are not included in the repository yet. Add captures to an `assets/screenshots/` folder and update the paths below.
+A preview of the INFINITY Total-Com Solutions website across key pages and flows.
 
-| Page | Placeholder path | Description |
-|------|------------------|-------------|
-| Home | `assets/screenshots/home.png` | Hero, services, clients |
-| Products | `assets/screenshots/products.png` | Catalog grid and filters |
-| Product Details | `assets/screenshots/product-details.png` | Specifications page |
-| Cart | `assets/screenshots/cart.png` | Cart drawer |
-| Checkout | `assets/screenshots/checkout.png` | Payment page |
-| Customer Dashboard | `assets/screenshots/user-dashboard.png` | Order history |
-| Staff Dashboard | `assets/screenshots/dashboard.png` | Admin inventory/orders |
-| Auth | `assets/screenshots/auth.png` | Sign in / Sign up |
-| Footer | `assets/screenshots/footer.png` | Shared three-column footer |
+### Home
+
+<p align="center">
+  <img src="assets/screenshots/home.png" alt="INFINITY home page with hero, services, and client logos" width="900">
+</p>
+
+---
+
+### Products
+
+<p align="center">
+  <img src="assets/screenshots/products.png" alt="Product catalog with category filters and search" width="900">
+</p>
+
+---
+
+### Product Details
+
+<p align="center">
+  <img src="assets/screenshots/product-details.png" alt="Product details page with specifications" width="900">
+</p>
+
+---
+
+### Shopping Cart
+
+<p align="center">
+  <img src="assets/screenshots/cart.png" alt="Shopping cart drawer with quantity controls" width="900">
+</p>
+
+---
+
+### Checkout
+
+<p align="center">
+  <img src="assets/screenshots/checkout.png" alt="Checkout page with payment method options" width="900">
+</p>
+
+---
+
+### Staff Dashboard
+
+<p align="center">
+  <img src="assets/screenshots/dashboard.png" alt="Staff admin dashboard with inventory and orders" width="900">
+</p>
+
+---
+
+### Authentication
+
+<p align="center">
+  <img src="assets/screenshots/auth-Sign-in.png" alt="Sign in page" width="440">
+  &nbsp;&nbsp;
+  <img src="assets/screenshots/auth-Sign-up.png" alt="Sign up page with validation" width="440">
+</p>
+
+---
+
+### Footer
+
+<p align="center">
+  <img src="assets/screenshots/footer.png" alt="Shared three-column footer with quick links, contact, and map" width="900">
+</p>
 
 ---
 

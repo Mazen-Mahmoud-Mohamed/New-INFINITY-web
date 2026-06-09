@@ -8,6 +8,7 @@
         required: '❌ This field is required.',
         fullName: '❌ Please enter your full name using letters only.',
         companyName: '❌ Company name may only contain letters, numbers, spaces, &, -, and .',
+        companyLocation: '❌ Company location must be 200 characters or fewer.',
         phone: '❌ Please enter a valid Egyptian mobile number (11 digits).',
         age: '❌ Age must be between 18 and 100.',
         email: '❌ Please enter a valid email address.',
@@ -38,6 +39,15 @@
         if (!v) return { valid: true };
         if (!/^[A-Za-z0-9\s&\-.]+$/.test(v) || v.length < 2) {
             return { valid: false, message: MESSAGES.companyName };
+        }
+        return { valid: true };
+    }
+
+    function validateCompanyLocation(value) {
+        const v = trim(value);
+        if (!v) return { valid: true };
+        if (v.length > 200) {
+            return { valid: false, message: MESSAGES.companyLocation };
         }
         return { valid: true };
     }
@@ -184,6 +194,10 @@
         if (input.value !== cleaned) input.value = cleaned;
     }
 
+    function sanitizeCompanyLocationInput(input) {
+        if (input.value.length > 200) input.value = input.value.slice(0, 200);
+    }
+
     function updatePasswordRequirements(passwordInput, requirementsEl) {
         if (!requirementsEl || !passwordInput) return;
         const value = passwordInput.value;
@@ -234,6 +248,7 @@
             if (input.type === 'number' || (input.id && input.id.includes('age'))) sanitizeAgeInput(input);
             if (input.id && input.id.includes('name') && !input.id.includes('company')) sanitizeFullNameInput(input);
             if (input.id && input.id.includes('company-name')) sanitizeCompanyNameInput(input);
+            if (input.id && input.id.includes('company-location')) sanitizeCompanyLocationInput(input);
             run();
         };
 
@@ -250,6 +265,7 @@
         const gender = form.querySelector('#signup-gender');
         const state = form.querySelector('#signup-state');
         const companyName = form.querySelector('#signup-company-name');
+        const companyLocation = form.querySelector('#signup-company-location');
         const email = form.querySelector('#signup-email');
         const password = form.querySelector('#signup-password');
         const confirm = form.querySelector('#signup-confirm-password');
@@ -261,12 +277,13 @@
             validateSelect(gender.value),
             validateSelect(state.value),
             validateCompanyName(companyName.value),
+            validateCompanyLocation(companyLocation ? companyLocation.value : ''),
             validateEmail(email.value),
             validatePassword(password.value),
             validateConfirmPassword(password.value, confirm.value)
         ];
 
-        const fields = [name, phone, age, gender, state, companyName, email, password, confirm];
+        const fields = [name, phone, age, gender, state, companyName, companyLocation, email, password, confirm];
         let firstInvalid = null;
 
         checks.forEach((result, i) => {
@@ -295,6 +312,7 @@
         const phone = form.querySelector('#cp-phone');
         const age = form.querySelector('#cp-age');
         const companyName = form.querySelector('#cp-company-name');
+        const companyLocation = form.querySelector('#cp-company-location');
         const password = form.querySelector('#cp-password');
         const confirm = form.querySelector('#cp-confirm-password');
 
@@ -302,11 +320,12 @@
             validateEgyptPhone(phone.value),
             validateAge(age.value, false),
             validateCompanyName(companyName.value),
+            validateCompanyLocation(companyLocation ? companyLocation.value : ''),
             validatePassword(password.value),
             validateConfirmPassword(password.value, confirm.value)
         ];
 
-        const fields = [phone, age, companyName, password, confirm];
+        const fields = [phone, age, companyName, companyLocation, password, confirm];
         let firstInvalid = null;
 
         checks.forEach((result, i) => {
@@ -340,6 +359,7 @@
         const gender = form.querySelector('#signup-gender');
         const state = form.querySelector('#signup-state');
         const companyName = form.querySelector('#signup-company-name');
+        const companyLocation = form.querySelector('#signup-company-location');
         const email = form.querySelector('#signup-email');
         const password = form.querySelector('#signup-password');
         const confirm = form.querySelector('#signup-confirm-password');
@@ -379,12 +399,15 @@
         bindField(gender, () => validateSelect(gender.value));
         bindField(state, () => validateSelect(state.value));
         bindField(companyName, () => validateCompanyName(companyName.value));
+        bindField(companyLocation, () => validateCompanyLocation(companyLocation ? companyLocation.value : ''));
         bindField(email, () => validateEmail(email.value));
         bindField(password, () => validatePassword(password.value), {
             onInput: () => updatePasswordRequirements(password, requirementsEl),
             liveConfirmTarget: confirm
         });
         bindField(confirm, () => validateConfirmPassword(password.value, confirm.value));
+
+        if (companyLocation) companyLocation.setAttribute('maxlength', '200');
 
         updatePasswordRequirements(password, requirementsEl);
     }
@@ -395,17 +418,22 @@
         const phone = form.querySelector('#cp-phone');
         const age = form.querySelector('#cp-age');
         const companyName = form.querySelector('#cp-company-name');
+        const companyLocation = form.querySelector('#cp-company-location');
         const password = form.querySelector('#cp-password');
         const confirm = form.querySelector('#cp-confirm-password');
 
         if (phone) {
             phone.setAttribute('maxlength', '11');
             phone.setAttribute('inputmode', 'numeric');
+            phone.setAttribute('autocomplete', 'tel');
         }
         if (age) {
             age.removeAttribute('type');
             age.setAttribute('inputmode', 'numeric');
             age.setAttribute('maxlength', '3');
+        }
+        if (companyLocation) {
+            companyLocation.setAttribute('maxlength', '200');
         }
 
         let requirementsEl = form.querySelector('.password-requirements');
@@ -429,6 +457,7 @@
         bindField(phone, () => validateEgyptPhone(phone.value));
         bindField(age, () => validateAge(age.value, false));
         bindField(companyName, () => validateCompanyName(companyName.value));
+        bindField(companyLocation, () => validateCompanyLocation(companyLocation ? companyLocation.value : ''));
         bindField(password, () => validatePassword(password.value), {
             onInput: () => updatePasswordRequirements(password, requirementsEl),
             liveConfirmTarget: confirm
@@ -442,6 +471,7 @@
         MESSAGES,
         validateFullName,
         validateCompanyName,
+        validateCompanyLocation,
         validateEgyptPhone,
         validateAge,
         validateEmail,

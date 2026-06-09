@@ -71,3 +71,15 @@
 .password-requirements li.fail::marker {
     color: #dc2626;
 }
+
+/* Prevent grid row stretch from pushing confirm-password errors downward */
+.signup-grid .form-group,
+.cp-grid > .cp-group,
+.cp-password-row > .cp-group {
+    align-self: start;
+}
+
+.cp-group,
+.form-group {
+    min-width: 0;
+}

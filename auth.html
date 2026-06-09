@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="mazen.css?v=20260506-1">
     <link rel="stylesheet" href="infinity-loader.css?v=20260607">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="form-validation.css?v=20260611">
+    <link rel="stylesheet" href="form-validation.css?v=20260614">
     <style>
         .auth-container {
             min-height: 100vh;
@@ -425,7 +425,7 @@
                 </div>
                 <div class="form-group full-width">
                     <label for="signup-company-location">Company Location (optional)</label>
-                    <input type="text" id="signup-company-location" placeholder="City / Address">
+                    <input type="text" id="signup-company-location" placeholder="City / Address" maxlength="200">
                 </div>
                 <div class="form-group full-width">
                     <label for="signup-email">Email</label>
@@ -468,7 +468,7 @@
 
     <script src="infinity-loader.js?v=20260607"></script>
     <script src="connectivity.js?v=20260607"></script>
-    <script src="form-validation.js?v=20260611"></script>
+    <script src="form-validation.js?v=20260614"></script>
     <script>
         // Check if user is already logged in
         async function checkAuth() {

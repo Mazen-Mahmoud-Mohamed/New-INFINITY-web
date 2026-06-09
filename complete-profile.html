@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="mazen.css?v=20260506-1">
     <link rel="stylesheet" href="infinity-loader.css?v=20260607">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="form-validation.css?v=20260611">
+    <link rel="stylesheet" href="form-validation.css?v=20260614">
     <style>
         .cp-wrap {
             min-height: 100dvh;
@@ -33,9 +33,22 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: .9rem;
+            align-items: start;
         }
-        .cp-group { display: grid; gap: .35rem; }
+        .cp-group {
+            display: grid;
+            gap: .35rem;
+            align-content: start;
+            min-width: 0;
+        }
         .cp-group.full { grid-column: 1 / -1; }
+        .cp-password-row {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: .9rem;
+            align-items: start;
+        }
         .cp-group label { font-weight: 600; color: var(--text-color); }
         .cp-group input, .cp-group select {
             width: 100%;
@@ -81,7 +94,8 @@
         .cp-msg.error { display: block; background: #fee2e2; border: 1px solid #fecaca; color: #991b1b; }
         .cp-msg.success { display: block; background: #dcfce7; border: 1px solid #86efac; color: #166534; }
         @media (max-width: 760px) {
-            .cp-grid { grid-template-columns: 1fr; }
+            .cp-grid,
+            .cp-password-row { grid-template-columns: 1fr; }
             .cp-card { padding: 1rem; }
             .cp-actions { flex-direction: column; }
             .cp-btn { width: 100%; min-height: 48px; }
@@ -97,7 +111,7 @@
                 <div class="cp-grid">
                     <div class="cp-group">
                         <label for="cp-phone">Phone Number *</label>
-                        <input id="cp-phone" type="tel" placeholder="01XXXXXXXXX" required>
+                        <input id="cp-phone" type="tel" placeholder="01XXXXXXXXX" maxlength="11" inputmode="numeric" autocomplete="tel" required>
                     </div>
                     <div class="cp-group">
                         <label for="cp-age">Age</label>
@@ -122,20 +136,22 @@
                     </div>
                     <div class="cp-group">
                         <label for="cp-company-location">Company Location</label>
-                        <input id="cp-company-location" type="text" placeholder="Optional">
+                        <input id="cp-company-location" type="text" placeholder="Optional" maxlength="200">
                     </div>
-                    <div class="cp-group">
-                        <label for="cp-password">Set Password *</label>
-                        <div class="password-field">
-                            <input id="cp-password" type="password" minlength="6" required>
-                            <button type="button" class="toggle-password" data-target="cp-password" aria-label="Show password"><i class="fas fa-eye"></i></button>
+                    <div class="cp-password-row">
+                        <div class="cp-group">
+                            <label for="cp-password">Set Password *</label>
+                            <div class="password-field">
+                                <input id="cp-password" type="password" required autocomplete="new-password">
+                                <button type="button" class="toggle-password" data-target="cp-password" aria-label="Show password"><i class="fas fa-eye"></i></button>
+                            </div>
                         </div>
-                    </div>
-                    <div class="cp-group">
-                        <label for="cp-confirm-password">Confirm Password *</label>
-                        <div class="password-field">
-                            <input id="cp-confirm-password" type="password" minlength="6" required>
-                            <button type="button" class="toggle-password" data-target="cp-confirm-password" aria-label="Show password"><i class="fas fa-eye"></i></button>
+                        <div class="cp-group">
+                            <label for="cp-confirm-password">Confirm Password *</label>
+                            <div class="password-field">
+                                <input id="cp-confirm-password" type="password" required autocomplete="new-password">
+                                <button type="button" class="toggle-password" data-target="cp-confirm-password" aria-label="Show password"><i class="fas fa-eye"></i></button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -150,7 +166,7 @@
 
     <script src="infinity-loader.js?v=20260607"></script>
     <script src="connectivity.js?v=20260607"></script>
-    <script src="form-validation.js?v=20260611"></script>
+    <script src="form-validation.js?v=20260614"></script>
     <script>
         function showMessage(message, type = "error") {
             const el = document.getElementById("cp-message");
