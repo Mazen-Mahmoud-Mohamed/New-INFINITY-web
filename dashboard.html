@@ -8,6 +8,7 @@
     <link rel="apple-touch-icon" href="assets/images/infinity-logo1.png">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="mazen.css?v=20260603-dash">
+    <link rel="stylesheet" href="infinity-loader.css?v=20260607">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -2851,6 +2852,7 @@
         </div>
     </div>
 
+    <script src="infinity-loader.js?v=20260607"></script>
     <script src="connectivity.js?v=20260607"></script>
     <script>
         let currentRole = "customer";
@@ -2914,6 +2916,10 @@
         }
 
         async function loadProducts() {
+            const tbody = document.querySelector('#products-table tbody');
+            if (tbody && window.InfinityLoader && !allProducts.length) {
+                tbody.innerHTML = InfinityLoader.skeletonTableBody(6, 7);
+            }
             const res = await fetch('/api/dashboard/products', { credentials: 'include' });
             const data = await res.json();
             allProducts = Array.isArray(data.products) ? data.products : [];
@@ -3980,6 +3986,10 @@
         }
 
         async function loadOrders() {
+            const tbody = document.querySelector('#orders-table tbody');
+            if (tbody && window.InfinityLoader && !allOrders.length) {
+                tbody.innerHTML = InfinityLoader.skeletonTableBody(5, 7);
+            }
             const status = document.getElementById('status-filter').value;
             const res = await fetch(`/api/dashboard/orders${status ? `?status=${encodeURIComponent(status)}` : ''}`, { credentials: 'include' });
             const data = await res.json();
@@ -4088,8 +4098,8 @@
                                 <option ${o.status === 'cancelled' ? 'selected' : ''}>cancelled</option>
                                 <option ${o.status === 'failed' ? 'selected' : ''}>failed</option>
                             </select>
-                            <button ${disabled} onclick="updateOrderStatus('${o._id}')">Update</button>
-                            <button class="pdf-btn" onclick="downloadOrderPdf('${o._id}')">PDF</button>
+                            <button ${disabled} onclick="updateOrderStatus('${o._id}', this)">Update</button>
+                            <button class="pdf-btn" onclick="downloadOrderPdf('${o._id}', this)">PDF</button>
                         </div>
                     </td>
                 `;
@@ -4097,12 +4107,20 @@
             });
         }
 
-        function downloadOrderPdf(orderId) {
+        function downloadOrderPdf(orderId, btn) {
+            if (btn && window.InfinityLoader) {
+                InfinityLoader.setButtonLoading(btn, true, 'PDF…');
+                setTimeout(() => InfinityLoader.setButtonLoading(btn, false), 2500);
+            } else if (window.InfinityLoader) {
+                InfinityLoader.showFullscreen('Generating PDF…');
+                setTimeout(() => InfinityLoader.hideFullscreen(), 2000);
+            }
             window.open(`/api/dashboard/orders/${orderId}/pdf`, '_blank');
         }
 
-        async function updateOrderStatus(orderId) {
+        async function updateOrderStatus(orderId, btn) {
             if (!canEditOrders()) return;
+            if (btn && window.InfinityLoader) InfinityLoader.setButtonLoading(btn, true);
             const status = document.getElementById(`order-status-${orderId}`).value;
             const res = await fetch(`/api/dashboard/orders/${orderId}/status`, {
                 method: 'PATCH',
@@ -4110,11 +4128,16 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status })
             });
+            if (btn && window.InfinityLoader) InfinityLoader.setButtonLoading(btn, false);
             if (!res.ok) { showToast('Failed to update order status.', 'error'); return; }
             await loadOrders();
         }
 
         async function loadUsers() {
+            const tbody = document.querySelector('#users-table tbody');
+            if (tbody && window.InfinityLoader && !allUsers.length) {
+                tbody.innerHTML = InfinityLoader.skeletonTableBody(4, 6);
+            }
             const res = await fetch('/api/dashboard/users', { credentials: 'include' });
             const data = await res.json();
             allUsers = Array.isArray(data.users) ? data.users : [];
@@ -4123,6 +4146,10 @@
 
         async function loadTeamMembers() {
             if (!canManageTeam()) return;
+            const tbody = document.querySelector('#team-table tbody');
+            if (tbody && window.InfinityLoader && !allTeamMembers.length) {
+                tbody.innerHTML = InfinityLoader.skeletonTableBody(4, 6);
+            }
             const res = await fetch('/api/dashboard/team', { credentials: 'include' });
             const data = await res.json();
             if (!res.ok) {
@@ -4417,6 +4444,10 @@
         }
 
         async function loadCustomers() {
+            const tbody = document.querySelector('#customers-table tbody');
+            if (tbody && window.InfinityLoader && !allCustomers.length) {
+                tbody.innerHTML = InfinityLoader.skeletonTableBody(5, 6);
+            }
             const res = await fetch('/api/dashboard/customers', { credentials: 'include' });
             const data = await res.json();
             allCustomers = Array.isArray(data.customers) ? data.customers : [];

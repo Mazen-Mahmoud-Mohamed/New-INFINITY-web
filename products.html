@@ -7,6 +7,9 @@
     <link rel="icon" href="assets/images/infinity-logo1.png" type="image/png">
     <link rel="apple-touch-icon" href="assets/images/infinity-logo1.png">
     <link rel="stylesheet" href="mazen.css?v=20260603-7">
+    <link rel="stylesheet" href="infinity-loader.css?v=20260607">
+    <link rel="stylesheet" href="site-footer.css?v=20260613">
+    <link rel="stylesheet" href="cart-drawer.css?v=20260609">
     <link rel="stylesheet" href="site-nav.css?v=20260603-nav11">
     <link rel="stylesheet" href="home-nav-mobile.css?v=20260603-m4">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -64,22 +67,6 @@
 
         .close-modal:hover {
             color: var(--primary-color);
-        }
-
-        .cart-item {
-            display: flex;
-            gap: 0.8rem;
-            align-items: center;
-        }
-
-        .cart-item-image {
-            width: 56px;
-            height: 56px;
-            border-radius: 10px;
-            object-fit: cover;
-            flex-shrink: 0;
-            border: 1px solid #e5e7eb;
-            background: #f8fafc;
         }
 
         .stock-status {
@@ -260,7 +247,7 @@
         @media (max-width: 680px) {
             .cart-sidebar {
                 width: 100%;
-                right: -100%;
+                max-width: 100%;
             }
 
             .cart-item .item-info h4,
@@ -353,164 +340,6 @@
                 transform: translate(-50%, 0);
             }
         }
-        body.products-page .cart-item {
-            gap: 0.75rem 1rem;
-            align-items: flex-start;
-        }
-
-        /* Quantity stepper + remove: grouped pill on desktop, tidy stack on mobile */
-        body.products-page .item-actions {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 0.65rem;
-        }
-
-        /* Fixed ~400px drawer: single row (image | text | controls) overflows — stack controls */
-        body.products-page .cart-sidebar {
-            min-width: 0;
-        }
-
-        body.products-page .cart-sidebar .cart-items {
-            min-width: 0;
-            overflow-x: hidden;
-        }
-
-        body.products-page .cart-sidebar .cart-item {
-            display: grid;
-            grid-template-columns: 48px minmax(0, 1fr);
-            grid-template-rows: auto auto;
-            gap: 0.5rem 0.65rem;
-            align-items: start;
-            width: 100%;
-            max-width: 100%;
-            box-sizing: border-box;
-        }
-
-        body.products-page .cart-sidebar .cart-item-image {
-            grid-column: 1;
-            grid-row: 1;
-            width: 48px;
-            height: 48px;
-        }
-
-        body.products-page .cart-sidebar .item-info {
-            grid-column: 2;
-            grid-row: 1;
-            min-width: 0;
-        }
-
-        body.products-page .cart-sidebar .item-actions {
-            grid-column: 1 / -1;
-            grid-row: 2;
-            width: 100%;
-            max-width: 100%;
-            box-sizing: border-box;
-            justify-content: flex-start;
-            margin: 0;
-            padding-top: 0.55rem;
-            border-top: 1px solid rgba(226, 232, 240, 0.95);
-        }
-
-        body.products-page .cart-sidebar .cart-qty-stepper {
-            max-width: 100%;
-            min-width: 0;
-        }
-
-        body.products-page .cart-sidebar .cart-qty-stepper .cart-qty-input {
-            min-width: 0;
-            max-width: 7ch;
-            width: min(7ch, 100%);
-        }
-
-        body.products-page .cart-qty-stepper {
-            display: inline-flex;
-            align-items: center;
-            flex: 0 0 auto;
-            background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
-            border: 1px solid rgba(8, 145, 178, 0.38);
-            border-radius: 999px;
-            padding: 4px 6px;
-            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
-        }
-
-        body.products-page .cart-qty-stepper .quantity-btn {
-            width: 32px;
-            height: 32px;
-            min-width: 32px;
-            min-height: 32px;
-            border-radius: 50%;
-            font-size: 1.05rem;
-            font-weight: 700;
-            background: rgba(8, 145, 178, 0.14);
-            color: var(--primary-color);
-        }
-
-        body.products-page .cart-qty-stepper .quantity-btn:hover {
-            background: var(--primary-color);
-            color: #fff;
-        }
-
-        body.products-page .cart-qty-stepper .cart-qty-input {
-            box-sizing: border-box;
-            width: 6ch;
-            min-width: 5ch;
-            max-width: 7ch;
-            flex: 0 1 auto;
-            min-height: 32px;
-            margin: 0 0.2rem;
-            padding: 0.28rem 0.25rem;
-            border: none;
-            border-radius: 10px;
-            background: transparent;
-            font-family: 'Poppins', system-ui, sans-serif;
-            font-size: 0.95rem;
-            font-weight: 600;
-            text-align: center;
-            color: var(--text-color);
-            line-height: 1.2;
-            box-shadow: none;
-        }
-
-        body.products-page .cart-qty-stepper .cart-qty-input:focus {
-            outline: none;
-            background: rgba(255, 255, 255, 0.98);
-            box-shadow: 0 0 0 2px rgba(8, 145, 178, 0.35);
-        }
-
-        body.products-page .cart-qty-input::-webkit-outer-spin-button,
-        body.products-page .cart-qty-input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-
-        body.products-page .cart-qty-input {
-            -moz-appearance: textfield;
-            appearance: textfield;
-        }
-
-        body.products-page .remove-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 40px;
-            min-height: 40px;
-            padding: 0;
-            border-radius: 12px;
-            background: rgba(239, 68, 68, 0.08);
-            color: #dc2626;
-            font-size: 1.3rem;
-            line-height: 1;
-            transition: background 0.2s ease, transform 0.2s ease, color 0.2s ease;
-        }
-
-        body.products-page .remove-btn:hover {
-            background: rgba(239, 68, 68, 0.16);
-            color: #b91c1c;
-            transform: scale(1.04);
-        }
-
         /* Product cards: catalog view (image + EN + AR names + add to cart) */
         body.products-page .product-card {
             cursor: pointer;
@@ -948,52 +777,14 @@
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer id="contact" class="contact-footer-enhanced contact-footer-enhanced--compact">
-        <div class="container contact-footer-container">
-            <header class="contact-footer-head">
-                <h2>Contact Us</h2>
-                <p class="contact-footer-sub">Reach our team for GPS, fleet, and security solutions across Egypt.</p>
-            </header>
-            <div class="contact-layout">
-                <div class="contact-details">
-                    <a href="tel:+201021111480" class="contact-card">
-                        <span class="contact-card-icon" aria-hidden="true"><i class="fas fa-phone"></i></span>
-                        <span class="contact-card-body">
-                            <span class="contact-card-label">Phone</span>
-                            <span class="contact-card-value">+20 10 21111480</span>
-                        </span>
-                    </a>
-                    <a href="mailto:Mohamed.Zidan@infinity-egy.net" class="contact-card">
-                        <span class="contact-card-icon" aria-hidden="true"><i class="fas fa-envelope"></i></span>
-                        <span class="contact-card-body">
-                            <span class="contact-card-label">Email</span>
-                            <span class="contact-card-value">Mohamed.Zidan@infinity-egy.net</span>
-                        </span>
-                    </a>
-                    <div class="contact-card contact-card--static">
-                        <span class="contact-card-icon" aria-hidden="true"><i class="fas fa-map-marker-alt"></i></span>
-                        <span class="contact-card-body">
-                            <span class="contact-card-label">Address</span>
-                            <span class="contact-card-value">50th St, Zahraa El Maadi, Maadi, Cairo Governorate, Egypt</span>
-                            <span class="contact-card-value contact-card-value--ar" lang="ar" dir="rtl">شارع 50، زهراء المعادي، قسم المعادي، محافظة القاهرة</span>
-                        </span>
-                    </div>
-                    <a href="https://maps.app.goo.gl/UnexyiT7tYRazK3A6" target="_blank" rel="noopener noreferrer" class="contact-maps-btn">
-                        <i class="fas fa-directions" aria-hidden="true"></i> Open in Google Maps
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2026 Infinity Total-Com Solutions. All rights reserved.</p>
-        </div>
-    </footer>
+    <div data-site-footer-mount></div>
+    <script src="site-footer.js?v=20260613"></script>
 
     <div id="theme-toast" class="theme-toast" role="status" aria-live="polite"></div>
 
+    <script src="infinity-loader.js?v=20260607"></script>
     <script src="connectivity.js?v=20260607"></script>
-    <script src="script.js?v=20260603-7"></script>
+    <script src="script.js?v=20260609"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const categoryBtns = document.querySelectorAll('.category-btn');
@@ -1185,7 +976,31 @@
                 });
             }
 
+            function showCatalogSkeleton() {
+                if (!productsWrapper || !window.InfinityLoader) return;
+                const cardCount = Math.max(
+                    productsWrapper.querySelectorAll('.product-card').length,
+                    4
+                );
+                let skel = productsWrapper.querySelector('.products-catalog-skeleton');
+                if (!skel) {
+                    skel = document.createElement('div');
+                    skel.className = 'products-catalog-skeleton';
+                    skel.setAttribute('aria-hidden', 'true');
+                    skel.innerHTML = InfinityLoader.skeletonProductCards(cardCount);
+                    productsWrapper.prepend(skel);
+                }
+                productsWrapper.classList.add('is-catalog-loading');
+            }
+
+            function hideCatalogSkeleton() {
+                if (!productsWrapper) return;
+                productsWrapper.classList.remove('is-catalog-loading');
+                productsWrapper.querySelector('.products-catalog-skeleton')?.remove();
+            }
+
             async function loadCatalogAndStock() {
+                showCatalogSkeleton();
                 try {
                     const res = await fetch('/api/products/public');
                     if (!res.ok) return;
@@ -1196,6 +1011,8 @@
                     applyStockFromProducts(products);
                 } catch (e) {
                     // keep static catalog on API failure
+                } finally {
+                    hideCatalogSkeleton();
                 }
             }
 
@@ -1410,41 +1227,16 @@
             }
 
             function updateCart() {
-                cartItems.innerHTML = '';
-                let subtotal = 0;
-                let installation = 0;
-                
-                cart.forEach(item => {
-                    subtotal += item.price * item.quantity;
-                    installation += item.installation * item.quantity;
-                    const stockNum = Number(productStockMap[item.id]);
-                    const maxAttr = Number.isFinite(stockNum) ? `max="${stockNum}"` : '';
-                    
-                    cartItems.innerHTML += `
-                        <div class="cart-item">
-                            <img class="cart-item-image" src="${item.image || fallbackCartImage}" alt="${item.name}">
-                            <div class="item-info">
-                                <h4>${item.name}</h4>
-                                ${item.nameAr ? `<p class="arabic-title">${item.nameAr}</p>` : ''}
-                                <p>EGP ${item.price.toFixed(2)} × ${item.quantity}</p>
-                                ${item.installation > 0 ? `<p class="installation-fee">Installation: EGP ${item.installation.toFixed(2)}</p>` : ''}
-                            </div>
-                            <div class="item-actions">
-                                <div class="cart-qty-stepper" role="group" aria-label="Quantity">
-                                    <button type="button" class="quantity-btn minus" data-id="${item.id}" aria-label="Decrease quantity">−</button>
-                                    <input type="number" class="cart-qty-input" data-id="${item.id}" min="1" ${maxAttr} value="${item.quantity}" inputmode="numeric" autocomplete="off" aria-label="Quantity">
-                                    <button type="button" class="quantity-btn plus" data-id="${item.id}" aria-label="Increase quantity">+</button>
-                                </div>
-                                <button type="button" class="remove-btn" data-id="${item.id}" aria-label="Remove from cart">×</button>
-                            </div>
-                        </div>
-                    `;
+                InfinityCart.renderCartItems(cartItems, cart, {
+                    productStockMap,
+                    fallbackImage: fallbackCartImage,
                 });
-
-                document.querySelector('.cart-count').textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
-                subtotalAmount.textContent = `EGP ${subtotal.toFixed(2)}`;
-                installationAmount.textContent = `EGP ${installation.toFixed(2)}`;
-                totalAmount.textContent = `EGP ${(subtotal + installation).toFixed(2)}`;
+                InfinityCart.updateCartTotals(cart, {
+                    subtotalEl: subtotalAmount,
+                    installationEl: installationAmount,
+                    totalEl: totalAmount,
+                    countSelector: '.cart-count',
+                });
             }
 
             productsWrapper?.addEventListener('click', (e) => {

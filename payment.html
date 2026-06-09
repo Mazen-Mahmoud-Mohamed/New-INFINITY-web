@@ -7,6 +7,8 @@
     <link rel="icon" href="assets/images/infinity-logo1.png" type="image/png">
     <link rel="apple-touch-icon" href="assets/images/infinity-logo1.png">
     <link rel="stylesheet" href="mazen.css?v=20260603-team-ui">
+    <link rel="stylesheet" href="infinity-loader.css?v=20260607">
+    <link rel="stylesheet" href="site-footer.css?v=20260613">
     <link rel="stylesheet" href="site-nav.css?v=20260603-nav11">
     <link rel="stylesheet" href="home-nav-mobile.css?v=20260603-m3">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1163,47 +1165,8 @@
     </div>
 
 
-    <!-- Footer -->
-    <footer id="contact" class="contact-footer-enhanced contact-footer-enhanced--compact">
-        <div class="container contact-footer-container">
-            <header class="contact-footer-head">
-                <h2>Contact Us</h2>
-                <p class="contact-footer-sub">Reach our team for GPS, fleet, and security solutions across Egypt.</p>
-            </header>
-            <div class="contact-layout">
-                <div class="contact-details">
-                    <a href="tel:+201021111480" class="contact-card">
-                        <span class="contact-card-icon" aria-hidden="true"><i class="fas fa-phone"></i></span>
-                        <span class="contact-card-body">
-                            <span class="contact-card-label">Phone</span>
-                            <span class="contact-card-value">+20 10 21111480</span>
-                        </span>
-                    </a>
-                    <a href="mailto:Mohamed.Zidan@infinity-egy.net" class="contact-card">
-                        <span class="contact-card-icon" aria-hidden="true"><i class="fas fa-envelope"></i></span>
-                        <span class="contact-card-body">
-                            <span class="contact-card-label">Email</span>
-                            <span class="contact-card-value">Mohamed.Zidan@infinity-egy.net</span>
-                        </span>
-                    </a>
-                    <div class="contact-card contact-card--static">
-                        <span class="contact-card-icon" aria-hidden="true"><i class="fas fa-map-marker-alt"></i></span>
-                        <span class="contact-card-body">
-                            <span class="contact-card-label">Address</span>
-                            <span class="contact-card-value">50th St, Zahraa El Maadi, Maadi, Cairo Governorate, Egypt</span>
-                            <span class="contact-card-value contact-card-value--ar" lang="ar" dir="rtl">شارع 50، زهراء المعادي، قسم المعادي، محافظة القاهرة</span>
-                        </span>
-                    </div>
-                    <a href="https://maps.app.goo.gl/UnexyiT7tYRazK3A6" target="_blank" rel="noopener noreferrer" class="contact-maps-btn">
-                        <i class="fas fa-directions" aria-hidden="true"></i> Open in Google Maps
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2026 Infinity Total-Com Solutions. All rights reserved.</p>
-        </div>
-    </footer>
+    <div data-site-footer-mount></div>
+    <script src="site-footer.js?v=20260613"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -1394,12 +1357,14 @@
                 submitOrderBtn.disabled = true;
                 submitOrderBtn.style.display = 'none';
                 processingPayment.classList.add('show');
+                if (window.InfinityLoader) InfinityLoader.showFullscreen('Processing payment…');
                 paymentResult.className = 'payment-result';
                 paymentResult.innerHTML = '';
             }
 
             function hideProcessing() {
                 processingPayment.classList.remove('show');
+                if (window.InfinityLoader) InfinityLoader.hideFullscreen();
                 submitOrderBtn.style.display = 'block';
                 submitOrderBtn.disabled = orderCompleted;
                 isSubmittingOrder = false;
@@ -1677,6 +1642,7 @@
             }
         });
     </script>
+    <script src="infinity-loader.js?v=20260607"></script>
     <script src="connectivity.js?v=20260607"></script>
     <script src="script.js?v=20260603-6"></script>
 </body>

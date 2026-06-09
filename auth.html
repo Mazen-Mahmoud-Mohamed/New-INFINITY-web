@@ -7,7 +7,9 @@
     <link rel="icon" href="assets/images/infinity-logo1.png" type="image/png">
     <link rel="apple-touch-icon" href="assets/images/infinity-logo1.png">
     <link rel="stylesheet" href="mazen.css?v=20260506-1">
+    <link rel="stylesheet" href="infinity-loader.css?v=20260607">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="form-validation.css?v=20260611">
     <style>
         .auth-container {
             min-height: 100vh;
@@ -369,11 +371,11 @@
                 </div>
                 <div class="form-group">
                     <label for="signup-phone">Phone Number (Egypt)</label>
-                    <input type="tel" id="signup-phone" placeholder="01XXXXXXXXX" required>
+                    <input type="tel" id="signup-phone" placeholder="01XXXXXXXXX" maxlength="11" inputmode="numeric" required>
                 </div>
                 <div class="form-group">
                     <label for="signup-age">Age</label>
-                    <input type="number" id="signup-age" min="16" max="100" required>
+                    <input type="text" id="signup-age" inputmode="numeric" maxlength="3" placeholder="18–100" required>
                 </div>
                 <div class="form-group">
                     <label for="signup-gender">Gender</label>
@@ -464,7 +466,9 @@
         </div>
     </div>
 
+    <script src="infinity-loader.js?v=20260607"></script>
     <script src="connectivity.js?v=20260607"></script>
+    <script src="form-validation.js?v=20260611"></script>
     <script>
         // Check if user is already logged in
         async function checkAuth() {
@@ -527,6 +531,8 @@
         // Form submission handlers
         document.getElementById('signin-form').addEventListener('submit', async function(e) {
             e.preventDefault();
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (window.InfinityLoader && submitBtn) InfinityLoader.setButtonLoading(submitBtn, true);
             const email = document.getElementById('signin-email').value;
             const password = document.getElementById('signin-password').value;
 
@@ -552,27 +558,35 @@
                     : "/index.html";
             } catch (error) {
                 showFormMessage('signin-form', "An error occurred during login", 'error');
+            } finally {
+                if (window.InfinityLoader && submitBtn) InfinityLoader.setButtonLoading(submitBtn, false);
             }
         });
 
-        document.getElementById('signup-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const name = document.getElementById('signup-name').value;
-            const phone = document.getElementById('signup-phone').value;
-            const age = document.getElementById('signup-age').value;
-            const gender = document.getElementById('signup-gender').value;
-            const state = document.getElementById('signup-state').value;
-            const companyName = document.getElementById('signup-company-name').value;
-            const companyLocation = document.getElementById('signup-company-location').value;
-            const email = document.getElementById('signup-email').value;
-            const password = document.getElementById('signup-password').value;
-            const confirmPassword = document.getElementById('signup-confirm-password').value;
+        const signupForm = document.getElementById('signup-form');
+        if (window.FormValidation && signupForm) {
+            FormValidation.attachSignupValidation(signupForm);
+        }
 
-            if (password !== confirmPassword) {
-                showFormMessage('signup-form', "Passwords do not match", 'error');
+        signupForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (window.FormValidation && !FormValidation.validateSignupForm(this)) {
                 return;
             }
 
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const name = document.getElementById('signup-name').value.trim();
+            const phone = document.getElementById('signup-phone').value.replace(/\D/g, '');
+            const age = document.getElementById('signup-age').value;
+            const gender = document.getElementById('signup-gender').value;
+            const state = document.getElementById('signup-state').value;
+            const companyName = document.getElementById('signup-company-name').value.trim();
+            const companyLocation = document.getElementById('signup-company-location').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+            const password = document.getElementById('signup-password').value;
+            const confirmPassword = document.getElementById('signup-confirm-password').value;
+
+            if (window.InfinityLoader && submitBtn) InfinityLoader.setButtonLoading(submitBtn, true);
             try {
                 const res = await fetch("/api/register", {
                     method: "POST",
@@ -604,6 +618,8 @@
                 showFormMessage('signin-form', "Registration successful! Please sign in.", 'success');
             } catch (error) {
                 showFormMessage('signup-form', "An error occurred during registration", 'error');
+            } finally {
+                if (window.InfinityLoader && submitBtn) InfinityLoader.setButtonLoading(submitBtn, false);
             }
         });
 

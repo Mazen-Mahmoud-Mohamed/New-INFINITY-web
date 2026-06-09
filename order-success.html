@@ -7,6 +7,7 @@
     <link rel="icon" href="assets/images/infinity-logo1.png" type="image/png">
     <link rel="apple-touch-icon" href="assets/images/infinity-logo1.png">
     <link rel="stylesheet" href="mazen.css?v=20260603-team-ui">
+    <link rel="stylesheet" href="infinity-loader.css?v=20260607">
     <link rel="stylesheet" href="site-nav.css?v=20260603-nav11">
     <link rel="stylesheet" href="home-nav-mobile.css?v=20260603-m3">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -190,10 +191,11 @@
             <h2 class="success-title">Order Submitted Successfully</h2>
             <p class="success-subtitle" style="margin-bottom:.75rem;">Your order is saved. You can review all details below.</p>
             <div class="success-chip"><i class="fas fa-circle-check"></i> Success</div>
-            <div id="order-success-body">Loading order details...</div>
+            <div id="order-success-body" aria-busy="true"></div>
         </div>
     </div>
 
+    <script src="infinity-loader.js?v=20260607"></script>
     <script src="connectivity.js?v=20260607"></script>
     <script src="script.js?v=20260603-6"></script>
     <script>
@@ -211,6 +213,11 @@
 
         async function initSuccessPage() {
             const body = document.getElementById("order-success-body");
+            if (window.InfinityLoader) {
+                body.innerHTML = InfinityLoader.skeletonOrderDetail();
+            } else {
+                body.textContent = "Loading order details...";
+            }
 
             try {
                 const userRes = await fetch("/api/user", { credentials: "include" });
@@ -238,6 +245,7 @@
                 const vat = order.vatApplied ? subtotal * 0.14 : 0;
                 const total = Number(order.amount || 0);
 
+                body.removeAttribute("aria-busy");
                 body.innerHTML = `
                     <div class="meta-grid">
                         <div class="meta-box"><div class="meta-label">Order ID</div><div class="meta-value">${escapeHtml(order._id || "-")}</div></div>

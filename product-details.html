@@ -7,6 +7,9 @@
     <link rel="icon" href="assets/images/infinity-logo1.png" type="image/png">
     <link rel="apple-touch-icon" href="assets/images/infinity-logo1.png">
     <link rel="stylesheet" href="mazen.css?v=20260603-team-ui">
+    <link rel="stylesheet" href="infinity-loader.css?v=20260607">
+    <link rel="stylesheet" href="site-footer.css?v=20260613">
+    <link rel="stylesheet" href="cart-drawer.css?v=20260609">
     <link rel="stylesheet" href="site-nav.css?v=20260603-nav11">
     <link rel="stylesheet" href="home-nav-mobile.css?v=20260603-m4">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -275,176 +278,6 @@
                 transform: translate(-50%, 0);
             }
         }
-        /* Cart drawer: horizontal stepper + row actions (fixes stacked / buggy controls) */
-        body.product-details-page .cart-sidebar .cart-header {
-            padding: 1rem 1.1rem;
-        }
-        body.product-details-page .cart-sidebar .cart-items {
-            padding: 0 0.65rem;
-            flex: 1;
-            min-height: 0;
-            overflow-y: auto;
-            overflow-x: hidden;
-        }
-        body.product-details-page .cart-sidebar .cart-item {
-            display: grid;
-            grid-template-columns: 52px minmax(0, 1fr);
-            grid-template-rows: auto auto;
-            gap: 0.45rem 0.75rem;
-            align-items: center;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid #eef2f7;
-        }
-        body.product-details-page .cart-sidebar .cart-item:last-child {
-            border-bottom: none;
-        }
-        body.product-details-page .cart-sidebar .cart-item-image {
-            grid-column: 1;
-            grid-row: 1;
-            width: 52px;
-            height: 52px;
-            border-radius: 10px;
-        }
-        body.product-details-page .cart-sidebar .item-info {
-            grid-column: 2;
-            grid-row: 1;
-            min-width: 0;
-        }
-        body.product-details-page .cart-sidebar .item-info h4 {
-            margin: 0 0 0.15rem;
-            font-size: 0.92rem;
-            color: #0f172a;
-        }
-        body.product-details-page .cart-sidebar .item-info .arabic-title {
-            margin: 0 0 0.2rem;
-            font-size: 0.82rem;
-        }
-        body.product-details-page .cart-sidebar .item-info p {
-            margin: 0.1rem 0 0;
-            font-size: 0.82rem;
-        }
-        body.product-details-page .cart-sidebar .item-actions {
-            grid-column: 1 / -1;
-            grid-row: 2;
-            display: flex;
-            flex-direction: row;
-            flex-wrap: nowrap;
-            align-items: center;
-            justify-content: space-between;
-            gap: 0.6rem;
-            width: 100%;
-            max-width: 100%;
-            padding: 0.5rem 0 0;
-            margin: 0;
-            border-top: 1px solid #eef2f7;
-            box-sizing: border-box;
-        }
-        body.product-details-page .cart-sidebar .cart-qty-stepper {
-            display: inline-flex !important;
-            flex-direction: row !important;
-            align-items: center;
-            flex: 0 1 auto;
-            min-width: 0;
-            background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
-            border: 1px solid rgba(8, 145, 178, 0.35);
-            border-radius: 999px;
-            padding: 4px 6px;
-            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
-        }
-        body.product-details-page .cart-sidebar .cart-qty-stepper .quantity-btn {
-            width: 34px;
-            height: 34px;
-            min-width: 34px;
-            min-height: 34px;
-            border: none;
-            border-radius: 50%;
-            font-size: 1rem;
-            font-weight: 700;
-            line-height: 1;
-            cursor: pointer;
-            background: rgba(8, 145, 178, 0.14);
-            color: var(--primary-color, #0891b2);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-        }
-        body.product-details-page .cart-sidebar .cart-qty-stepper .quantity-btn:hover {
-            background: var(--primary-color, #0891b2);
-            color: #fff;
-        }
-        body.product-details-page .cart-sidebar .cart-qty-stepper .cart-qty-input {
-            width: 2.75rem;
-            min-width: 2.5rem;
-            max-width: 4rem;
-            min-height: 32px;
-            margin: 0 0.2rem;
-            padding: 0.25rem 0.2rem;
-            border: none;
-            border-radius: 8px;
-            background: transparent;
-            font-family: 'Poppins', system-ui, sans-serif;
-            font-size: 0.9rem;
-            font-weight: 600;
-            text-align: center;
-            color: #0f172a;
-        }
-        body.product-details-page .cart-sidebar .cart-qty-stepper .cart-qty-input:focus {
-            outline: none;
-            background: #fff;
-            box-shadow: 0 0 0 2px rgba(8, 145, 178, 0.35);
-        }
-        body.product-details-page .cart-sidebar .cart-qty-input::-webkit-outer-spin-button,
-        body.product-details-page .cart-sidebar .cart-qty-input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        body.product-details-page .cart-sidebar .cart-qty-input {
-            -moz-appearance: textfield;
-            appearance: textfield;
-        }
-        body.product-details-page .cart-sidebar .remove-btn {
-            flex-shrink: 0;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 40px;
-            min-height: 40px;
-            padding: 0;
-            border: none;
-            border-radius: 10px;
-            background: #fee2e2;
-            color: #dc2626;
-            font-size: 1.25rem;
-            line-height: 1;
-            cursor: pointer;
-        }
-        body.product-details-page .cart-sidebar .remove-btn:hover {
-            background: #fecaca;
-            color: #b91c1c;
-        }
-        body.product-details-page .cart-sidebar .cart-footer {
-            padding: 0.85rem 1rem 1rem;
-            border-top: 1px solid #e8eef4;
-            box-shadow: 0 -4px 14px rgba(2, 6, 23, 0.04);
-        }
-        @media (max-width: 680px) {
-            body.product-details-page .cart-sidebar .cart-qty-stepper .quantity-btn {
-                width: 38px;
-                height: 38px;
-                min-width: 38px;
-                min-height: 38px;
-            }
-        }
-        /* Beat mazen.css @media (max-width: 768px) body.products-page .cart-item .item-actions { grid-column: 2 } */
-        @media (max-width: 768px) {
-            body.product-details-page .cart-sidebar .cart-item .item-actions {
-                grid-column: 1 / -1 !important;
-                grid-row: 2 !important;
-                justify-content: space-between !important;
-                flex-wrap: nowrap !important;
-            }
-        }
         @media (max-width: 860px) {
             .details-head { grid-template-columns: 1fr; }
             .details-head .details-media {
@@ -530,7 +363,8 @@
         </div>
     </nav>
 
-    <main class="details-wrap">
+    <main class="details-wrap is-details-loading">
+        <div class="details-live">
         <section class="details-head">
             <div class="details-media"><img id="product-image" src="" alt=""></div>
             <div class="details-summary">
@@ -548,6 +382,7 @@
             <h2>Specifications</h2>
             <div id="specs-list" class="specs-paper"></div>
         </section>
+        </div>
     </main>
 
     <div class="cart-sidebar">
@@ -573,50 +408,13 @@
         </div>
     </div>
 
-    <footer id="contact" class="contact-footer-enhanced contact-footer-enhanced--compact">
-        <div class="container contact-footer-container">
-            <header class="contact-footer-head">
-                <h2>Contact Us</h2>
-                <p class="contact-footer-sub">Reach our team for GPS, fleet, and security solutions across Egypt.</p>
-            </header>
-            <div class="contact-layout">
-                <div class="contact-details">
-                    <a href="tel:+201021111480" class="contact-card">
-                        <span class="contact-card-icon" aria-hidden="true"><i class="fas fa-phone"></i></span>
-                        <span class="contact-card-body">
-                            <span class="contact-card-label">Phone</span>
-                            <span class="contact-card-value">+20 10 21111480</span>
-                        </span>
-                    </a>
-                    <a href="mailto:Mohamed.Zidan@infinity-egy.net" class="contact-card">
-                        <span class="contact-card-icon" aria-hidden="true"><i class="fas fa-envelope"></i></span>
-                        <span class="contact-card-body">
-                            <span class="contact-card-label">Email</span>
-                            <span class="contact-card-value">Mohamed.Zidan@infinity-egy.net</span>
-                        </span>
-                    </a>
-                    <div class="contact-card contact-card--static">
-                        <span class="contact-card-icon" aria-hidden="true"><i class="fas fa-map-marker-alt"></i></span>
-                        <span class="contact-card-body">
-                            <span class="contact-card-label">Address</span>
-                            <span class="contact-card-value">50th St, Zahraa El Maadi, Maadi, Cairo Governorate, Egypt</span>
-                            <span class="contact-card-value contact-card-value--ar" lang="ar" dir="rtl">شارع 50، زهراء المعادي، قسم المعادي، محافظة القاهرة</span>
-                        </span>
-                    </div>
-                    <a href="https://maps.app.goo.gl/UnexyiT7tYRazK3A6" target="_blank" rel="noopener noreferrer" class="contact-maps-btn">
-                        <i class="fas fa-directions" aria-hidden="true"></i> Open in Google Maps
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2026 Infinity Total-Com Solutions. All rights reserved.</p>
-        </div>
-    </footer>
+    <div data-site-footer-mount></div>
+    <script src="site-footer.js?v=20260613"></script>
 
     <div id="theme-toast" class="theme-toast" role="status" aria-live="polite"></div>
+    <script src="infinity-loader.js?v=20260607"></script>
     <script src="connectivity.js?v=20260607"></script>
-    <script src="script.js?v=20260603-7"></script>
+    <script src="script.js?v=20260609"></script>
     <script>
         (function () {
         const PRODUCT_DATA = {
@@ -709,6 +507,26 @@
         const imageEl = document.getElementById('product-image');
         const specsList = document.getElementById('specs-list') || document.querySelector('.specs-paper');
         const specsHost = document.querySelector('.details-specs');
+        const detailsWrap = document.querySelector('.details-wrap');
+
+        function showDetailsSkeleton() {
+            if (!detailsWrap || !window.InfinityLoader) return;
+            if (!detailsWrap.querySelector('.details-skeleton')) {
+                const holder = document.createElement('div');
+                holder.innerHTML = InfinityLoader.skeletonProductDetail();
+                if (holder.firstElementChild) {
+                    detailsWrap.insertBefore(holder.firstElementChild, detailsWrap.firstElementChild);
+                }
+            }
+            detailsWrap.classList.add('is-details-loading');
+        }
+
+        function hideDetailsSkeleton() {
+            detailsWrap?.classList.remove('is-details-loading');
+            detailsWrap?.querySelector('.details-skeleton')?.remove();
+        }
+
+        showDetailsSkeleton();
 
         function sectionizeSpecs(base) {
             const fromSections = Array.isArray(base.specSections)
@@ -838,12 +656,13 @@
                 PRODUCT_DATA[id] = { ...(PRODUCT_DATA[id] || {}), ...product };
                 applyProductToPage();
             } catch (_e) { /* ignore */ }
+            finally {
+                hideDetailsSkeleton();
+            }
         }
 
-        loadProductFromApi().then(() => {
-            applyProductToPage();
-            setTimeout(renderSpecs, 0);
-        });
+        applyProductToPage();
+        loadProductFromApi();
 
         // When navigating away/back, browsers may restore from bfcache and skip running scripts.
         // Re-render on pageshow so Specifications never appears empty.
@@ -1003,38 +822,16 @@
         }
 
         function updateCart() {
-            cartItems.innerHTML = '';
-            let subtotal = 0;
-            let installation = 0;
-            cart.forEach((item) => {
-                subtotal += item.price * item.quantity;
-                installation += item.installation * item.quantity;
-                const stockNum = Number(productStockMap[item.id]);
-                const maxAttr = Number.isFinite(stockNum) ? `max="${stockNum}"` : '';
-                cartItems.innerHTML += `
-                        <div class="cart-item">
-                            <img class="cart-item-image" src="${item.image || fallbackImage}" alt="${item.name}">
-                            <div class="item-info">
-                                <h4>${item.name}</h4>
-                                ${item.nameAr ? `<p class="arabic-title">${item.nameAr}</p>` : ''}
-                                <p>EGP ${item.price.toFixed(2)} × ${item.quantity}</p>
-                                ${item.installation > 0 ? `<p class="installation-fee">Installation: EGP ${item.installation.toFixed(2)}</p>` : ''}
-                            </div>
-                            <div class="item-actions">
-                                <div class="cart-qty-stepper" role="group" aria-label="Quantity">
-                                    <button type="button" class="quantity-btn minus" data-id="${item.id}" aria-label="Decrease quantity">−</button>
-                                    <input type="number" class="cart-qty-input" data-id="${item.id}" min="1" ${maxAttr} value="${item.quantity}" inputmode="numeric" autocomplete="off" aria-label="Quantity">
-                                    <button type="button" class="quantity-btn plus" data-id="${item.id}" aria-label="Increase quantity">+</button>
-                                </div>
-                                <button type="button" class="remove-btn" data-id="${item.id}" aria-label="Remove from cart">×</button>
-                            </div>
-                        </div>
-                    `;
+            InfinityCart.renderCartItems(cartItems, cart, {
+                productStockMap,
+                fallbackImage,
             });
-            document.querySelector('.cart-count').textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
-            subtotalAmount.textContent = `EGP ${subtotal.toFixed(2)}`;
-            installationAmount.textContent = `EGP ${installation.toFixed(2)}`;
-            totalAmount.textContent = `EGP ${(subtotal + installation).toFixed(2)}`;
+            InfinityCart.updateCartTotals(cart, {
+                subtotalEl: subtotalAmount,
+                installationEl: installationAmount,
+                totalEl: totalAmount,
+                countSelector: '.cart-count',
+            });
         }
 
         if (cartIcon) {

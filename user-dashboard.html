@@ -7,6 +7,7 @@
     <link rel="icon" href="assets/images/infinity-logo1.png" type="image/png">
     <link rel="apple-touch-icon" href="assets/images/infinity-logo1.png">
     <link rel="stylesheet" href="mazen.css?v=20260603-team-ui">
+    <link rel="stylesheet" href="infinity-loader.css?v=20260607">
     <link rel="stylesheet" href="site-nav.css?v=20260603-nav11">
     <link rel="stylesheet" href="home-nav-mobile.css?v=20260603-m3">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -202,6 +203,7 @@
         </div>
     </div>
 
+    <script src="infinity-loader.js?v=20260607"></script>
     <script src="connectivity.js?v=20260607"></script>
     <script src="script.js?v=20260603-6"></script>
     <script>
@@ -263,14 +265,18 @@
                         </div>
                         <div class="order-bottom">
                             <div class="amount">Total: EGP ${Number(o.amount || 0).toFixed(2)}</div>
-                            <button class="pdf-btn" onclick="downloadPdf('${o._id}')">PDF</button>
+                            <button class="pdf-btn" onclick="downloadPdf('${o._id}', this)">PDF</button>
                         </div>
                     </div>
                 `;
             }).join("");
         }
 
-        function downloadPdf(orderId) {
+        function downloadPdf(orderId, btn) {
+            if (btn && window.InfinityLoader) {
+                InfinityLoader.setButtonLoading(btn, true, "PDF…");
+                setTimeout(() => InfinityLoader.setButtonLoading(btn, false), 2500);
+            }
             window.open(`/api/orders/${orderId}/pdf`, "_blank");
         }
 
@@ -284,11 +290,17 @@
         }
 
         async function loadOrders() {
+            const list = document.getElementById("orders-list");
+            if (window.InfinityLoader) {
+                list.innerHTML = `<div class="il-sk-orders-grid">${InfinityLoader.skeletonOrderCards(3)}</div>`;
+                list.setAttribute("aria-busy", "true");
+            }
             const ok = await ensureAuth();
             if (!ok) return;
             const res = await fetch("/api/orders/me", { credentials: "include" });
             const data = await res.json();
             allOrders = Array.isArray(data.orders) ? data.orders : [];
+            if (list) list.removeAttribute("aria-busy");
             renderOrders();
         }
 

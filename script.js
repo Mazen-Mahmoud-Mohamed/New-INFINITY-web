@@ -716,4 +716,76 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-}); 
+});
+
+/** Shared cart drawer rendering — single source of truth for all pages */
+(function initInfinityCart(global) {
+    if (global.InfinityCart) return;
+
+    const DEFAULT_FALLBACK = 'assets/images/infinity-logo.png';
+
+    function renderCartItems(container, cart, options) {
+        if (!container) return;
+        const opts = options || {};
+        const productStockMap = opts.productStockMap || {};
+        const fallbackImage = opts.fallbackImage || DEFAULT_FALLBACK;
+
+        container.innerHTML = '';
+        (cart || []).forEach((item) => {
+            const stockNum = Number(productStockMap[item.id]);
+            const maxAttr = Number.isFinite(stockNum) ? `max="${stockNum}"` : '';
+            container.innerHTML += `
+                <div class="cart-item">
+                    <img class="cart-item-image" src="${item.image || fallbackImage}" alt="${item.name}">
+                    <div class="item-info">
+                        <h4>${item.name}</h4>
+                        ${item.nameAr ? `<p class="arabic-title">${item.nameAr}</p>` : ''}
+                        <p>EGP ${item.price.toFixed(2)} × ${item.quantity}</p>
+                        ${item.installation > 0 ? `<p class="installation-fee">Installation: EGP ${item.installation.toFixed(2)}</p>` : ''}
+                    </div>
+                    <div class="item-actions">
+                        <div class="cart-qty-stepper" role="group" aria-label="Quantity">
+                            <button type="button" class="quantity-btn minus" data-id="${item.id}" aria-label="Decrease quantity">−</button>
+                            <input type="number" class="cart-qty-input" data-id="${item.id}" min="1" ${maxAttr} value="${item.quantity}" inputmode="numeric" autocomplete="off" aria-label="Quantity">
+                            <button type="button" class="quantity-btn plus" data-id="${item.id}" aria-label="Increase quantity">+</button>
+                        </div>
+                        <button type="button" class="remove-btn" data-id="${item.id}" aria-label="Remove from cart">×</button>
+                    </div>
+                </div>`;
+        });
+    }
+
+    function updateCartTotals(cart, elements) {
+        const items = cart || [];
+        let subtotal = 0;
+        let installation = 0;
+        items.forEach((item) => {
+            subtotal += item.price * item.quantity;
+            installation += item.installation * item.quantity;
+        });
+        const count = items.reduce((sum, item) => sum + item.quantity, 0);
+
+        if (elements.subtotalEl) {
+            elements.subtotalEl.textContent = `EGP ${subtotal.toFixed(2)}`;
+        }
+        if (elements.installationEl) {
+            elements.installationEl.textContent = `EGP ${installation.toFixed(2)}`;
+        }
+        if (elements.totalEl) {
+            elements.totalEl.textContent = `EGP ${(subtotal + installation).toFixed(2)}`;
+        }
+        if (elements.countEl) {
+            elements.countEl.textContent = count;
+        } else if (elements.countSelector) {
+            document.querySelectorAll(elements.countSelector).forEach((el) => {
+                el.textContent = count;
+            });
+        }
+    }
+
+    global.InfinityCart = {
+        DEFAULT_FALLBACK,
+        renderCartItems,
+        updateCartTotals,
+    };
+})(window);

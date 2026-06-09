@@ -7,7 +7,9 @@
     <link rel="icon" href="assets/images/infinity-logo1.png" type="image/png">
     <link rel="apple-touch-icon" href="assets/images/infinity-logo1.png">
     <link rel="stylesheet" href="mazen.css?v=20260506-1">
+    <link rel="stylesheet" href="infinity-loader.css?v=20260607">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="form-validation.css?v=20260611">
     <style>
         .cp-wrap {
             min-height: 100dvh;
@@ -99,7 +101,7 @@
                     </div>
                     <div class="cp-group">
                         <label for="cp-age">Age</label>
-                        <input id="cp-age" type="number" min="16" max="100">
+                        <input id="cp-age" type="text" inputmode="numeric" maxlength="3" placeholder="18–100">
                     </div>
                     <div class="cp-group">
                         <label for="cp-gender">Gender</label>
@@ -146,7 +148,9 @@
         </div>
     </div>
 
+    <script src="infinity-loader.js?v=20260607"></script>
     <script src="connectivity.js?v=20260607"></script>
+    <script src="form-validation.js?v=20260611"></script>
     <script>
         function showMessage(message, type = "error") {
             const el = document.getElementById("cp-message");
@@ -170,17 +174,22 @@
             return true;
         }
 
-        document.getElementById("complete-profile-form").addEventListener("submit", async (e) => {
+        const completeProfileForm = document.getElementById("complete-profile-form");
+        if (window.FormValidation && completeProfileForm) {
+            FormValidation.attachCompleteProfileValidation(completeProfileForm);
+        }
+
+        completeProfileForm.addEventListener("submit", async (e) => {
             e.preventDefault();
-            const password = document.getElementById("cp-password").value;
-            const confirmPassword = document.getElementById("cp-confirm-password").value;
-            if (password !== confirmPassword) {
-                showMessage("Passwords do not match.", "error");
+            if (window.FormValidation && !FormValidation.validateCompleteProfileForm(completeProfileForm)) {
                 return;
             }
 
+            const password = document.getElementById("cp-password").value;
+            const confirmPassword = document.getElementById("cp-confirm-password").value;
+
             const payload = {
-                phone: document.getElementById("cp-phone").value.trim(),
+                phone: document.getElementById("cp-phone").value.replace(/\D/g, ""),
                 age: Number(document.getElementById("cp-age").value) || null,
                 gender: document.getElementById("cp-gender").value || null,
                 state: document.getElementById("cp-state").value.trim(),
