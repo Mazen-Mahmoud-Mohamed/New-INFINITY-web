@@ -442,9 +442,10 @@ The site is optimized for **desktop**, **laptop**, **tablet**, and **mobile** vi
 
 On screens **≤768px**, the Hero section uses:
 
-- `100svh` / `100dvh` minimum height so it fills the initial viewport
-- `clamp()` and `svh`-based spacing for logo, typography, CTAs, trust cards, and Explore hint
+- `100svh` / `100dvh` height so it fills the initial viewport
+- `clamp()` and `svh`-based spacing for typography, CTAs, trust cards, and Explore hint
 - Height-based media queries for common phone heights (667px–932px)
+- **Logo sizing last** — full **150px** branding on tall phones (812px+); spacing tightens first on medium screens; logo shrinks subtly only at 720px and below
 - Minimum **44px** touch targets on CTA buttons
 
 The Hero automatically tightens spacing on shorter screens while keeping the logo prominent and the layout premium. **Desktop and tablet Hero layouts are unchanged.**
