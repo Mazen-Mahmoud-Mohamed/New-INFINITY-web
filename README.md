@@ -25,6 +25,7 @@ The project combines a marketing site, product catalog, shopping cart, multi-met
 - [Usage](#usage)
 - [Validation](#validation)
 - [Performance Optimizations](#performance-optimizations)
+- [Responsive Design](#responsive-design)
 - [Accessibility](#accessibility)
 - [API Overview](#api-overview)
 - [Environment Variables](#environment-variables)
@@ -56,15 +57,18 @@ The backend is an Express API with MongoDB persistence, session-based authentica
 | Capability | Description |
 |------------|-------------|
 | **Responsive design** | Mobile-first layouts across home, products, team, legal, and dashboard pages |
+| **Viewport-adaptive Hero** | Home Hero scales spacing, logo, and typography with `svh`/`dvh` and height-based breakpoints so the full section fits on short mobile screens |
 | **Modern UI/UX** | Gradient hero, glass-style cards, premium contact footer, consistent typography (Poppins) |
-| **Animated hero section** | Cinematic in-hero entrance on the home page (~2.6s sequence, once per browser session) |
-| **Shared navbar** | `site-nav.js` injects the same top navigation on legal and utility pages |
+| **Enhanced Hero intro animation** | Cinematic in-hero entrance on the home page (~2.6s staggered sequence; replays on every visit) |
+| **Shared navbar** | `site-nav.js` injects unified top navigation on legal and utility pages |
+| **Unified responsive navigation** | Home quick-nav, products nav, and legal-page nav adapt across desktop, tablet, and mobile |
 | **Shared footer** | `site-footer.js` injects a unified three-column footer site-wide |
 | **Page transitions** | Top progress bar on internal `.html` navigation via `InfinityLoader.initPageTransitions()` |
-| **Hero entrance animations** | Staggered logo, headline, subtitle, CTAs, trust badges, and scroll hint |
+| **Hero entrance animations** | Staggered logo, headline, subtitle, CTAs, trust badges, and Explore scroll hint |
 | **Accessibility** | ARIA labels, keyboard support, `prefers-reduced-motion` fallbacks, form `aria-invalid` states |
 | **Offline awareness** | `connectivity.js` shows connectivity banners when the network is unavailable |
 | **Scroll reveal** | Marketing sections animate into view on scroll (`script.js`) |
+| **Responsive legal pages** | Documentation-style layout: sticky sidebar on desktop (≥1024px), stacked tablet, compact mobile TOC |
 
 ### Products & E-Commerce
 
@@ -91,7 +95,8 @@ The backend is an Express API with MongoDB persistence, session-based authentica
 | **OAuth** | Optional Google and Facebook login when env vars are configured |
 | **Complete Profile** | `complete-profile.html` — phone and password for new/OAuth users |
 | **Session handling** | `express-session` + `connect-mongo`; role-based redirects after login |
-| **Client-side validation** | Shared `form-validation.js` module |
+| **Client-side validation** | Shared `form-validation.js` module with live feedback |
+| **Shared validation system** | Sign Up and Complete Profile reuse the same rules, checklist UI, and error styling |
 | **Password validation** | Live checklist (length, upper, lower, number, special character) |
 | **Egyptian phone validation** | Exactly 11 digits; prefixes 010, 011, 012, 015 |
 | **Form error messages** | Per-field errors below inputs with red borders; errors clear on fix |
@@ -142,7 +147,7 @@ Centralized in **`infinity-loader.js`** + **`infinity-loader.css`**. Global API:
 | `sectionLoading(container, label?)` | Section-level loading indicator |
 | `setContainerSkeleton()` / `clearContainerBusy()` | Generic container busy states |
 | `enhanceImages(root?)` | Lazy image loading with fade-in |
-| `playHeroEntrance()` / `playHeroIntro()` | Home hero cinematic sequence (once per session) |
+| `playHeroEntrance()` / `playHeroIntro()` | Home hero cinematic sequence (replays on every `index.html` load) |
 | `skipHeroIntro()` | Skip hero animation (reduced-motion / programmatic) |
 | `startPageEnter()` | Subtle page-enter opacity transition |
 | `initPageTransitions()` | Top progress bar on link navigation |
@@ -164,7 +169,13 @@ Styling lives in **`site-footer.css`**. HTML source of truth: **`snippets/site-f
 
 ### Legal Pages
 
-Dedicated legal/support pages with shared navbar, footer, table-of-contents sidebar, and consistent styling (`legal-pages.css`):
+Dedicated legal/support pages with shared navbar, footer, table-of-contents navigation, and responsive styling (`legal-pages.css`):
+
+| Breakpoint | Layout |
+|------------|--------|
+| **Desktop (≥1024px)** | Two-column layout with 280px sticky sidebar; single-line TOC links |
+| **Tablet (768–1023px)** | Stacked layout with standard TOC card |
+| **Mobile (<768px)** | Compact TOC card, full-width content, non-sticky navigation |
 
 | Page | File | Purpose |
 |------|------|---------|
@@ -191,7 +202,6 @@ Additional: `delete-account.html` — account deletion information.
 | **JavaScript (ES6+)** | Vanilla JS modules; no frontend framework |
 | **Font Awesome 6** | Icons (nav, footer, forms, dashboard) |
 | **Google Fonts (Poppins)** | Primary typeface |
-| **Session Storage** | Hero intro played-once flag (`il-intro-played`) |
 | **Local Storage** | Dashboard tour/preferences per user |
 
 ### Backend
@@ -412,8 +422,36 @@ Invalid fields show a red border and an error message below the input. Errors cl
 | **Optimized transitions** | `cubic-bezier` easing; overlapping animation steps |
 | **Reusable loading system** | One API (`InfinityLoader`) for fullscreen, button, skeleton, and page loaders |
 | **Responsive layout** | CSS Grid/Flexbox breakpoints; mobile card layouts for dashboard tables |
+| **Viewport-height Hero** | `svh`/`dvh` units and height-based media queries on mobile home Hero |
 | **Response compression** | Express `compression` middleware |
 | **Cart drawer** | Fixed to viewport; only `.cart-items` scrolls internally |
+
+---
+
+## Responsive Design
+
+The site is optimized for **desktop**, **laptop**, **tablet**, and **mobile** viewports using mobile-first CSS, flexible grids, and breakpoint-specific layouts.
+
+| Viewport | Behavior |
+|----------|----------|
+| **Desktop (≥1024px)** | Full two-column legal docs; wide Hero; expanded navigation |
+| **Laptop / tablet landscape (768–1023px)** | Adaptive stacked layouts; Hero retains tablet styling from `mazen.css` |
+| **Mobile (<768px)** | Compact navigation, stacked content, touch-friendly controls |
+
+### Home Hero (mobile only)
+
+On screens **≤768px**, the Hero section uses:
+
+- `100svh` / `100dvh` minimum height so it fills the initial viewport
+- `clamp()` and `svh`-based spacing for logo, typography, CTAs, trust cards, and Explore hint
+- Height-based media queries for common phone heights (667px–932px)
+- Minimum **44px** touch targets on CTA buttons
+
+The Hero automatically tightens spacing on shorter screens while keeping the logo prominent and the layout premium. **Desktop and tablet Hero layouts are unchanged.**
+
+### Legal pages
+
+Responsive breakpoints are defined in `legal-pages.css` — sticky sidebar on desktop, compact mobile TOC, and active-section scroll-spy via `legal-pages.js`.
 
 ---
 
@@ -603,7 +641,8 @@ Potential enhancements for future releases:
 | Cloudinary uploads fail | Verify `CLOUDINARY_*` env vars; restart server |
 | Receipt required at checkout | Bank Transfer and InstaPay require a receipt image before submit |
 | Analytics / Team tab missing | Only **manager** and **primary** roles see those tabs |
-| Hero animation replays | Clears with new session; stored in `sessionStorage` (`il-intro-played`) |
+| Hero content cut off on mobile | Hard-refresh to load latest `home.css`; Hero uses viewport-height scaling on screens ≤768px |
+| Hero animation not replaying | Hard-refresh (`Ctrl+F5`) to load latest `infinity-loader.js`; animation runs on every `index.html` load |
 | Footer or nav looks wrong | Ensure `site-footer.css` / `site-nav.css` are loaded; check `site-footer.js` / `site-nav.js` mount points |
 
 ---

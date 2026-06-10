@@ -8,7 +8,6 @@
     if (global.InfinityLoader) return;
 
     const REDUCED = global.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const INTRO_KEY = "il-intro-played";
     const IS_HOME = document.body.classList.contains("home-page");
 
     let fullscreenEl = null;
@@ -263,6 +262,17 @@
 
     const HERO_SEQUENCE_MS = 2600;
 
+    function resetHeroEntranceState() {
+        document.body.classList.remove("il-hero-intro", "il-hero-pending", "il-hero-ready", "il-hero-complete");
+        const hero = document.querySelector(".hero");
+        if (!hero) return;
+        [hero, ...hero.querySelectorAll("*")].forEach((node) => {
+            [...node.classList].forEach((cls) => {
+                if (cls.startsWith("il-animate-")) node.classList.remove(cls);
+            });
+        });
+    }
+
     function runHeroSequence() {
         const hero = document.querySelector(".hero");
         if (!hero) return;
@@ -315,13 +325,9 @@
         const hero = document.querySelector(".hero");
         if (!hero) return;
 
-        if (sessionStorage.getItem(INTRO_KEY)) {
-            document.body.classList.remove("il-hero-intro", "il-hero-pending", "il-hero-complete");
-            return;
-        }
+        resetHeroEntranceState();
 
         if (REDUCED) {
-            sessionStorage.setItem(INTRO_KEY, "1");
             document.body.classList.add("il-hero-intro");
             requestAnimationFrame(() => {
                 runHeroSequence();
@@ -333,7 +339,6 @@
             return;
         }
 
-        sessionStorage.setItem(INTRO_KEY, "1");
         document.body.classList.add("il-hero-intro");
 
         requestAnimationFrame(() => {
@@ -427,6 +432,12 @@
         initPageTransitions();
         startPageEnter();
         enhanceImages();
+
+        global.addEventListener("pageshow", (event) => {
+            if (event.persisted && document.body.classList.contains("home-page")) {
+                playHeroEntrance();
+            }
+        });
 
         if (IS_HOME) {
             playHeroEntrance();

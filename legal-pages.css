@@ -15,16 +15,11 @@ body.legal-page {
 
 /* mazen.css applies position:fixed;width:100% to ALL nav — reset legal TOC only */
 body.legal-page nav.legal-toc {
-    position: sticky !important;
-    top: 5.5rem !important;
     left: auto !important;
     right: auto !important;
     bottom: auto !important;
-    width: auto !important;
-    max-width: none !important;
     height: auto !important;
     margin: 0 !important;
-    padding: 1.1rem 1rem !important;
     background: #fff !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
@@ -35,6 +30,16 @@ body.legal-page nav.legal-toc {
     z-index: 2 !important;
     overflow: visible !important;
     transform: none !important;
+}
+
+@media (min-width: 1024px) {
+    body.legal-page nav.legal-toc {
+        position: sticky !important;
+        top: 5.5rem !important;
+        width: 100% !important;
+        max-width: none !important;
+        padding: 1.1rem 1rem !important;
+    }
 }
 
 body.legal-page .legal-layout {
@@ -103,9 +108,90 @@ body.legal-page .legal-layout {
     margin: 0 auto;
     padding: clamp(1.75rem, 4vw, 2.75rem) clamp(1rem, 4vw, 1.5rem) 3.5rem;
     display: grid;
-    grid-template-columns: 220px minmax(0, 1fr);
-    gap: clamp(1.5rem, 4vw, 2.75rem);
+    grid-template-columns: 1fr;
+    gap: clamp(1rem, 3vw, 1.5rem);
     align-items: start;
+}
+
+/* ── Desktop (>=1024px): two-column documentation layout ── */
+@media (min-width: 1024px) {
+    .legal-layout {
+        grid-template-columns: 280px minmax(0, 1fr);
+        gap: clamp(1.5rem, 4vw, 2.75rem);
+    }
+
+    body.legal-page nav.legal-toc {
+        min-width: 0;
+    }
+
+    body.legal-page nav.legal-toc ul {
+        display: flex !important;
+        flex-direction: column !important;
+        position: static !important;
+        top: auto !important;
+        left: auto !important;
+        width: 100% !important;
+        gap: 0.35rem !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+
+    body.legal-page nav.legal-toc ul li {
+        position: static !important;
+        width: 100% !important;
+    }
+
+    body.legal-page nav.legal-toc ul li a {
+        display: block;
+        padding: 0.4rem 0.55rem !important;
+        font-size: 0.84rem !important;
+        font-weight: 500;
+        line-height: 1.35;
+        white-space: nowrap;
+    }
+}
+
+/* ── Tablet (768px–1023px): stacked layout, standard TOC card ── */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .legal-layout {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+        padding: clamp(1.5rem, 4vw, 2rem) clamp(1rem, 4vw, 1.5rem) 3rem;
+    }
+
+    body.legal-page nav.legal-toc {
+        position: static !important;
+        top: auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0.85rem 1rem !important;
+    }
+
+    body.legal-page nav.legal-toc ul {
+        display: flex !important;
+        flex-direction: column !important;
+        position: static !important;
+        top: auto !important;
+        left: auto !important;
+        width: 100% !important;
+        gap: 0.25rem !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+
+    body.legal-page nav.legal-toc ul li {
+        position: static !important;
+        width: auto !important;
+    }
+
+    body.legal-page nav.legal-toc ul li a {
+        padding: 0.45rem 0.55rem !important;
+        font-size: 0.86rem !important;
+    }
 }
 
 .legal-toc {
@@ -151,6 +237,17 @@ body.legal-page .legal-layout {
 .legal-toc a.is-active {
     background: #e0f2fe;
     color: #0369a1;
+}
+
+/* Neutralize mazen global nav link decorations inside legal TOC */
+body.legal-page nav.legal-toc a::after {
+    display: none !important;
+    content: none !important;
+}
+
+body.legal-page nav.legal-toc ul li a {
+    text-align: left;
+    font-size: inherit;
 }
 
 .legal-content {
@@ -258,11 +355,93 @@ body.legal-page .legal-layout {
     margin-top: 0.35rem;
 }
 
-@media (max-width: 860px) {
-    .legal-layout {
-        grid-template-columns: 1fr;
+/* ── Mobile legal TOC (<768px) ── */
+@media (max-width: 767px) {
+    body.legal-page nav.legal-toc {
+        position: static !important;
+        top: auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0.65rem 0.75rem !important;
+        border-radius: 12px !important;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
     }
-    .legal-toc {
-        position: static;
+
+    body.legal-page nav.legal-toc .legal-toc-title {
+        margin: 0 0 0.4rem;
+        font-size: 0.68rem;
+        letter-spacing: 0.07em;
+    }
+
+    /* mazen.css sets nav ul to position:absolute;top:100% on mobile — reset for TOC */
+    body.legal-page nav.legal-toc ul {
+        display: flex !important;
+        flex-direction: column !important;
+        flex: none !important;
+        position: static !important;
+        top: auto !important;
+        left: auto !important;
+        width: 100% !important;
+        gap: 0.12rem !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        white-space: normal !important;
+    }
+
+    body.legal-page nav.legal-toc ul li {
+        position: static !important;
+        width: 100% !important;
+    }
+
+    body.legal-page nav.legal-toc ul li a {
+        display: block;
+        padding: 0.42rem 0.5rem !important;
+        font-size: 0.84rem !important;
+        font-weight: 500;
+        line-height: 1.35;
+        border-radius: 8px;
+    }
+
+    .legal-layout {
+        padding: 1rem 0.85rem 2.25rem;
+        gap: 0.65rem;
+    }
+
+    .legal-hero {
+        padding: clamp(2rem, 6vw, 2.75rem) 0 clamp(1.5rem, 4vw, 2rem);
+    }
+
+    .legal-hero .container {
+        padding-left: 0.85rem;
+        padding-right: 0.85rem;
+    }
+
+    .legal-content .legal-intro {
+        padding: 1rem 1.05rem;
+        margin-bottom: 0.65rem;
+        font-size: 0.92rem;
+    }
+
+    .legal-section {
+        padding: 1.05rem 1rem;
+        margin-bottom: 0.65rem;
+        scroll-margin-top: 4.75rem;
+    }
+
+    .legal-section-head {
+        gap: 0.6rem;
+        margin-bottom: 0.7rem;
+        padding-bottom: 0.6rem;
+    }
+
+    .legal-section h2 {
+        font-size: 1.05rem;
+    }
+
+    .legal-section p,
+    .legal-section ul {
+        font-size: 0.9rem;
     }
 }

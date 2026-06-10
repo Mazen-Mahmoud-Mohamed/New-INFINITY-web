@@ -423,8 +423,255 @@ body.home-page .client-logo.featured {
     }
 }
 
+/* ── Mobile Hero: fit full section in initial viewport (≤768px only) ── */
+@media (max-width: 768px) {
+    body.home-page .hero {
+        --hero-pad-top: clamp(0.5rem, 2.2svh, 1.25rem);
+        --hero-pad-bottom: clamp(0.35rem, 1.4svh, 0.85rem);
+        --hero-logo: clamp(88px, 17svh, 142px);
+        --hero-main-gap: clamp(0.45rem, 1.8svh, 1.15rem);
+        --hero-stack-gap: clamp(0.3rem, 1svh, 0.65rem);
+        --hero-cta-gap: clamp(0.32rem, 0.95svh, 0.55rem);
+        --hero-trust-mt: clamp(0.4rem, 1.3svh, 0.85rem);
+        --hero-explore-mt: clamp(0.3rem, 1.1svh, 0.7rem);
+
+        min-height: 100svh;
+        min-height: 100dvh;
+        height: 100dvh;
+        max-height: 100dvh;
+        padding: max(var(--hero-pad-top), env(safe-area-inset-top, 0px)) 0 var(--hero-pad-bottom);
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    body.home-page .hero-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        max-height: 100%;
+        padding: 0 clamp(0.65rem, 3vw, 1rem);
+        flex: 1 1 auto;
+        min-height: 0;
+    }
+
+    body.home-page .hero-main {
+        flex: 0 1 auto;
+        min-height: 0;
+    }
+
+    body.home-page .hero::after {
+        height: clamp(28px, 5.5svh, 56px);
+    }
+
+    body.home-page .hero-main {
+        flex-direction: column;
+        gap: var(--hero-main-gap);
+        width: 100%;
+    }
+
+    body.home-page .hero-text-content {
+        text-align: center;
+        max-width: 100%;
+    }
+
+    body.home-page .hero-logo-image {
+        width: var(--hero-logo);
+        max-height: 18svh;
+        height: auto;
+        object-fit: contain;
+    }
+
+    body.home-page .hero-eyebrow {
+        margin: 0 0 var(--hero-stack-gap);
+        padding: 0.28rem 0.65rem;
+        font-size: clamp(0.66rem, 1.9svh, 0.76rem);
+    }
+
+    body.home-page .hero h1 {
+        margin-bottom: clamp(0.15rem, 0.5svh, 0.35rem);
+    }
+
+    body.home-page .hero-company-name {
+        font-size: clamp(1.75rem, 6.8svh, 2.65rem) !important;
+        letter-spacing: 1px;
+    }
+
+    body.home-page .hero-subtitle {
+        margin-bottom: var(--hero-stack-gap);
+        font-size: clamp(0.95rem, 3.2svh, 1.25rem);
+    }
+
+    body.home-page .hero-text {
+        margin-bottom: var(--hero-stack-gap);
+        font-size: clamp(0.8rem, 2.15svh, 0.92rem);
+        line-height: 1.42;
+        max-width: 36ch;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    body.home-page .cta-buttons {
+        margin-top: clamp(0.25rem, 0.85svh, 0.55rem);
+        flex-direction: column;
+        gap: var(--hero-cta-gap);
+        padding: 0 clamp(0.5rem, 4vw, 1rem);
+        width: 100%;
+        max-width: 320px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    body.home-page .cta-primary,
+    body.home-page .cta-secondary {
+        min-height: 44px;
+        padding: clamp(0.55rem, 1.6svh, 0.72rem) clamp(0.9rem, 2.8svh, 1.15rem);
+        font-size: clamp(0.84rem, 2.1svh, 0.92rem);
+        width: 100%;
+    }
+
+    body.home-page .hero-trust-row {
+        margin-top: var(--hero-trust-mt);
+        gap: clamp(0.3rem, 0.9svh, 0.5rem);
+        justify-content: center;
+    }
+
+    body.home-page .hero-trust-item {
+        padding: clamp(0.32rem, 1.1svh, 0.48rem) clamp(0.45rem, 1.4svh, 0.65rem);
+        min-width: clamp(4.2rem, 26vw, 5.2rem);
+    }
+
+    body.home-page .hero-trust-item strong {
+        font-size: clamp(0.82rem, 2.4svh, 0.98rem);
+    }
+
+    body.home-page .hero-trust-item span {
+        font-size: clamp(0.58rem, 1.6svh, 0.66rem);
+    }
+
+    body.home-page .hero-scroll-hint {
+        margin-top: var(--hero-explore-mt);
+        gap: 0.2rem;
+        font-size: clamp(0.62rem, 1.7svh, 0.72rem);
+    }
+
+    body.home-page .hero-scroll-hint i {
+        font-size: clamp(0.85rem, 2.4svh, 1rem);
+    }
+}
+
+/* Height-based tightening for shorter mobile viewports */
+@media (max-width: 768px) and (max-height: 896px) {
+    body.home-page .hero {
+        --hero-logo: clamp(82px, 15.5svh, 130px);
+        --hero-main-gap: clamp(0.4rem, 1.55svh, 0.95rem);
+    }
+}
+
+@media (max-width: 768px) and (max-height: 844px) {
+    body.home-page .hero {
+        --hero-stack-gap: clamp(0.26rem, 0.92svh, 0.55rem);
+        --hero-trust-mt: clamp(0.32rem, 1.15svh, 0.65rem);
+    }
+}
+
+@media (max-width: 768px) and (max-height: 812px) {
+    body.home-page .hero {
+        --hero-pad-top: clamp(0.42rem, 1.9svh, 0.95rem);
+        --hero-pad-bottom: clamp(0.28rem, 1.1svh, 0.65rem);
+        --hero-logo: clamp(76px, 14.5svh, 118px);
+        --hero-cta-gap: clamp(0.28rem, 0.82svh, 0.48rem);
+        --hero-explore-mt: clamp(0.24rem, 0.92svh, 0.52rem);
+    }
+}
+
+@media (max-width: 768px) and (max-height: 780px) {
+    body.home-page .hero-content {
+        transform: scale(0.97);
+        transform-origin: center center;
+    }
+
+    body.home-page .hero {
+        --hero-pad-top: clamp(0.38rem, 1.7svh, 0.78rem);
+        --hero-pad-bottom: clamp(0.22rem, 0.95svh, 0.48rem);
+        --hero-logo: clamp(72px, 13.8svh, 108px);
+        --hero-main-gap: clamp(0.35rem, 1.25svh, 0.72rem);
+        --hero-stack-gap: clamp(0.2rem, 0.78svh, 0.42rem);
+        --hero-trust-mt: clamp(0.26rem, 0.95svh, 0.48rem);
+        --hero-explore-mt: clamp(0.2rem, 0.78svh, 0.4rem);
+    }
+
+    body.home-page .hero-company-name {
+        font-size: clamp(1.55rem, 6.2svh, 2.15rem) !important;
+    }
+}
+
+@media (max-width: 768px) and (max-height: 740px) {
+    body.home-page .hero-text {
+        font-size: clamp(0.78rem, 2.05svh, 0.88rem);
+        line-height: 1.38;
+    }
+
+    body.home-page .hero-trust-item {
+        min-width: clamp(4rem, 24vw, 4.8rem);
+    }
+}
+
+@media (max-width: 768px) and (max-height: 720px) {
+    body.home-page .hero-content {
+        transform: scale(0.94);
+        transform-origin: center center;
+    }
+
+    body.home-page .hero {
+        --hero-logo: clamp(66px, 12.8svh, 98px);
+        --hero-main-gap: clamp(0.32rem, 1.1svh, 0.62rem);
+    }
+}
+
+@media (max-width: 768px) and (max-height: 667px) {
+    body.home-page .hero-content {
+        transform: scale(0.88);
+        transform-origin: center center;
+    }
+
+    body.home-page .hero {
+        --hero-pad-top: clamp(0.32rem, 1.35svh, 0.58rem);
+        --hero-pad-bottom: clamp(0.18rem, 0.78svh, 0.35rem);
+        --hero-logo: clamp(58px, 11.5svh, 86px);
+        --hero-stack-gap: clamp(0.16rem, 0.62svh, 0.32rem);
+        --hero-cta-gap: clamp(0.22rem, 0.65svh, 0.34rem);
+        --hero-trust-mt: clamp(0.18rem, 0.72svh, 0.36rem);
+        --hero-explore-mt: clamp(0.16rem, 0.62svh, 0.3rem);
+    }
+
+    body.home-page .hero-company-name {
+        font-size: clamp(1.38rem, 5.6svh, 1.85rem) !important;
+    }
+
+    body.home-page .hero-subtitle {
+        font-size: clamp(0.84rem, 2.6svh, 1rem);
+    }
+
+    body.home-page .hero-trust-item {
+        min-width: clamp(3.6rem, 22vw, 4.4rem);
+        padding: 0.26rem 0.38rem;
+    }
+
+    body.home-page .hero-trust-item strong {
+        font-size: clamp(0.76rem, 2.1svh, 0.88rem);
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     body.home-page .hero-scroll-hint i {
         animation: none;
+    }
+
+    body.home-page .hero-content {
+        transform: none !important;
     }
 }
