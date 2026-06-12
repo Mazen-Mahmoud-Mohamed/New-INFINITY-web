@@ -7,6 +7,19 @@ const {
     validateConfirmPassword,
 } = require("../validators/passwordResetValidators");
 const passwordResetService = require("../services/passwordResetService");
+const { MailDeliveryError } = require("../services/mail/mailService");
+
+function handleRouteError(res, err, context) {
+    if (err instanceof MailDeliveryError) {
+        console.error(`${context} mail error:`, err.cause?.message || err.message);
+        return res.status(err.status || 500).json({
+            error: err.message,
+            code: err.code || "MAIL_DELIVERY_FAILED",
+        });
+    }
+    console.error(`${context} error:`, err);
+    return res.status(500).json({ error: "Something went wrong. Please try again." });
+}
 
 function createPasswordResetRouter({ User }) {
     const router = express.Router();
@@ -43,8 +56,7 @@ function createPasswordResetRouter({ User }) {
                 expiresAt: result.expiresAt,
             });
         } catch (err) {
-            console.error("Password reset request error:", err);
-            return res.status(500).json({ error: "Something went wrong. Please try again." });
+            return handleRouteError(res, err, "Password reset request");
         }
     });
 
@@ -69,8 +81,7 @@ function createPasswordResetRouter({ User }) {
                 expiresAt: result.expiresAt,
             });
         } catch (err) {
-            console.error("Password reset resend error:", err);
-            return res.status(500).json({ error: "Something went wrong. Please try again." });
+            return handleRouteError(res, err, "Password reset resend");
         }
     });
 
