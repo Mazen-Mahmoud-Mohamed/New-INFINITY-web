@@ -1,0 +1,29 @@
+# fly.toml app configuration file generated for infinity-web on 2026-06-12T00:44:56Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'infinity-web'
+primary_region = 'ams'
+
+[http_service]
+  auto_start_machines = true
+  auto_stop_machines = 'off'
+  force_https = true
+  internal_port = 3000
+  min_machines_running = 1
+  processes = ['app']
+
+[[vm]]
+  cpu_kind = 'shared'
+  cpus = 1
+  memory = '1gb'
+  memory_mb = 256
+
+[[vm]]
+  cpu_kind = 'shared'
+  cpus = 4
+  memory = '2gb'
+  memory_mb = 2048
+  processes = ['app']
+  size = 'shared-cpu-4x'
