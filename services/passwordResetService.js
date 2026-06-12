@@ -60,11 +60,20 @@ async function createAndSendOtp(User, email) {
         verifyAttempts: 0,
     });
 
-    await sendPasswordResetEmail({
-        to: user.email,
-        name: user.name,
-        otp,
-    });
+    try {
+        await sendPasswordResetEmail({
+            to: user.email,
+            name: user.name,
+            otp,
+        });
+    } catch (err) {
+        await PasswordResetOtp.deleteMany({
+            email: normalized,
+            otpHash,
+            used: false,
+        });
+        throw err;
+    }
 
     return {
         ok: true,
