@@ -15,6 +15,7 @@ The project combines a marketing site, product catalog, shopping cart, multi-met
   - [Website](#website)
   - [Products & E-Commerce](#products--e-commerce)
   - [Authentication](#authentication)
+  - [Password Recovery](#password-recovery)
   - [Dashboard](#dashboard)
   - [Loading System](#loading-system)
   - [Shared Footer](#shared-footer)
@@ -101,6 +102,79 @@ The backend is an Express API with MongoDB persistence, session-based authentica
 | **Egyptian phone validation** | Exactly 11 digits; prefixes 010, 011, 012, 015 |
 | **Form error messages** | Per-field errors below inputs with red borders; errors clear on fix |
 | **Password visibility toggle** | Show/hide icons on password fields |
+| **Forgot Password** | `forgot-password.html` — request a 6-digit OTP by email |
+| **OTP Verification** | `verify-otp.html` — 6-box code entry, 10-minute timer, 60s resend cooldown |
+| **Reset Password** | `reset-password.html` — set a new password after OTP verification |
+
+### Password Recovery
+
+End-to-end password reset flow integrated with existing auth, validation, and loading systems.
+
+| Step | Page | Description |
+|------|------|-------------|
+| 1 | `auth.html` | Click **Forgot Password?** on the Sign In form |
+| 2 | `forgot-password.html` | Enter account email; same success response whether or not the account exists |
+| 3 | Email (Brevo SMTP) | Branded HTML email with subject **Reset Your Infinity Password** and 6-digit OTP |
+| 4 | `verify-otp.html` | Enter OTP (auto-focus, paste support, countdown timer) |
+| 5 | `reset-password.html` | Choose a new password with live checklist validation; premium success screen |
+| 6 | `auth.html?reset=success` | Auto-redirect after ~2 seconds; sign in with the new password |
+
+**Email flow (Brevo SMTP via Nodemailer):**
+
+- Reusable mail service: `services/mail/mailService.js`
+- Uses `.env` values only (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM_EMAIL`, `SMTP_FROM_NAME`, `EMAIL_LOGO_URL`)
+- Logo resolution order: `EMAIL_LOGO_URL` (public HTTPS) → public `APP_BASE_URL` asset → inline CID attachment (works in Gmail, Outlook, Apple Mail when running locally)
+- Includes Infinity logo, greeting, large centered OTP, 10-minute expiry notice, and professional footer
+- Plain-text fallback included for accessibility
+
+**Security features:**
+
+| Control | Implementation |
+|---------|----------------|
+| Email enumeration prevention | Request/resend always return HTTP 200 with the same message: *"If an account exists for this email, a verification code has been sent."* |
+| OTP generation | Cryptographically secure 6-digit code (`crypto.randomInt`) |
+| OTP storage | Bcrypt-hashed in MongoDB (`PasswordResetOtp` model); never stored in plain text |
+| OTP lifetime | 10 minutes (`expiresAt`) |
+| Single use | `used` flag set after successful verification or lockout |
+| Brute-force protection | Max 5 incorrect OTP attempts per code; OTP is immediately invalidated on the 5th failure |
+| Rate limiting | Max 3 request/resend attempts per email + IP within 15 minutes |
+| Reset session | Short-lived server session (`req.session.passwordReset`) with random `resetToken` |
+| Session destruction | After successful reset: all OTPs invalidated, reset session cleared and saved, client `sessionStorage` cleared |
+| Password reuse blocked | New password cannot match the current bcrypt hash |
+| Password hashing | Existing bcrypt implementation on `User.passwordHash` |
+| Invalidation | Previous OTPs invalidated on resend; OTP and session cleared after password update |
+
+**UX enhancements:**
+
+| Feature | Description |
+|---------|-------------|
+| Success screen | Animated checkmark, confirmation copy, 2-second countdown before redirect to Sign In |
+| Page transitions | Subtle fade/slide entrance on all recovery pages |
+| Error feedback | Shake animation on validation and OTP errors |
+| Loading states | Button spinners and fullscreen loader on resend |
+| Mobile layout | Responsive OTP boxes, checklist, and cards at 390px / 430px / 768px |
+| Accessibility | Focus-visible rings, ARIA live regions, reduced-motion support |
+
+**Backend modules:**
+
+```
+models/PasswordResetOtp.js
+middlewares/rateLimit.js
+validators/passwordResetValidators.js
+services/passwordResetService.js
+services/mail/mailService.js
+routes/passwordResetRoutes.js
+```
+
+**Frontend modules:**
+
+```
+forgot-password.html
+verify-otp.html
+reset-password.html
+password-reset.css
+password-reset.js
+```
 
 ### Dashboard
 
@@ -216,6 +290,7 @@ Additional: `delete-account.html` — account deletion information.
 | **connect-mongo** | Session store in MongoDB |
 | **Passport** | Google & Facebook OAuth |
 | **bcrypt** | Password hashing |
+| **Nodemailer** | Transactional email (password reset OTP via Brevo SMTP) |
 | **PDFKit** | Order PDF generation |
 | **arabic-persian-reshaper** | Arabic text shaping in PDF invoices |
 | **Cloudinary** | Product, team, and receipt image hosting |
@@ -241,6 +316,9 @@ web/
 ├── product-details.html      # Product specifications
 ├── team.html                 # Our Team (API-driven roster)
 ├── auth.html                 # Sign in / Sign up
+├── forgot-password.html      # Password recovery — request OTP
+├── verify-otp.html           # Password recovery — verify 6-digit code
+├── reset-password.html       # Password recovery — set new password
 ├── complete-profile.html     # Profile completion
 ├── user-dashboard.html       # Customer order history
 ├── dashboard.html            # Staff admin dashboard
@@ -259,6 +337,21 @@ web/
 ├── infinity-loader.css       # Loader, skeleton, hero animation styles
 ├── form-validation.js        # Shared client-side form validation
 ├── form-validation.css       # Validation UI styles
+├── password-reset.js         # Password recovery OTP UI and API helpers
+├── password-reset.css        # Password recovery page styles
+│
+├── models/
+│   └── PasswordResetOtp.js   # Hashed OTP records (MongoDB)
+├── middlewares/
+│   └── rateLimit.js          # In-memory rate limiter
+├── validators/
+│   └── passwordResetValidators.js
+├── services/
+│   ├── passwordResetService.js
+│   └── mail/
+│       └── mailService.js    # Nodemailer + Brevo branded templates
+├── routes/
+│   └── passwordResetRoutes.js
 ├── site-nav.js               # Shared top navigation injector
 ├── site-footer.js            # Shared footer injector
 ├── connectivity.js           # Offline / connectivity banners
@@ -358,6 +451,17 @@ Create a free cluster at [MongoDB Atlas](https://www.mongodb.com/atlas), whiteli
 3. If prompted, complete your profile at `complete-profile.html` (phone + password).
 4. Alternatively, use **Google** or **Facebook** sign-in when OAuth credentials are configured.
 
+### Reset your password
+
+1. On `auth.html`, click **Forgot Password?**
+2. Enter your account email on `forgot-password.html`.
+3. Check your inbox for a 6-digit code (valid for 10 minutes).
+4. Enter the code on `verify-otp.html` (use **Resend code** after 60 seconds if needed).
+5. Set a new password on `reset-password.html`.
+6. Sign in at `auth.html` with your updated credentials.
+
+**SMTP required:** Add Brevo SMTP credentials to `.env` (see [Environment Variables](#environment-variables)) and restart the server before testing email delivery.
+
 ### Shop and checkout
 
 1. Sign in, then add products to the cart from the catalog or details page.
@@ -393,7 +497,7 @@ Create a free cluster at [MongoDB Atlas](https://www.mongodb.com/atlas), whiteli
 
 ## Validation
 
-Client-side validation is centralized in **`form-validation.js`** and shared by **`auth.html`** (Sign Up) and **`complete-profile.html`**.
+Client-side validation is centralized in **`form-validation.js`** and shared by **`auth.html`** (Sign Up), **`complete-profile.html`**, and the password recovery pages.
 
 | Field | Rules |
 |-------|-------|
@@ -483,6 +587,15 @@ Responsive breakpoints are defined in `legal-pages.css` — sticky sidebar on de
 
 OAuth (when configured): `/auth/google`, `/auth/facebook` + callbacks.
 
+### Password Recovery
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/password-reset/request` | Verify email exists; send OTP email |
+| POST | `/api/password-reset/resend` | Invalidate previous OTP; send new code |
+| POST | `/api/password-reset/verify` | Validate OTP; return `resetToken` + session |
+| POST | `/api/password-reset/reset` | Update password (requires `resetToken` + session) |
+
 ### Storefront
 
 | Method | Path | Description |
@@ -534,6 +647,13 @@ Copy `.env.example` to `.env`:
 | `CLOUDINARY_API_KEY` | No | Cloudinary API key |
 | `CLOUDINARY_API_SECRET` | No | Cloudinary API secret |
 | `STRIPE_API_KEY_BASE64` | No | Optional payment configuration |
+| `SMTP_HOST` | For password reset | Brevo SMTP host (default `smtp-relay.brevo.com`) |
+| `SMTP_PORT` | No | SMTP port (default `587`) |
+| `SMTP_USER` | For password reset | Brevo SMTP login |
+| `SMTP_PASS` | For password reset | Brevo SMTP key (never commit to git) |
+| `SMTP_FROM_EMAIL` | No | Sender address (defaults to `SMTP_USER`) |
+| `SMTP_FROM_NAME` | No | Sender display name (default `INFINITY Total-Com Solutions`) |
+| `EMAIL_LOGO_URL` | No | Public HTTPS URL for the logo in password-reset emails (recommended in production) |
 
 ---
 
@@ -645,6 +765,11 @@ Potential enhancements for future releases:
 | Hero content cut off on mobile | Hard-refresh to load latest `home.css`; Hero uses viewport-height scaling on screens ≤768px |
 | Hero animation not replaying | Hard-refresh (`Ctrl+F5`) to load latest `infinity-loader.js`; animation runs on every `index.html` load |
 | Footer or nav looks wrong | Ensure `site-footer.css` / `site-nav.css` are loaded; check `site-footer.js` / `site-nav.js` mount points |
+| Password reset email not sent | Set `SMTP_USER` and `SMTP_PASS` in `.env`; restart server; check Brevo dashboard for delivery logs |
+| Email logo broken in inbox | Set `EMAIL_LOGO_URL` to a public HTTPS image URL, or deploy with a public `APP_BASE_URL` (local dev uses inline CID attachment automatically) |
+| "Email service temporarily unavailable" | SMTP env vars missing or invalid — copy values from `.env.example` and fill in Brevo credentials |
+| OTP expired or too many attempts | Request a new code from `verify-otp.html` (60s resend cooldown applies) |
+| Reset session expired | Re-verify OTP on `verify-otp.html` before setting a new password |
 
 ---
 

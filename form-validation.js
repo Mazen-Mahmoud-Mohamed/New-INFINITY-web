@@ -118,7 +118,7 @@
     }
 
     function getFieldContainer(input) {
-        return input.closest('.form-group, .cp-group') || input.parentElement;
+        return input.closest('.form-group, .cp-group, .pr-group') || input.parentElement;
     }
 
     function ensureErrorElement(input) {
@@ -467,6 +467,45 @@
         updatePasswordRequirements(password, requirementsEl);
     }
 
+    function attachForgotEmailValidation(form) {
+        if (!form) return;
+        const email = form.querySelector('#forgot-email');
+        if (!email) return;
+        bindField(email, () => validateEmail(email.value));
+    }
+
+    function attachResetPasswordValidation(form) {
+        if (!form) return;
+        const password = form.querySelector('#reset-password');
+        const confirm = form.querySelector('#reset-confirm');
+        if (!password || !confirm) return;
+
+        let requirementsEl = form.querySelector('.password-requirements');
+        bindField(password, () => validatePassword(password.value), {
+            onInput: () => updatePasswordRequirements(password, requirementsEl),
+            liveConfirmTarget: confirm,
+        });
+        bindField(confirm, () => validateConfirmPassword(password.value, confirm.value));
+        updatePasswordRequirements(password, requirementsEl);
+    }
+
+    function validateResetPasswordForm(form) {
+        if (!form) return false;
+        const password = form.querySelector('#reset-password');
+        const confirm = form.querySelector('#reset-confirm');
+        let ok = true;
+        if (!validatePassword(password.value).valid) {
+            setFieldError(password);
+            ok = false;
+        }
+        const confirmResult = validateConfirmPassword(password.value, confirm.value);
+        if (!confirmResult.valid) {
+            setFieldError(confirm, confirmResult.message);
+            ok = false;
+        }
+        return ok;
+    }
+
     global.FormValidation = {
         MESSAGES,
         validateFullName,
@@ -477,11 +516,16 @@
         validateEmail,
         validatePassword,
         validateConfirmPassword,
+        getPasswordChecks,
+        updatePasswordRequirements,
         setFieldError,
         clearFieldError,
         attachSignupValidation,
         attachCompleteProfileValidation,
+        attachForgotEmailValidation,
+        attachResetPasswordValidation,
         validateSignupForm,
-        validateCompleteProfileForm
+        validateCompleteProfileForm,
+        validateResetPasswordForm
     };
 })(typeof window !== 'undefined' ? window : globalThis);

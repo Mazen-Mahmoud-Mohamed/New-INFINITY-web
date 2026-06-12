@@ -2171,6 +2171,9 @@ app.post("/api/logout", (req, res) => {
     res.json({ message: "Logged out successfully" });
 });
 
+const createPasswordResetRouter = require("./routes/passwordResetRoutes");
+app.use("/api/password-reset", createPasswordResetRouter({ User }));
+
 app.use("/api", (_req, res) => {
     res.status(404).json({ error: "API route not found. Restart the server with npm start." });
 });
