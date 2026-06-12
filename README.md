@@ -119,11 +119,16 @@ End-to-end password reset flow integrated with existing auth, validation, and lo
 | 5 | `reset-password.html` | Choose a new password with live checklist validation; premium success screen |
 | 6 | `auth.html?reset=success` | Auto-redirect after ~2 seconds; sign in with the new password |
 
-**Email flow (Brevo SMTP via Nodemailer):**
+**Email flow (Brevo via HTTPS API or SMTP):**
 
-- Reusable mail service: `services/mail/mailService.js`
-- Uses `.env` values only (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM_EMAIL`, `SMTP_FROM_NAME`, `EMAIL_LOGO_URL`)
-- Logo resolution order: `EMAIL_LOGO_URL` (public HTTPS) → public `APP_BASE_URL` asset → inline CID attachment (works in Gmail, Outlook, Apple Mail when running locally)
+- Modular mail service under `services/mail/`
+- **Production on Render:** use `BREVO_API_KEY` (HTTPS port 443) — Render free tier blocks outbound SMTP ports 25/465/587
+- **Local development:** SMTP via Nodemailer still works when `BREVO_API_KEY` is not set
+- Transport selection (`MAIL_TRANSPORT=auto`): prefers Brevo API when `BREVO_API_KEY` is set, otherwise SMTP
+- Uses `.env` only — never hardcoded credentials
+- Startup logs: transport mode, host/port, credential presence (never passwords), verify result
+- All sends bounded by `MAIL_SEND_TIMEOUT_MS` (default 15s) so requests fail fast
+- Logo resolution order: `EMAIL_LOGO_URL` (public HTTPS) → public `APP_BASE_URL` asset → inline CID (SMTP) or base64 (API)
 - Includes Infinity logo, greeting, large centered OTP, 10-minute expiry notice, and professional footer
 - Plain-text fallback included for accessibility
 
@@ -290,7 +295,8 @@ Additional: `delete-account.html` — account deletion information.
 | **connect-mongo** | Session store in MongoDB |
 | **Passport** | Google & Facebook OAuth |
 | **bcrypt** | Password hashing |
-| **Nodemailer** | Transactional email (password reset OTP via Brevo SMTP) |
+| **Nodemailer** | Transactional email via SMTP (local/dev) |
+| **Brevo HTTPS API** | Transactional email on Render and other SMTP-restricted hosts |
 | **PDFKit** | Order PDF generation |
 | **arabic-persian-reshaper** | Arabic text shaping in PDF invoices |
 | **Cloudinary** | Product, team, and receipt image hosting |
@@ -349,7 +355,11 @@ web/
 ├── services/
 │   ├── passwordResetService.js
 │   └── mail/
-│       └── mailService.js    # Nodemailer + Brevo branded templates
+│       └── mailService.js    # Mail facade (API + SMTP)
+│       ├── mailConfig.js     # Env-driven transport config
+│       ├── emailTemplates.js # Branded HTML/text templates
+│       ├── brevoApiTransport.js
+│       └── smtpTransport.js
 ├── routes/
 │   └── passwordResetRoutes.js
 ├── site-nav.js               # Shared top navigation injector
@@ -460,7 +470,7 @@ Create a free cluster at [MongoDB Atlas](https://www.mongodb.com/atlas), whiteli
 5. Set a new password on `reset-password.html`.
 6. Sign in at `auth.html` with your updated credentials.
 
-**SMTP required:** Add Brevo SMTP credentials to `.env` (see [Environment Variables](#environment-variables)) and restart the server before testing email delivery.
+**Email required:** Configure Brevo in `.env` (see [Environment Variables](#environment-variables)). On **Render**, set `BREVO_API_KEY` — SMTP is blocked on free-tier web services.
 
 ### Shop and checkout
 
@@ -654,6 +664,13 @@ Copy `.env.example` to `.env`:
 | `SMTP_FROM_EMAIL` | No | Sender address (defaults to `SMTP_USER`) |
 | `SMTP_FROM_NAME` | No | Sender display name (default `INFINITY Total-Com Solutions`) |
 | `EMAIL_LOGO_URL` | No | Public HTTPS URL for the logo in password-reset emails (recommended in production) |
+| `BREVO_API_KEY` | **Required on Render** | Brevo v3 API key (HTTPS). Create in Brevo → SMTP & API → API Keys |
+| `MAIL_TRANSPORT` | No | `auto` (default), `api`, or `smtp` |
+| `SMTP_CONNECTION_TIMEOUT_MS` | No | SMTP connect timeout (default `10000`) |
+| `SMTP_GREETING_TIMEOUT_MS` | No | SMTP greeting timeout (default `10000`) |
+| `SMTP_SOCKET_TIMEOUT_MS` | No | SMTP socket timeout (default `15000`) |
+| `MAIL_SEND_TIMEOUT_MS` | No | Max time for any send/API call (default `15000`) |
+| `MAIL_VERIFY_TIMEOUT_MS` | No | Max time for startup mail verify (default `10000`) |
 
 ---
 
@@ -765,9 +782,11 @@ Potential enhancements for future releases:
 | Hero content cut off on mobile | Hard-refresh to load latest `home.css`; Hero uses viewport-height scaling on screens ≤768px |
 | Hero animation not replaying | Hard-refresh (`Ctrl+F5`) to load latest `infinity-loader.js`; animation runs on every `index.html` load |
 | Footer or nav looks wrong | Ensure `site-footer.css` / `site-nav.css` are loaded; check `site-footer.js` / `site-nav.js` mount points |
-| Password reset email not sent | Set `SMTP_USER` and `SMTP_PASS` in `.env`; restart server; check Brevo dashboard for delivery logs |
-| Email logo broken in inbox | Set `EMAIL_LOGO_URL` to a public HTTPS image URL, or deploy with a public `APP_BASE_URL` (local dev uses inline CID attachment automatically) |
-| "Email service temporarily unavailable" | SMTP env vars missing or invalid — copy values from `.env.example` and fill in Brevo credentials |
+| Password reset email not sent | On Render: set `BREVO_API_KEY` (SMTP ports are blocked on free tier). Locally: set SMTP vars or `BREVO_API_KEY` |
+| Email logo broken in inbox | Set `EMAIL_LOGO_URL` to a public HTTPS image URL, or deploy with a public `APP_BASE_URL` |
+| "Email service temporarily unavailable" | Mail env vars missing — set `BREVO_API_KEY` (Render) or `SMTP_USER` + `SMTP_PASS` (local) |
+| Forgot password hangs then fails | Check Render logs for `[mail]` startup verify; increase timeouts only after confirming transport is `api` on Render |
+| SMTP ETIMEDOUT on Render | Expected on free tier — switch to `BREVO_API_KEY`; SMTP works on paid Render instances only |
 | OTP expired or too many attempts | Request a new code from `verify-otp.html` (60s resend cooldown applies) |
 | Reset session expired | Re-verify OTP on `verify-otp.html` before setting a new password |
 

@@ -1129,6 +1129,9 @@ async function start() {
         await seedDefaultTeamMembers();
         console.log("Connected to MongoDB");
 
+        const { initializeMailService } = require("./services/mail/mailService");
+        await initializeMailService();
+
         app.listen(PORT, () => {
             console.log(`Server running at http://localhost:${PORT}`);
         });
