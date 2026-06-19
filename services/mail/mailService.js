@@ -1,4 +1,5 @@
 const {
+    getAppBaseUrl,
     getDiagnostics,
     getMailTransportMode,
     getSenderConfig,
@@ -8,6 +9,8 @@ const {
 const {
     buildPasswordResetHtml,
     buildPasswordResetText,
+    buildEmailVerificationHtml,
+    buildEmailVerificationText,
     resolveEmailLogo,
     resolveLogoSrcForApi,
 } = require("./emailTemplates");
@@ -123,35 +126,70 @@ async function sendPasswordResetEmail({ to, name, otp }) {
         if (mode === "api") {
             const logoSrc = resolveLogoSrcForApi(logo);
             const html = buildPasswordResetHtml({ name, otp, logoSrc });
-            await sendViaBrevoApi({ to, subject, html, text });
+            await sendMailMessage({ to, subject, html, text });
             return;
         }
 
         const html = buildPasswordResetHtml({ name, otp, logoSrc: logo.src });
-        await sendViaSmtp({
-            from: `"${fromName}" <${fromEmail}>`,
-            to,
-            subject,
-            html,
-            text,
-            attachments: logo.attachments,
-        });
+        await sendMailMessage({ to, subject, html, text, attachments: logo.attachments });
     } catch (err) {
-        const isTimeout = err.code === "MAIL_TIMEOUT"
-            || err.code === "ETIMEDOUT"
-            || err.code === "ESOCKET"
-            || /timed out/i.test(err.message || "");
+        if (err instanceof MailDeliveryError) throw err;
+        wrapMailError(err, "Unable to send verification email. Please try again later.");
+    }
+}
 
-        throw new MailDeliveryError(
-            isTimeout
-                ? "Unable to send verification email right now. Please try again in a few minutes."
-                : "Unable to send verification email. Please try again later.",
-            {
-                code: isTimeout ? "MAIL_TIMEOUT" : "MAIL_DELIVERY_FAILED",
-                status: 500,
-                cause: err,
-            }
-        );
+async function sendMailMessage({ to, subject, html, text, attachments = [] }) {
+    const mode = getMailTransportMode();
+    const { fromEmail, fromName } = getSenderConfig();
+    if (mode === "api") {
+        await sendViaBrevoApi({ to, subject, html, text });
+        return;
+    }
+    await sendViaSmtp({
+        from: `"${fromName}" <${fromEmail}>`,
+        to,
+        subject,
+        html,
+        text,
+        attachments,
+    });
+}
+
+function wrapMailError(err, fallbackMessage) {
+    const isTimeout = err.code === "MAIL_TIMEOUT"
+        || err.code === "ETIMEDOUT"
+        || err.code === "ESOCKET"
+        || /timed out/i.test(err.message || "");
+    throw new MailDeliveryError(
+        isTimeout
+            ? "Unable to send email right now. Please try again in a few minutes."
+            : (fallbackMessage || "Unable to send email. Please try again later."),
+        {
+            code: isTimeout ? "MAIL_TIMEOUT" : "MAIL_DELIVERY_FAILED",
+            status: 500,
+            cause: err,
+        }
+    );
+}
+
+async function sendEmailVerificationEmail({ to, name, verifyUrl }) {
+    if (!isMailConfigured()) {
+        throw new MailDeliveryError("Email service is not configured.", { code: "MAIL_NOT_CONFIGURED", status: 503 });
+    }
+    const logo = resolveEmailLogo();
+    const subject = "Verify Your INFINITY Account";
+    const text = buildEmailVerificationText({ name, verifyUrl });
+    try {
+        if (getMailTransportMode() === "api") {
+            const html = buildEmailVerificationHtml({ name, verifyUrl, logoSrc: resolveLogoSrcForApi(logo) });
+            await sendMailMessage({ to, subject, html, text });
+            return;
+        }
+        const html = buildEmailVerificationHtml({ name, verifyUrl, logoSrc: logo.src });
+        await sendMailMessage({ to, subject, html, text, attachments: logo.attachments });
+    } catch (err) {
+        if (err instanceof MailDeliveryError) throw err;
+        wrapMailError(err, "Unable to send verification email. Please try again later.");
     }
 }
 
@@ -166,6 +204,7 @@ module.exports = {
     getLastVerifyResult,
     isMailConfigured,
     sendPasswordResetEmail,
+    sendEmailVerificationEmail,
     resolveEmailLogo,
     logMailDiagnostics,
 };
