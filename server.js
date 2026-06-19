@@ -139,10 +139,24 @@ function validateInput(email, password, name = null) {
     return { valid: true };
 }
 
+function computeAgeFromDateOfBirth(dateOfBirth) {
+    if (!dateOfBirth) return null;
+    const birth = new Date(dateOfBirth);
+    if (Number.isNaN(birth.getTime())) return null;
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+        age -= 1;
+    }
+    return age;
+}
+
 function validateRegistrationProfile(profile = {}) {
     const {
         phone,
         age,
+        dateOfBirth,
         gender,
         state,
         companyName,
@@ -153,9 +167,11 @@ function validateRegistrationProfile(profile = {}) {
         return { valid: false, message: "Please enter a valid Egyptian phone number" };
     }
 
-    const parsedAge = Number(age);
-    if (!Number.isInteger(parsedAge) || parsedAge < 16 || parsedAge > 100) {
-        return { valid: false, message: "Age must be a number between 16 and 100" };
+    const parsedAge = age != null && age !== ""
+        ? Number(age)
+        : computeAgeFromDateOfBirth(dateOfBirth);
+    if (!Number.isInteger(parsedAge) || parsedAge < 18 || parsedAge > 100) {
+        return { valid: false, message: "You must be between 18 and 100 years old." };
     }
 
     const allowedGenders = ["male", "female", "prefer_not_to_say"];
@@ -207,6 +223,19 @@ function getRoleForEmail(email = "") {
     return null;
 }
 
+const IdentityDocumentSchema = new mongoose.Schema({
+    type: { type: String, required: true },
+    url: { type: String, required: true },
+    mimeType: { type: String, default: "" },
+    uploadedAt: { type: Date, default: Date.now },
+    status: {
+        type: String,
+        enum: ["draft", "pending", "approved", "rejected"],
+        default: "draft",
+    },
+    rejectionReason: { type: String, default: "" },
+}, { _id: false });
+
 const UserSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true, index: true, lowercase: true, trim: true },
     passwordHash: { type: String, default: null },
@@ -220,6 +249,30 @@ const UserSchema = new mongoose.Schema({
     role: { type: String, enum: ["customer", "technical", "employee", "manager", "primary"], default: "customer" },
     provider: { type: String, default: "local" },
     providerId: { type: String, default: null },
+    accountType: { type: String, enum: ["personal", "company"], default: "personal", index: true },
+    emailVerified: { type: Boolean, default: false, index: true },
+    contactPerson: { type: String, default: null, trim: true },
+    address: { type: String, default: null, trim: true },
+    city: { type: String, default: null, trim: true },
+    country: { type: String, default: "Egypt", trim: true },
+    dateOfBirth: { type: Date, default: null },
+    taxNumber: { type: String, default: null, trim: true },
+    companyWebsite: { type: String, default: null, trim: true },
+    companyAddress: { type: String, default: null, trim: true },
+    profilePicture: { type: String, default: null },
+    companyLogo: { type: String, default: null },
+    identityVerification: {
+        status: {
+            type: String,
+            enum: ["none", "pending", "approved", "rejected", "reupload_requested"],
+            default: "none",
+        },
+        documents: { type: [IdentityDocumentSchema], default: [] },
+        staffNotes: { type: String, default: "" },
+        submittedAt: { type: Date, default: null },
+        reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+        reviewedAt: { type: Date, default: null },
+    },
 }, { timestamps: true });
 
 const OrderSchema = new mongoose.Schema({
@@ -977,6 +1030,12 @@ function getMissingProfileFields(user) {
     const missing = [];
     if (!user.passwordHash) missing.push("password");
     if (!user.phone) missing.push("phone");
+    if (!user.state) missing.push("state");
+    const accountType = user.accountType || "personal";
+    if (accountType === "company") {
+        if (!user.companyName) missing.push("companyName");
+        if (!user.companyLocation) missing.push("companyLocation");
+    }
     return missing;
 }
 
@@ -991,6 +1050,8 @@ async function ensurePrimaryAdmin() {
             passwordHash,
             role: "primary",
             provider: "local",
+            emailVerified: true,
+            accountType: "personal",
         });
         return;
     }
@@ -1064,10 +1125,13 @@ if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
                         provider: "google",
                         providerId: profile.id,
                         passwordHash: null,
+                        emailVerified: true,
+                        accountType: "personal",
                     });
                 } else if (!user.providerId) {
                     user.provider = "google";
                     user.providerId = profile.id;
+                    if (!user.emailVerified) user.emailVerified = true;
                     await user.save();
                 }
                 user = await syncRoleFromEmailLists(user);
@@ -1102,10 +1166,13 @@ if (FACEBOOK_APP_ID && FACEBOOK_APP_SECRET) {
                         provider: "facebook",
                         providerId: profile.id,
                         passwordHash: null,
+                        emailVerified: true,
+                        accountType: "personal",
                     });
                 } else if (!user.providerId) {
                     user.provider = "facebook";
                     user.providerId = profile.id;
+                    if (!user.emailVerified) user.emailVerified = true;
                     await user.save();
                 }
                 user = await syncRoleFromEmailLists(user);
@@ -1128,6 +1195,9 @@ async function start() {
         await seedDefaultProducts();
         await seedDefaultTeamMembers();
         console.log("Connected to MongoDB");
+
+        const { migrateExistingUsers } = require("./services/migrateUsers");
+        await migrateExistingUsers(User);
 
         const { initializeMailService } = require("./services/mail/mailService");
         await initializeMailService();
@@ -1765,7 +1835,7 @@ app.get("/api/dashboard/users", requireRole(["technical", "employee", "manager",
 app.get("/api/dashboard/customers", requireRole(["technical", "employee", "manager", "primary"]), async (_req, res) => {
     try {
         const customers = await User.find({ role: "customer" })
-            .select("name email phone age gender state companyName companyLocation createdAt -_id")
+            .select("name email phone age gender state companyName companyLocation accountType emailVerified identityVerification.status profilePicture createdAt")
             .sort({ createdAt: -1 })
             .lean();
         res.json({ customers });
@@ -2047,18 +2117,37 @@ app.get("/auth/facebook/callback", (req, res, next) => {
 
 app.post("/api/register", async (req, res) => {
     try {
-        const { email, password, name, phone, age, gender, state, companyName, companyLocation } = req.body;
-        
-        const validation = validateInput(email, password, name);
+        const {
+            email, password, name, phone, age, gender, state, companyName, companyLocation,
+            accountType, address, city, country, dateOfBirth, contactPerson,
+            taxNumber, companyWebsite, companyAddress, companyLogo,
+        } = req.body;
+
+        const type = accountType === "company" ? "company" : "personal";
+        const displayName = type === "company"
+            ? String(contactPerson || name || "").trim()
+            : String(name || "").trim();
+
+        const validation = validateInput(email, password, displayName);
         if (!validation.valid) {
             return res.status(400).json({ error: validation.message });
         }
 
-        const profileValidation = validateRegistrationProfile({
-            phone, age, gender, state, companyName, companyLocation
-        });
-        if (!profileValidation.valid) {
-            return res.status(400).json({ error: profileValidation.message });
+        if (type === "personal" && accountType !== "company") {
+            const computedAge = age != null && age !== "" ? Number(age) : computeAgeFromDateOfBirth(dateOfBirth);
+            const profileValidation = validateRegistrationProfile({
+                phone, age: computedAge, dateOfBirth, gender, state, companyName, companyLocation,
+            });
+            if (!profileValidation.valid) {
+                return res.status(400).json({ error: profileValidation.message });
+            }
+        } else {
+            if (!phone || !String(phone).trim()) {
+                return res.status(400).json({ error: "Phone number is required." });
+            }
+            if (!companyName || !String(companyName).trim()) {
+                return res.status(400).json({ error: "Company name is required." });
+            }
         }
 
         const existing = await User.findOne({ email: email.toLowerCase() });
@@ -2067,27 +2156,77 @@ app.post("/api/register", async (req, res) => {
         }
 
         const passwordHash = await bcrypt.hash(password, 10);
+        const assignedRole = getRoleForEmail(email) || "customer";
+        const isStaff = ["employee", "manager", "primary", "technical"].includes(assignedRole);
+        const computedAge = age != null && age !== "" ? Number(age) : computeAgeFromDateOfBirth(dateOfBirth);
+
+        let logoUrl = null;
+        if (type === "company" && companyLogo) {
+            try {
+                const { uploadUserFile } = require("./services/uploadService");
+                const tempId = email.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 24);
+                const logoResult = await uploadUserFile(tempId, "company", "logo", companyLogo, { allowPdf: false });
+                if (logoResult.ok) logoUrl = logoResult.url;
+            } catch (_e) { /* optional field */ }
+        }
+
         const user = await User.create({
             email,
             passwordHash,
-            name,
-            role: getRoleForEmail(email) || "customer",
-            phone: String(phone).trim(),
-            age: Number(age),
-            gender,
-            state: String(state).trim(),
-            companyName: companyName ? String(companyName).trim() : null,
+            name: displayName,
+            role: assignedRole,
+            accountType: type,
+            emailVerified: isStaff,
+            phone: phone ? String(phone).trim() : null,
+            age: computedAge != null && Number.isFinite(computedAge) ? computedAge : null,
+            gender: gender || null,
+            state: state ? String(state).trim() : null,
+            companyName: type === "company" ? String(companyName).trim() : (companyName ? String(companyName).trim() : null),
             companyLocation: companyLocation ? String(companyLocation).trim() : null,
+            contactPerson: type === "company" ? displayName : null,
+            address: address ? String(address).trim() : (companyAddress ? String(companyAddress).trim() : null),
+            companyAddress: companyAddress ? String(companyAddress).trim() : null,
+            city: city ? String(city).trim() : null,
+            country: country ? String(country).trim() : "Egypt",
+            dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
+            taxNumber: taxNumber ? String(taxNumber).trim() : null,
+            companyWebsite: companyWebsite ? String(companyWebsite).trim() : null,
+            companyLogo: logoUrl,
         });
 
-        // optional auto-login after registration:
-        req.session.user = { id: String(user._id), email: user.email, name: user.name, role: user.role || "customer" };
+        if (!isStaff) {
+            const emailVerificationService = require("./services/emailVerificationService");
+            const { isMailConfigured, MailDeliveryError } = require("./services/mail/mailService");
+            if (!isMailConfigured()) {
+                await User.deleteOne({ _id: user._id });
+                return res.status(503).json({ error: "Email service is temporarily unavailable." });
+            }
+            try {
+                await emailVerificationService.createAndSendVerification(User, user);
+            } catch (mailErr) {
+                await User.deleteOne({ _id: user._id });
+                if (mailErr instanceof MailDeliveryError) {
+                    return res.status(mailErr.status || 500).json({ error: mailErr.message, code: mailErr.code });
+                }
+                throw mailErr;
+            }
+            return res.json({
+                message: "Registration successful! Please check your email to verify your account.",
+                requiresVerification: true,
+                email: user.email,
+            });
+        }
 
-        res.json({ message: "Registration successful!", user: { email: user.email, name: user.name, role: user.role || "customer" } });
+        req.session.user = { id: String(user._id), email: user.email, name: user.name, role: user.role || "customer" };
+        res.json({
+            message: "Registration successful!",
+            user: { email: user.email, name: user.name, role: user.role || "customer" },
+        });
     } catch (error) {
         if (error?.code === 11000) {
             return res.status(400).json({ error: "Email already registered" });
         }
+        console.error("Register error:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 });
@@ -2108,6 +2247,14 @@ app.post("/api/login", async (req, res) => {
         }
         await syncRoleFromEmailLists(user);
 
+        if (!user.emailVerified) {
+            return res.status(403).json({
+                error: "Please verify your email before signing in.",
+                code: "EMAIL_NOT_VERIFIED",
+                email: user.email,
+            });
+        }
+
         req.session.user = { id: String(user._id), email: user.email, name: user.name, role: user.role || "customer" };
         res.json({ message: "Login successful!", user: { email: user.email, name: user.name, role: user.role || "customer" } });
     } catch (error) {
@@ -2124,11 +2271,25 @@ app.get("/api/user", async (req, res) => {
         req.session.user.role = user?.role || "customer";
     }
     const dbUser = await User.findById(req.session.user.id)
-        .select("phone passwordHash")
+        .select("phone passwordHash emailVerified accountType state companyName companyLocation identityVerification profilePicture")
         .lean();
+
+    let unreadNotifications = 0;
+    try {
+        const { getUnreadCount } = require("./services/notificationService");
+        unreadNotifications = await getUnreadCount(req.session.user.id);
+    } catch (_e) { /* non-fatal */ }
+
     res.json({
-        user: req.session.user,
-        missingProfileFields: getMissingProfileFields(dbUser)
+        user: {
+            ...req.session.user,
+            emailVerified: dbUser?.emailVerified !== false,
+            accountType: dbUser?.accountType || "personal",
+            identityStatus: dbUser?.identityVerification?.status || "none",
+            profilePicture: dbUser?.profilePicture || null,
+        },
+        missingProfileFields: getMissingProfileFields(dbUser),
+        unreadNotifications,
     });
 });
 
@@ -2137,8 +2298,6 @@ app.post("/api/profile/complete", requireAuth, async (req, res) => {
         const {
             password,
             phone,
-            age,
-            gender,
             state,
             companyName,
             companyLocation
@@ -2153,14 +2312,27 @@ app.post("/api/profile/complete", requireAuth, async (req, res) => {
         if (!phone || !String(phone).trim()) {
             return res.status(400).json({ error: "Phone number is required" });
         }
+        if (!state || !String(state).trim()) {
+            return res.status(400).json({ error: "State is required" });
+        }
+
+        const accountType = user.accountType || "personal";
+        if (accountType === "company") {
+            if (!companyName || !String(companyName).trim()) {
+                return res.status(400).json({ error: "Company name is required" });
+            }
+            if (!companyLocation || !String(companyLocation).trim()) {
+                return res.status(400).json({ error: "Company location is required" });
+            }
+        }
 
         user.passwordHash = await bcrypt.hash(String(password), 10);
         user.phone = String(phone).trim();
-        if (typeof age === "number" && Number.isFinite(age)) user.age = age;
-        if (typeof gender === "string" && ["male", "female", "prefer_not_to_say"].includes(gender)) user.gender = gender;
-        if (typeof state === "string") user.state = state.trim() || null;
-        if (typeof companyName === "string") user.companyName = companyName.trim() || null;
-        if (typeof companyLocation === "string") user.companyLocation = companyLocation.trim() || null;
+        user.state = String(state).trim();
+        if (accountType === "company") {
+            user.companyName = String(companyName).trim();
+            user.companyLocation = String(companyLocation).trim();
+        }
 
         await user.save();
         res.json({ message: "Profile completed successfully" });
@@ -2176,6 +2348,24 @@ app.post("/api/logout", (req, res) => {
 
 const createPasswordResetRouter = require("./routes/passwordResetRoutes");
 app.use("/api/password-reset", createPasswordResetRouter({ User }));
+
+const createEmailVerificationRouter = require("./routes/emailVerificationRoutes");
+app.use("/api/email-verification", createEmailVerificationRouter({ User }));
+
+const createSupportRouter = require("./routes/supportRoutes");
+app.use("/api/support", createSupportRouter({ User, requireAuth, requireRole }));
+
+const createProfileRouter = require("./routes/profileRoutes");
+app.use("/api/profile", createProfileRouter({ User, requireAuth }));
+
+const createNotificationRouter = require("./routes/notificationRoutes");
+app.use("/api/notifications", createNotificationRouter({ requireAuth }));
+
+const createDashboardSupportRouter = require("./routes/dashboardSupportRoutes");
+app.use("/api/dashboard/support", createDashboardSupportRouter({ User, requireRole }));
+
+const createDashboardVerificationRouter = require("./routes/dashboardVerificationRoutes");
+app.use("/api/dashboard/verification", createDashboardVerificationRouter({ User, requireRole }));
 
 app.use("/api", (_req, res) => {
     res.status(404).json({ error: "API route not found. Restart the server with npm start." });

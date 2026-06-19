@@ -9,16 +9,20 @@
 }
 
 .field-error {
-    display: none;
+    display: block;
+    min-height: 1.25rem;
     margin-top: 0.3rem;
     font-size: 0.82rem;
     line-height: 1.45;
     color: #dc2626;
-    white-space: pre-line;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+    visibility: hidden;
 }
 
 .field-error.visible {
-    display: block;
+    visibility: visible;
 }
 
 .password-requirements {
@@ -28,6 +32,16 @@
     background: #f8fafc;
     border: 1px solid #e2e8f0;
     font-size: 0.78rem;
+    display: none;
+}
+
+.password-requirements.is-visible {
+    display: block;
+}
+
+.password-requirements--signup {
+    display: block;
+    min-height: 6.75rem;
 }
 
 .password-requirements-title {
@@ -72,11 +86,46 @@
     color: #dc2626;
 }
 
-/* Prevent grid row stretch from pushing confirm-password errors downward */
+/* Stable grid rows — errors never push siblings */
 .signup-grid .form-group,
 .cp-grid > .cp-group,
-.cp-password-row > .cp-group {
+.cp-password-row > .cp-group,
+#signin-form .form-group {
     align-self: start;
+    min-width: 0;
+}
+
+.signup-grid .form-group,
+#signin-form .form-group {
+    position: relative;
+    padding-bottom: 1.35rem;
+}
+
+.signup-grid .form-group .field-error,
+#signin-form .form-group .field-error {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin-top: 0;
+}
+
+/* Password row: requirements sit in flow; confirm field keeps error slot */
+.signup-grid .form-group:has(.password-requirements--signup) {
+    padding-bottom: 0;
+}
+
+.signup-grid .form-group:has(.password-requirements--signup) .password-requirements {
+    margin-bottom: 0.35rem;
+}
+
+.signup-grid .form-group:has(#signup-password) {
+    padding-bottom: 0;
+}
+
+.signup-grid .form-group:has(#signup-confirm-password),
+.signup-grid .form-group:has(#signup-email) {
+    padding-bottom: 1.35rem;
 }
 
 .cp-group,

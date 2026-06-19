@@ -296,6 +296,12 @@ async function initAuthUI() {
         document.querySelectorAll('.user-orders-link').forEach((el) => {
             setAuthNavItemVisible(el, false);
         });
+        document.querySelectorAll('.user-profile-link').forEach((el) => {
+            setAuthNavItemVisible(el, false);
+        });
+        document.querySelectorAll('.user-support-link').forEach((el) => {
+            setAuthNavItemVisible(el, false);
+        });
         document.querySelectorAll('.staff-dashboard-link').forEach((el) => {
             setAuthNavItemVisible(el, false);
         });
@@ -341,6 +347,12 @@ async function initAuthUI() {
         document.querySelectorAll('.user-orders-link').forEach((el) => {
             setAuthNavItemVisible(el, canSeeMyOrders);
         });
+        document.querySelectorAll('.user-profile-link').forEach((el) => {
+            setAuthNavItemVisible(el, canSeeMyOrders);
+        });
+        document.querySelectorAll('.user-support-link').forEach((el) => {
+            setAuthNavItemVisible(el, canSeeMyOrders);
+        });
         document.querySelectorAll('.staff-dashboard-link').forEach((el) => {
             setAuthNavItemVisible(el, canSeeDashboard);
         });
@@ -376,6 +388,7 @@ async function initAuthUI() {
         }
         const data = await res.json();
         applyLoggedIn(data);
+        if (window.InfinityNotifications) InfinityNotifications.refreshBadges();
     } catch (_e) {
         applyLoggedOut();
     }

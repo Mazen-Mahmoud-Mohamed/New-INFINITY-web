@@ -34,22 +34,26 @@
         return { valid: true };
     }
 
-    function validateCompanyName(value) {
+    function validateCompanyName(value, required) {
         const v = trim(value);
-        if (!v) return { valid: true };
+        if (!v) return required ? { valid: false, message: MESSAGES.required } : { valid: true };
         if (!/^[A-Za-z0-9\s&\-.]+$/.test(v) || v.length < 2) {
             return { valid: false, message: MESSAGES.companyName };
         }
         return { valid: true };
     }
 
-    function validateCompanyLocation(value) {
+    function validateCompanyLocation(value, required) {
         const v = trim(value);
-        if (!v) return { valid: true };
+        if (!v) return required ? { valid: false, message: MESSAGES.required } : { valid: true };
         if (v.length > 200) {
             return { valid: false, message: MESSAGES.companyLocation };
         }
         return { valid: true };
+    }
+
+    function getCompleteProfileAccountType(form) {
+        return form?.dataset?.accountType === 'company' ? 'company' : 'personal';
     }
 
     function validateEgyptPhone(value) {
@@ -258,40 +262,35 @@
         return run;
     }
 
-    function validateSignupForm(form) {
-        const name = form.querySelector('#signup-name');
-        const phone = form.querySelector('#signup-phone');
-        const age = form.querySelector('#signup-age');
-        const gender = form.querySelector('#signup-gender');
-        const state = form.querySelector('#signup-state');
-        const companyName = form.querySelector('#signup-company-name');
-        const companyLocation = form.querySelector('#signup-company-location');
-        const email = form.querySelector('#signup-email');
-        const password = form.querySelector('#signup-password');
-        const confirm = form.querySelector('#signup-confirm-password');
+    function getSignupAccountType(form) {
+        const checked = form?.querySelector('input[name="account-type"]:checked');
+        return checked?.value === 'company' ? 'company' : 'personal';
+    }
 
-        const checks = [
-            validateFullName(name.value),
-            validateEgyptPhone(phone.value),
-            validateAge(age.value, true),
-            validateSelect(gender.value),
-            validateSelect(state.value),
-            validateCompanyName(companyName.value),
-            validateCompanyLocation(companyLocation ? companyLocation.value : ''),
-            validateEmail(email.value),
-            validatePassword(password.value),
-            validateConfirmPassword(password.value, confirm.value)
-        ];
+    function validateDateOfBirth(value, required) {
+        const v = trim(value);
+        if (!v) return required ? { valid: false, message: MESSAGES.required } : { valid: true };
+        const birth = new Date(v);
+        if (Number.isNaN(birth.getTime())) {
+            return { valid: false, message: '❌ Please enter a valid date of birth.' };
+        }
+        const today = new Date();
+        let age = today.getFullYear() - birth.getFullYear();
+        const monthDiff = today.getMonth() - birth.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age -= 1;
+        if (age < 18 || age > 100) return { valid: false, message: MESSAGES.age };
+        return { valid: true, normalized: age };
+    }
 
-        const fields = [name, phone, age, gender, state, companyName, companyLocation, email, password, confirm];
+    function runFieldChecks(checks, fields, form) {
         let firstInvalid = null;
-
         checks.forEach((result, i) => {
             const input = fields[i];
+            if (!input) return;
             if (!result.valid) {
                 if (isPrimaryPasswordInput(input)) {
                     setFieldError(input);
-                    updatePasswordRequirements(input, form.querySelector('.password-requirements'));
+                    updatePasswordRequirements(input, form?.querySelector('.password-requirements'));
                 } else {
                     setFieldError(input, result.message);
                 }
@@ -300,7 +299,6 @@
                 clearFieldError(input);
             }
         });
-
         if (firstInvalid) {
             firstInvalid.focus();
             return false;
@@ -308,9 +306,63 @@
         return true;
     }
 
+    function validateSignupForm(form) {
+        const accountType = getSignupAccountType(form);
+        const checks = [];
+        const fields = [];
+
+        if (accountType === 'personal') {
+            checks.push(validateFullName(form.querySelector('#signup-name')?.value || ''));
+            fields.push(form.querySelector('#signup-name'));
+            checks.push(validateEgyptPhone(form.querySelector('#signup-phone')?.value || ''));
+            fields.push(form.querySelector('#signup-phone'));
+            checks.push(validateAge(form.querySelector('#signup-age')?.value, true));
+            fields.push(form.querySelector('#signup-age'));
+            checks.push(validateSelect(form.querySelector('#signup-gender')?.value));
+            fields.push(form.querySelector('#signup-gender'));
+            checks.push(validateSelect(form.querySelector('#signup-state')?.value));
+            fields.push(form.querySelector('#signup-state'));
+            const city = form.querySelector('#signup-city');
+            const address = form.querySelector('#signup-address');
+            checks.push(trim(city?.value) ? { valid: true } : { valid: false, message: MESSAGES.required });
+            fields.push(city);
+            checks.push(trim(address?.value) ? { valid: true } : { valid: false, message: MESSAGES.required });
+            fields.push(address);
+            checks.push(validateDateOfBirth(form.querySelector('#signup-dob')?.value, false));
+            fields.push(form.querySelector('#signup-dob'));
+        } else {
+            checks.push(validateCompanyName(form.querySelector('#signup-company-name-req')?.value, true));
+            fields.push(form.querySelector('#signup-company-name-req'));
+            checks.push(validateFullName(form.querySelector('#signup-contact-person')?.value || ''));
+            fields.push(form.querySelector('#signup-contact-person'));
+            checks.push(validateEgyptPhone(form.querySelector('#signup-company-phone')?.value || ''));
+            fields.push(form.querySelector('#signup-company-phone'));
+            const city = form.querySelector('#signup-company-city');
+            const address = form.querySelector('#signup-company-address');
+            checks.push(trim(city?.value) ? { valid: true } : { valid: false, message: MESSAGES.required });
+            fields.push(city);
+            checks.push(trim(address?.value) ? { valid: true } : { valid: false, message: MESSAGES.required });
+            fields.push(address);
+            checks.push(validateSelect(form.querySelector('#signup-company-state')?.value));
+            fields.push(form.querySelector('#signup-company-state'));
+        }
+
+        const password = form.querySelector('#signup-password');
+        const confirm = form.querySelector('#signup-confirm-password');
+        checks.push(validateEmail(form.querySelector('#signup-email')?.value || ''));
+        fields.push(form.querySelector('#signup-email'));
+        checks.push(validatePassword(password?.value || ''));
+        fields.push(password);
+        checks.push(validateConfirmPassword(password?.value || '', confirm?.value || ''));
+        fields.push(confirm);
+
+        return runFieldChecks(checks, fields, form);
+    }
+
     function validateCompleteProfileForm(form) {
+        const isCompany = getCompleteProfileAccountType(form) === 'company';
         const phone = form.querySelector('#cp-phone');
-        const age = form.querySelector('#cp-age');
+        const state = form.querySelector('#cp-state');
         const companyName = form.querySelector('#cp-company-name');
         const companyLocation = form.querySelector('#cp-company-location');
         const password = form.querySelector('#cp-password');
@@ -318,14 +370,24 @@
 
         const checks = [
             validateEgyptPhone(phone.value),
-            validateAge(age.value, false),
-            validateCompanyName(companyName.value),
-            validateCompanyLocation(companyLocation ? companyLocation.value : ''),
+            validateSelect(state.value),
+        ];
+        const fields = [phone, state];
+
+        if (isCompany) {
+            checks.push(
+                validateCompanyName(companyName.value, true),
+                validateCompanyLocation(companyLocation ? companyLocation.value : '', true)
+            );
+            fields.push(companyName, companyLocation);
+        }
+
+        checks.push(
             validatePassword(password.value),
             validateConfirmPassword(password.value, confirm.value)
-        ];
+        );
+        fields.push(password, confirm);
 
-        const fields = [phone, age, companyName, companyLocation, password, confirm];
         let firstInvalid = null;
 
         checks.forEach((result, i) => {
@@ -354,12 +416,19 @@
         if (!form) return;
 
         const name = form.querySelector('#signup-name');
-        const phone = form.querySelector('#signup-phone');
         const age = form.querySelector('#signup-age');
+        const contactPerson = form.querySelector('#signup-contact-person');
+        const phone = form.querySelector('#signup-phone');
+        const dob = form.querySelector('#signup-dob');
         const gender = form.querySelector('#signup-gender');
         const state = form.querySelector('#signup-state');
-        const companyName = form.querySelector('#signup-company-name');
-        const companyLocation = form.querySelector('#signup-company-location');
+        const companyName = form.querySelector('#signup-company-name-req');
+        const companyPhone = form.querySelector('#signup-company-phone');
+        const companyAddress = form.querySelector('#signup-company-address');
+        const companyCity = form.querySelector('#signup-company-city');
+        const companyState = form.querySelector('#signup-company-state');
+        const address = form.querySelector('#signup-address');
+        const city = form.querySelector('#signup-city');
         const email = form.querySelector('#signup-email');
         const password = form.querySelector('#signup-password');
         const confirm = form.querySelector('#signup-confirm-password');
@@ -369,16 +438,11 @@
             phone.setAttribute('inputmode', 'numeric');
             phone.setAttribute('autocomplete', 'tel');
         }
-        if (age) {
-            age.removeAttribute('type');
-            age.setAttribute('inputmode', 'numeric');
-            age.setAttribute('maxlength', '3');
-        }
 
         let requirementsEl = form.querySelector('.password-requirements');
         if (!requirementsEl && password) {
             requirementsEl = document.createElement('div');
-            requirementsEl.className = 'password-requirements';
+            requirementsEl.className = 'password-requirements password-requirements--signup';
             requirementsEl.innerHTML = [
                 '<p class="password-requirements-title">Password must include:</p>',
                 '<ul>',
@@ -393,13 +457,25 @@
             if (passwordGroup) passwordGroup.appendChild(requirementsEl);
         }
 
-        bindField(name, () => validateFullName(name.value));
-        bindField(phone, () => validateEgyptPhone(phone.value));
-        bindField(age, () => validateAge(age.value, true));
-        bindField(gender, () => validateSelect(gender.value));
-        bindField(state, () => validateSelect(state.value));
-        bindField(companyName, () => validateCompanyName(companyName.value));
-        bindField(companyLocation, () => validateCompanyLocation(companyLocation ? companyLocation.value : ''));
+        if (password && requirementsEl) {
+            requirementsEl.classList.add('password-requirements--signup', 'is-visible');
+            updatePasswordRequirements(password, requirementsEl);
+        }
+
+        bindField(name, () => (getSignupAccountType(form) === 'personal' ? validateFullName(name.value) : { valid: true }));
+        bindField(age, () => (getSignupAccountType(form) === 'personal' ? validateAge(age.value, true) : { valid: true }));
+        bindField(contactPerson, () => (getSignupAccountType(form) === 'company' ? validateFullName(contactPerson.value) : { valid: true }));
+        bindField(phone, () => (getSignupAccountType(form) === 'personal' ? validateEgyptPhone(phone.value) : { valid: true }));
+        bindField(dob, () => (getSignupAccountType(form) === 'personal' ? validateDateOfBirth(dob.value, false) : { valid: true }));
+        bindField(gender, () => (getSignupAccountType(form) === 'personal' ? validateSelect(gender.value) : { valid: true }));
+        bindField(state, () => (getSignupAccountType(form) === 'personal' ? validateSelect(state.value) : { valid: true }));
+        bindField(companyName, () => validateCompanyName(companyName?.value, getSignupAccountType(form) === 'company'));
+        bindField(companyPhone, () => (getSignupAccountType(form) === 'company' ? validateEgyptPhone(companyPhone.value) : { valid: true }));
+        bindField(address, () => (getSignupAccountType(form) === 'personal' && !trim(address?.value) ? { valid: false, message: MESSAGES.required } : { valid: true }));
+        bindField(city, () => (getSignupAccountType(form) === 'personal' && !trim(city?.value) ? { valid: false, message: MESSAGES.required } : { valid: true }));
+        bindField(companyAddress, () => (getSignupAccountType(form) === 'company' && !trim(companyAddress?.value) ? { valid: false, message: MESSAGES.required } : { valid: true }));
+        bindField(companyCity, () => (getSignupAccountType(form) === 'company' && !trim(companyCity?.value) ? { valid: false, message: MESSAGES.required } : { valid: true }));
+        bindField(companyState, () => (getSignupAccountType(form) === 'company' ? validateSelect(companyState?.value) : { valid: true }));
         bindField(email, () => validateEmail(email.value));
         bindField(password, () => validatePassword(password.value), {
             onInput: () => updatePasswordRequirements(password, requirementsEl),
@@ -407,16 +483,19 @@
         });
         bindField(confirm, () => validateConfirmPassword(password.value, confirm.value));
 
-        if (companyLocation) companyLocation.setAttribute('maxlength', '200');
-
-        updatePasswordRequirements(password, requirementsEl);
+        if (address) address.setAttribute('maxlength', '200');
+        if (companyAddress) companyAddress.setAttribute('maxlength', '200');
+        if (companyPhone) {
+            companyPhone.setAttribute('maxlength', '11');
+            companyPhone.setAttribute('inputmode', 'numeric');
+        }
     }
 
     function attachCompleteProfileValidation(form) {
         if (!form) return;
 
         const phone = form.querySelector('#cp-phone');
-        const age = form.querySelector('#cp-age');
+        const state = form.querySelector('#cp-state');
         const companyName = form.querySelector('#cp-company-name');
         const companyLocation = form.querySelector('#cp-company-location');
         const password = form.querySelector('#cp-password');
@@ -426,11 +505,6 @@
             phone.setAttribute('maxlength', '11');
             phone.setAttribute('inputmode', 'numeric');
             phone.setAttribute('autocomplete', 'tel');
-        }
-        if (age) {
-            age.removeAttribute('type');
-            age.setAttribute('inputmode', 'numeric');
-            age.setAttribute('maxlength', '3');
         }
         if (companyLocation) {
             companyLocation.setAttribute('maxlength', '200');
@@ -455,9 +529,13 @@
         }
 
         bindField(phone, () => validateEgyptPhone(phone.value));
-        bindField(age, () => validateAge(age.value, false));
-        bindField(companyName, () => validateCompanyName(companyName.value));
-        bindField(companyLocation, () => validateCompanyLocation(companyLocation ? companyLocation.value : ''));
+        bindField(state, () => validateSelect(state.value));
+        if (companyName) {
+            bindField(companyName, () => validateCompanyName(companyName.value, getCompleteProfileAccountType(form) === 'company'));
+        }
+        if (companyLocation) {
+            bindField(companyLocation, () => validateCompanyLocation(companyLocation.value, getCompleteProfileAccountType(form) === 'company'));
+        }
         bindField(password, () => validatePassword(password.value), {
             onInput: () => updatePasswordRequirements(password, requirementsEl),
             liveConfirmTarget: confirm
@@ -520,11 +598,12 @@
         updatePasswordRequirements,
         setFieldError,
         clearFieldError,
+        validateDateOfBirth,
+        validateSignupForm,
         attachSignupValidation,
         attachCompleteProfileValidation,
         attachForgotEmailValidation,
         attachResetPasswordValidation,
-        validateSignupForm,
         validateCompleteProfileForm,
         validateResetPasswordForm
     };

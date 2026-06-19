@@ -21,18 +21,18 @@
         }
         .cp-card {
             width: 100%;
-            max-width: 760px;
+            max-width: 520px;
             background: #fff;
             border-radius: 14px;
             box-shadow: var(--box-shadow);
-            padding: 1.2rem;
+            padding: 1.25rem;
         }
-        .cp-title { margin: 0; color: var(--primary-color); }
-        .cp-sub { color: var(--text-light); margin: .35rem 0 1rem; }
+        .cp-title { margin: 0; color: var(--primary-color); font-size: 1.35rem; }
+        .cp-sub { color: var(--text-light); margin: .35rem 0 1.1rem; font-size: 0.92rem; line-height: 1.45; }
         .cp-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: .9rem;
+            gap: .85rem;
             align-items: start;
         }
         .cp-group {
@@ -40,16 +40,26 @@
             gap: .35rem;
             align-content: start;
             min-width: 0;
+            position: relative;
+            padding-bottom: 1.35rem;
+        }
+        .cp-group:has(.password-requirements) { padding-bottom: 0; }
+        .cp-group .field-error {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin-top: 0;
         }
         .cp-group.full { grid-column: 1 / -1; }
         .cp-password-row {
             grid-column: 1 / -1;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: .9rem;
+            gap: .85rem;
             align-items: start;
         }
-        .cp-group label { font-weight: 600; color: var(--text-color); }
+        .cp-group label { font-weight: 600; color: var(--text-color); font-size: 0.9rem; }
         .cp-group input, .cp-group select {
             width: 100%;
             padding: .68rem .72rem;
@@ -57,6 +67,7 @@
             border-radius: 10px;
             font-size: 16px;
             min-height: 44px;
+            box-sizing: border-box;
         }
         .cp-group input:focus, .cp-group select:focus {
             outline: none;
@@ -74,8 +85,58 @@
             background: transparent;
             color: #64748b;
             cursor: pointer;
+            min-width: 44px;
+            min-height: 44px;
         }
-        .cp-actions { margin-top: 1rem; display: flex; gap: .6rem; flex-wrap: wrap; }
+        .cp-account-type {
+            grid-column: 1 / -1;
+            margin-bottom: .15rem;
+        }
+        .cp-account-type > span:first-child {
+            display: block;
+            font-weight: 600;
+            color: var(--text-color);
+            font-size: 0.9rem;
+            margin-bottom: .45rem;
+        }
+        .cp-account-type-options {
+            display: flex;
+            gap: .65rem;
+            flex-wrap: wrap;
+        }
+        .cp-account-type-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: .45rem;
+            padding: .55rem .85rem;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            color: #94a3b8;
+            font-weight: 600;
+            font-size: 0.88rem;
+            user-select: none;
+        }
+        .cp-account-type-chip.is-active {
+            border-color: var(--primary-color);
+            background: rgba(0, 153, 204, .08);
+            color: var(--primary-color);
+        }
+        .cp-account-type-chip .cp-type-dot {
+            width: .65rem;
+            height: .65rem;
+            border-radius: 50%;
+            border: 2px solid currentColor;
+            flex-shrink: 0;
+        }
+        .cp-account-type-chip.is-active .cp-type-dot {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            box-shadow: inset 0 0 0 2px #fff;
+        }
+        .cp-company-only { display: none; }
+        #complete-profile-form.cp-is-company .cp-company-only { display: grid; }
+        .cp-actions { margin-top: .25rem; display: flex; gap: .6rem; flex-wrap: wrap; }
         .cp-btn {
             border: none;
             border-radius: 10px;
@@ -93,12 +154,14 @@
         }
         .cp-msg.error { display: block; background: #fee2e2; border: 1px solid #fecaca; color: #991b1b; }
         .cp-msg.success { display: block; background: #dcfce7; border: 1px solid #86efac; color: #166534; }
-        @media (max-width: 760px) {
+        @media (max-width: 560px) {
             .cp-grid,
             .cp-password-row { grid-template-columns: 1fr; }
             .cp-card { padding: 1rem; }
             .cp-actions { flex-direction: column; }
             .cp-btn { width: 100%; min-height: 48px; }
+            .cp-account-type-options { flex-direction: column; }
+            .cp-account-type-chip { width: 100%; }
         }
     </style>
 </head>
@@ -106,38 +169,43 @@
     <div class="cp-wrap">
         <div class="cp-card">
             <h2 class="cp-title">Complete Your Profile</h2>
-            <p class="cp-sub">For security, please set a password and phone number before continuing.</p>
-            <form id="complete-profile-form">
+            <p class="cp-sub">A few details to activate your account. You can add everything else from your Profile page later.</p>
+            <form id="complete-profile-form" data-account-type="personal" class="cp-is-personal">
                 <div class="cp-grid">
+                    <div class="cp-account-type">
+                        <span>Account Type</span>
+                        <div class="cp-account-type-options" aria-live="polite">
+                            <span class="cp-account-type-chip" id="cp-chip-personal" data-type="personal">
+                                <span class="cp-type-dot" aria-hidden="true"></span>
+                                Personal Account
+                            </span>
+                            <span class="cp-account-type-chip" id="cp-chip-company" data-type="company">
+                                <span class="cp-type-dot" aria-hidden="true"></span>
+                                Company Account
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="cp-group cp-company-only full">
+                        <label for="cp-company-name">Company Name *</label>
+                        <input id="cp-company-name" type="text" autocomplete="organization">
+                    </div>
+                    <div class="cp-group cp-company-only full">
+                        <label for="cp-company-location">Company Location *</label>
+                        <input id="cp-company-location" type="text" placeholder="City, area, or address" maxlength="200" autocomplete="organization-title">
+                    </div>
+
                     <div class="cp-group">
                         <label for="cp-phone">Phone Number *</label>
                         <input id="cp-phone" type="tel" placeholder="01XXXXXXXXX" maxlength="11" inputmode="numeric" autocomplete="tel" required>
                     </div>
                     <div class="cp-group">
-                        <label for="cp-age">Age</label>
-                        <input id="cp-age" type="text" inputmode="numeric" maxlength="3" placeholder="18–100">
-                    </div>
-                    <div class="cp-group">
-                        <label for="cp-gender">Gender</label>
-                        <select id="cp-gender">
-                            <option value="">Select Gender</option>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                            <option value="prefer_not_to_say">Prefer not to say</option>
+                        <label for="cp-state">State *</label>
+                        <select id="cp-state" required>
+                            <option value="">Select State</option>
                         </select>
                     </div>
-                    <div class="cp-group">
-                        <label for="cp-state">State</label>
-                        <input id="cp-state" type="text" placeholder="Cairo">
-                    </div>
-                    <div class="cp-group">
-                        <label for="cp-company-name">Company Name</label>
-                        <input id="cp-company-name" type="text" placeholder="Optional">
-                    </div>
-                    <div class="cp-group">
-                        <label for="cp-company-location">Company Location</label>
-                        <input id="cp-company-location" type="text" placeholder="Optional" maxlength="200">
-                    </div>
+
                     <div class="cp-password-row">
                         <div class="cp-group">
                             <label for="cp-password">Set Password *</label>
@@ -166,8 +234,37 @@
 
     <script src="infinity-loader.js?v=20260607"></script>
     <script src="connectivity.js?v=20260607"></script>
-    <script src="form-validation.js?v=20260614"></script>
+    <script src="form-validation.js?v=20260628"></script>
     <script>
+        const EGYPT_STATES = [
+            "Cairo", "Giza", "Alexandria", "Qalyubia", "Dakahlia", "Red Sea", "Beheira", "Fayoum",
+            "Gharbia", "Ismailia", "Menofia", "Minya", "Qena", "Aswan", "Sohag", "Suez", "Sharqia",
+            "Assiut", "Beni Suef", "Port Said", "Damietta", "Luxor", "Matrouh", "North Sinai",
+            "South Sinai", "Kafr El Sheikh", "Monufia"
+        ];
+
+        function populateStateSelect() {
+            const sel = document.getElementById("cp-state");
+            if (!sel) return;
+            sel.innerHTML = '<option value="">Select State</option>'
+                + EGYPT_STATES.map((s) => `<option value="${s}">${s}</option>`).join("");
+        }
+
+        function applyAccountType(type) {
+            const accountType = type === "company" ? "company" : "personal";
+            const form = document.getElementById("complete-profile-form");
+            if (!form) return;
+            form.dataset.accountType = accountType;
+            form.classList.toggle("cp-is-company", accountType === "company");
+            form.classList.toggle("cp-is-personal", accountType === "personal");
+            document.getElementById("cp-chip-personal")?.classList.toggle("is-active", accountType === "personal");
+            document.getElementById("cp-chip-company")?.classList.toggle("is-active", accountType === "company");
+            const companyName = document.getElementById("cp-company-name");
+            const companyLocation = document.getElementById("cp-company-location");
+            if (companyName) companyName.required = accountType === "company";
+            if (companyLocation) companyLocation.required = accountType === "company";
+        }
+
         function showMessage(message, type = "error") {
             const el = document.getElementById("cp-message");
             el.textContent = message;
@@ -182,18 +279,26 @@
             }
             const data = await res.json();
             const missing = Array.isArray(data?.missingProfileFields) ? data.missingProfileFields : [];
-            if (!missing.includes("password") && !missing.includes("phone")) {
+            if (missing.length === 0) {
                 const role = data?.user?.role || "customer";
                 window.location.href = ["employee", "manager", "primary", "technical"].includes(role) ? "/dashboard.html" : "/index.html";
                 return false;
             }
+            applyAccountType(data?.user?.accountType || "personal");
             return true;
         }
 
+        populateStateSelect();
+
         const completeProfileForm = document.getElementById("complete-profile-form");
-        if (window.FormValidation && completeProfileForm) {
-            FormValidation.attachCompleteProfileValidation(completeProfileForm);
-        }
+
+        (async () => {
+            const canContinue = await ensureSessionAndNeed();
+            if (!canContinue) return;
+            if (window.FormValidation && completeProfileForm) {
+                FormValidation.attachCompleteProfileValidation(completeProfileForm);
+            }
+        })();
 
         completeProfileForm.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -201,18 +306,17 @@
                 return;
             }
 
-            const password = document.getElementById("cp-password").value;
-            const confirmPassword = document.getElementById("cp-confirm-password").value;
-
+            const accountType = completeProfileForm.dataset.accountType === "company" ? "company" : "personal";
             const payload = {
                 phone: document.getElementById("cp-phone").value.replace(/\D/g, ""),
-                age: Number(document.getElementById("cp-age").value) || null,
-                gender: document.getElementById("cp-gender").value || null,
-                state: document.getElementById("cp-state").value.trim(),
-                companyName: document.getElementById("cp-company-name").value.trim(),
-                companyLocation: document.getElementById("cp-company-location").value.trim(),
-                password
+                state: document.getElementById("cp-state").value,
+                password: document.getElementById("cp-password").value,
             };
+
+            if (accountType === "company") {
+                payload.companyName = document.getElementById("cp-company-name").value.trim();
+                payload.companyLocation = document.getElementById("cp-company-location").value.trim();
+            }
 
             const btn = document.getElementById("cp-save-btn");
             const prevText = btn.textContent;
@@ -223,7 +327,7 @@
                     method: "POST",
                     credentials: "include",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(payload),
                 });
                 const data = await res.json();
                 if (!res.ok) {
@@ -272,8 +376,6 @@
                 syncPasswordToggle(btn, target);
             });
         });
-
-        ensureSessionAndNeed();
     </script>
 </body>
 </html>

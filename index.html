@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="mazen.css?v=20260603-7">
     <link rel="stylesheet" href="infinity-loader.css?v=20260612">
     <link rel="stylesheet" href="home.css?v=20260619">
-    <link rel="stylesheet" href="home-nav-index.css?v=20260603-nav3">
+    <link rel="stylesheet" href="home-nav-index.css?v=20260625">
     <link rel="stylesheet" href="home-nav-mobile.css?v=20260603-m3">
     <link rel="stylesheet" href="site-footer.css?v=20260613">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -73,7 +73,7 @@
                 <a href="#contact" class="home-quick-link"><i class="fas fa-map-marker-alt" aria-hidden="true"></i> Contact</a>
             </div>
             <div class="home-account-dropdown is-guest" id="home-account-menu">
-                <button type="button" class="home-account-toggle" id="home-account-toggle" aria-expanded="false" aria-controls="home-account-panel" aria-haspopup="true">
+                <button type="button" class="home-account-toggle" id="home-account-toggle" data-notif-badge aria-expanded="false" aria-controls="home-account-panel" aria-haspopup="true">
                     <i class="fas fa-user home-account-toggle-icon" aria-hidden="true"></i>
                     <span class="home-account-toggle-label">Sign In</span>
                     <i class="fas fa-chevron-down home-account-chevron" aria-hidden="true"></i>
@@ -84,6 +84,16 @@
                         <li class="user-orders-link" hidden>
                             <a href="user-dashboard.html" class="home-account-item my-orders-nav-link">
                                 <i class="fas fa-receipt" aria-hidden="true"></i> My Orders
+                            </a>
+                        </li>
+                        <li class="user-profile-link" hidden>
+                            <a href="profile.html" class="home-account-item">
+                                <i class="fas fa-user-circle" aria-hidden="true"></i> Profile
+                            </a>
+                        </li>
+                        <li class="user-support-link" hidden>
+                            <a href="support.html" class="home-account-item">
+                                <i class="fas fa-life-ring" aria-hidden="true"></i> Support
                             </a>
                         </li>
                         <li class="staff-dashboard-link" hidden>
@@ -358,7 +368,8 @@
 
     <script src="infinity-loader.js?v=20260615"></script>
     <script src="connectivity.js?v=20260607"></script>
-    <script src="script.js?v=20260603-6"></script>
+    <script src="script.js?v=20260612"></script>
+    <script src="notifications.js?v=20260625"></script>
     <script>
     (function initClientsMarquee() {
         function duplicateMarqueeGroup() {

@@ -93,6 +93,7 @@ body.home-page .home-quick-logo .nav-logo-svg {
 }
 
 body.home-page .home-account-toggle {
+    position: relative;
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
@@ -262,6 +263,26 @@ body.home-page .home-account-signout-btn:hover,
 body.home-page .home-account-signout-btn:focus-visible {
     background: #fef2f2;
     color: #c0392b;
+}
+
+body.home-page .notif-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    background: #dc2626;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    pointer-events: none;
+    line-height: 1;
+    border: 2px solid #fff;
 }
 
 body.home-page .home-quick-link {

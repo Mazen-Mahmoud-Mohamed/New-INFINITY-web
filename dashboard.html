@@ -9,6 +9,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="mazen.css?v=20260603-dash">
     <link rel="stylesheet" href="infinity-loader.css?v=20260607">
+    <link rel="stylesheet" href="account-pages.css?v=20260622">
+    <link rel="stylesheet" href="identity-docs.css?v=20260622">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -2172,6 +2174,185 @@
             }
             .dash-guide-nav button { white-space: nowrap; width: auto; flex-shrink: 0; }
         }
+
+        /* Identity verification review panel */
+        .dash-user-cell { display: flex; align-items: center; gap: .55rem; }
+        .dash-user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        .dash-user-avatar--text {
+            display: inline-grid;
+            place-content: center;
+            background: #e2e8f0;
+            color: #475569;
+            font-weight: 700;
+            font-size: .85rem;
+        }
+        .dash-doc-review-row {
+            border: 1px solid var(--dash-border-soft);
+            border-radius: var(--dash-radius-sm);
+            padding: 1rem;
+            margin-bottom: .75rem;
+            background: #fff;
+        }
+        .dash-doc-review-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: .5rem;
+            margin-bottom: .65rem;
+        }
+        .dash-doc-preview-row { margin: .5rem 0; }
+        .dash-doc-preview {
+            display: inline-block;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--dash-border);
+            max-width: 220px;
+        }
+        .dash-doc-preview img {
+            display: block;
+            width: 100%;
+            max-height: 160px;
+            object-fit: cover;
+        }
+        .dash-doc-pdf,
+        .dash-doc-file {
+            display: inline-grid;
+            place-content: center;
+            gap: .35rem;
+            min-width: 120px;
+            min-height: 100px;
+            background: #f8fafc;
+            color: #64748b;
+            text-decoration: none;
+            font-size: .85rem;
+        }
+        .dash-doc-review-actions {
+            display: flex;
+            gap: .4rem;
+            flex-wrap: wrap;
+            margin: .5rem 0;
+        }
+        .dash-doc-review-row .doc-reject-reason {
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: .35rem;
+            padding: .5rem .65rem;
+            border: 1px solid var(--dash-border);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: .85rem;
+        }
+
+        /* Support chat in dashboard */
+        .dash-support-chat {
+            display: grid;
+            gap: .85rem;
+            max-height: min(52vh, 480px);
+            overflow-y: auto;
+            padding: .75rem;
+            background: #f8fafc;
+            border: 1px solid var(--dash-border-soft);
+            border-radius: var(--dash-radius-sm);
+        }
+        .dash-support-msg {
+            max-width: 92%;
+            padding: .65rem .85rem;
+            border-radius: 12px;
+            font-size: .88rem;
+            line-height: 1.5;
+        }
+        .dash-support-msg.user {
+            margin-right: auto;
+            background: #fff;
+            border: 1px solid var(--dash-border-soft);
+        }
+        .dash-support-msg.staff {
+            margin-left: auto;
+            background: #e0f2fe;
+            border: 1px solid #bae6fd;
+        }
+        .dash-support-msg-head {
+            display: flex;
+            justify-content: space-between;
+            gap: .5rem;
+            flex-wrap: wrap;
+            font-size: .75rem;
+            margin-bottom: .35rem;
+            opacity: .85;
+        }
+        .dash-support-msg-body { word-break: break-word; }
+        .dash-msg-attachments {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .45rem;
+            margin-top: .55rem;
+        }
+        .dash-attach-thumb {
+            display: block;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--dash-border);
+            max-width: 140px;
+        }
+        .dash-attach-thumb img {
+            display: block;
+            width: 100%;
+            max-height: 120px;
+            object-fit: cover;
+        }
+        .dash-attach-file {
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            padding: .4rem .6rem;
+            background: #fff;
+            border: 1px solid var(--dash-border);
+            border-radius: 8px;
+            font-size: .8rem;
+            color: var(--dash-text);
+            text-decoration: none;
+        }
+        .dash-support-reply-form textarea {
+            border: 1px solid var(--dash-border);
+            border-radius: var(--dash-radius-sm);
+            padding: .65rem;
+            font-family: inherit;
+            font-size: .88rem;
+        }
+        .dash-support-reply-files {
+            margin-bottom: .65rem;
+        }
+        .dash-support-reply-files label {
+            display: block;
+            font-size: .82rem;
+            margin-bottom: .3rem;
+        }
+        .dash-support-reply-files input[type="file"] {
+            width: 100%;
+            font-size: .82rem;
+        }
+        .ap-ticket-list { display: grid; gap: .5rem; max-height: 420px; overflow-y: auto; }
+        .ap-ticket-item {
+            border: 1px solid var(--dash-border-soft);
+            border-radius: var(--dash-radius-sm);
+            padding: .75rem;
+            background: #fff;
+            cursor: pointer;
+            transition: border-color .15s ease, background .15s ease;
+        }
+        .ap-ticket-item:hover { border-color: #7dd3fc; background: #f0f9ff; }
+        @media (max-width: 900px) {
+            #support-section .dash-card > div[style*="grid-template-columns"] {
+                grid-template-columns: 1fr !important;
+            }
+            .dash-support-chat { max-height: 40vh; }
+        }
     </style>
 </head>
 <body class="dashboard-page">
@@ -2207,6 +2388,8 @@
                 <button type="button" class="dash-tab" data-section="customers-section"><i class="fas fa-user-friends" aria-hidden="true"></i> Customers</button>
                 <button type="button" class="dash-tab" data-section="analytics-section" id="analytics-tab" style="display:none;"><i class="fas fa-chart-line" aria-hidden="true"></i> Analytics</button>
                 <button type="button" class="dash-tab" data-section="users-section"><i class="fas fa-user-cog" aria-hidden="true"></i> Users</button>
+                <button type="button" class="dash-tab" data-section="support-section" id="support-tab" style="display:none;"><i class="fas fa-life-ring" aria-hidden="true"></i> Support</button>
+                <button type="button" class="dash-tab" data-section="verification-section" id="verification-tab" style="display:none;"><i class="fas fa-id-card" aria-hidden="true"></i> Identity</button>
             </nav>
         </div>
         </div>
@@ -2214,7 +2397,7 @@
         <div id="dash-welcome" class="dash-welcome" role="region" aria-label="Dashboard welcome">
             <div class="dash-welcome-text">
                 <strong>New here? Take a quick tour</strong>
-                <p>Learn how Inventory, Orders, Team management, and the new features work — tailored to your role.</p>
+                <p>The dashboard supports Product Management, Team Management, Customer Management, Identity Verification, Customer Support, Analytics, Orders, and Inventory — tailored to your role.</p>
                 <label class="dash-welcome-pref">
                     <input type="checkbox" id="dash-welcome-skip-pref">
                     Don&apos;t show this again when I open the dashboard
@@ -2482,7 +2665,7 @@
                     </div>
                 </div>
                 <table class="dash-table" id="customers-table">
-                    <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Profile</th><th>Location / Company</th><th>Created</th></tr></thead>
+                    <thead><tr><th>Customer</th><th>Account</th><th>Email</th><th>Phone</th><th>Email Status</th><th>Identity Status</th><th>Actions</th></tr></thead>
                     <tbody></tbody>
                 </table>
             </div>
@@ -2561,6 +2744,84 @@
                         </div>
                         <canvas id="chart-customers"></canvas>
                         <div id="top-customers-insights" class="analytics-insights"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="support-section" class="dash-section">
+            <div class="dash-card">
+                <div class="section-head">
+                    <h3>Support Tickets</h3>
+                    <div class="section-tools" style="flex-wrap:wrap;gap:.5rem;">
+                        <input id="dash-support-search" class="dash-search" placeholder="Search tickets…">
+                        <select id="dash-support-status">
+                            <option value="">All statuses</option>
+                            <option value="open">Open</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="waiting_customer">Waiting for Customer</option>
+                            <option value="resolved">Resolved</option>
+                            <option value="closed">Closed</option>
+                        </select>
+                        <select id="dash-support-category">
+                            <option value="">All categories</option>
+                            <option value="technical">Technical Issue</option>
+                            <option value="billing">Billing</option>
+                            <option value="product">Product Question</option>
+                            <option value="complaint">Complaint</option>
+                            <option value="suggestion">Suggestion</option>
+                            <option value="account">Account Issue</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:1rem;">
+                    <div id="dash-support-list" class="ap-ticket-list"></div>
+                    <div>
+                        <div id="dash-support-empty" class="muted" style="padding:1rem;text-align:center;">Select a ticket to view the conversation.</div>
+                        <div id="dash-support-detail" hidden>
+                            <h4 id="dash-support-subject" style="margin:0 0 .25rem;"></h4>
+                            <p id="dash-support-meta" class="muted" style="margin:0 0 .5rem;"></p>
+                            <p id="dash-support-customer" class="muted" style="margin:0 0 1rem;"></p>
+                            <div id="dash-support-chat" class="ap-chat dash-support-chat"></div>
+                            <form id="dash-support-reply-form" class="dash-support-reply-form" style="margin-top:1rem;">
+                                <textarea id="dash-support-reply-body" rows="3" style="width:100%;margin-bottom:.5rem;box-sizing:border-box;" placeholder="Staff reply…" required></textarea>
+                                <div class="dash-support-reply-files">
+                                    <label for="dash-support-reply-attachments">Attachments <span class="muted">(optional, up to 3 files)</span></label>
+                                    <input id="dash-support-reply-attachments" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" multiple>
+                                </div>
+                                <button type="submit" class="dash-btn primary">Send reply</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="verification-section" class="dash-section">
+            <div class="dash-card">
+                <div class="section-head">
+                    <h3>Identity Verification</h3>
+                    <select id="dash-verification-filter" class="dash-search" style="max-width:200px;">
+                        <option value="actionable">Pending review</option>
+                        <option value="pending">Submitted</option>
+                        <option value="rejected">Rejected</option>
+                        <option value="approved">Approved</option>
+                        <option value="all">All</option>
+                    </select>
+                </div>
+                <table class="dash-table" id="verification-table">
+                    <thead><tr><th>Customer</th><th>Email</th><th>Account</th><th>Status</th><th>Submitted</th><th>Actions</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+                <div id="dash-verification-detail" class="dash-card" style="margin-top:1rem;" hidden>
+                    <h4 id="dash-verification-user"></h4>
+                    <div id="dash-verification-docs" style="margin:.75rem 0;"></div>
+                    <label>Internal notes<textarea id="dash-verification-notes" rows="3" style="width:100%;"></textarea></label>
+                    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem;">
+                        <button type="button" class="dash-btn primary" id="dash-verification-approve">Approve</button>
+                        <button type="button" class="dash-btn ghost" id="dash-verification-reject">Reject</button>
+                        <button type="button" class="dash-btn ghost" id="dash-verification-reupload">Request re-upload</button>
                     </div>
                 </div>
             </div>
@@ -2854,6 +3115,7 @@
 
     <script src="infinity-loader.js?v=20260607"></script>
     <script src="connectivity.js?v=20260607"></script>
+    <script src="dashboard-extensions.js?v=20260624"></script>
     <script>
         let currentRole = "customer";
         let currentUserId = "";
@@ -4446,7 +4708,7 @@
         async function loadCustomers() {
             const tbody = document.querySelector('#customers-table tbody');
             if (tbody && window.InfinityLoader && !allCustomers.length) {
-                tbody.innerHTML = InfinityLoader.skeletonTableBody(5, 6);
+                tbody.innerHTML = InfinityLoader.skeletonTableBody(5, 8);
             }
             const res = await fetch('/api/dashboard/customers', { credentials: 'include' });
             const data = await res.json();
@@ -4455,31 +4717,97 @@
             renderAnalytics();
         }
 
+        function identityStatusLabel(status) {
+            const map = {
+                none: 'Not Submitted',
+                pending: 'Pending',
+                approved: 'Approved',
+                rejected: 'Rejected',
+                reupload_requested: 'Rejected',
+            };
+            return map[status] || 'Not Submitted';
+        }
+
+        function identityStatusChip(status) {
+            const label = identityStatusLabel(status);
+            const cls = status === 'approved' ? 'ok' : (status === 'pending' ? 'pending' : (status === 'none' ? 'pending' : 'bad'));
+            return `<span class="ap-chip ${cls}">${label}</span>`;
+        }
+
         function renderCustomers() {
             const keyword = (document.getElementById('customers-search')?.value || '').trim().toLowerCase();
             const tbody = document.querySelector('#customers-table tbody');
             tbody.innerHTML = '';
+            const canIdentity = ['employee', 'manager', 'primary'].includes(currentRole);
             const visible = allCustomers.filter((c) => {
                 if (!keyword) return true;
                 const hay = [
                     c.name, c.email, c.phone, c.gender, c.age, c.state,
-                    c.companyName, c.companyLocation
+                    c.companyName, c.companyLocation, c.accountType,
+                    identityStatusLabel(c.identityVerification?.status),
                 ].filter(Boolean).join(' ').toLowerCase();
                 return hay.includes(keyword);
             });
 
             visible.forEach((c) => {
+                const accountType = c.accountType === 'company' ? 'Company' : 'Personal';
+                const emailChip = c.emailVerified !== false
+                    ? '<span class="ap-chip ok">Verified</span>'
+                    : '<span class="ap-chip bad">Not Verified</span>';
+                const idStatus = c.identityVerification?.status || 'none';
+                const avatar = c.profilePicture
+                    ? `<img src="${c.profilePicture}" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">`
+                    : `<span style="width:36px;height:36px;border-radius:50%;background:#e2e8f0;display:inline-grid;place-content:center;font-weight:700;">${(c.name || 'U').charAt(0).toUpperCase()}</span>`;
+                const actions = canIdentity ? `
+                    <div style="display:flex;gap:.35rem;flex-wrap:wrap;">
+                        <button type="button" class="dash-btn ghost" data-open-docs="${c._id}">Documents</button>
+                        <button type="button" class="dash-btn primary" data-quick-approve="${c._id}">Approve</button>
+                        <button type="button" class="dash-btn ghost" data-quick-reject="${c._id}">Reject</button>
+                    </div>` : '<span class="muted">—</span>';
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td data-label="Name">${c.name || '-'}</td>
+                    <td data-label="Customer"><div style="display:flex;align-items:center;gap:.5rem;">${avatar}<div><strong>${c.name || '-'}</strong><br><small class="muted">${c.companyName || ''}</small></div></div></td>
+                    <td data-label="Account">${accountType}</td>
                     <td data-label="Email">${c.email || '-'}</td>
                     <td data-label="Phone">${c.phone || '-'}</td>
-                    <td data-label="Profile">${c.gender || '-'} | Age: ${c.age ?? '-'}</td>
-                    <td data-label="Location / Company">${c.state || '-'}<br><small class="muted">${c.companyName || '-'} / ${c.companyLocation || '-'}</small></td>
-                    <td data-label="Created"><small class="muted">${c.createdAt ? new Date(c.createdAt).toLocaleString() : '-'}</small></td>
+                    <td data-label="Email Status">${emailChip}</td>
+                    <td data-label="Identity Status">${identityStatusChip(idStatus)}</td>
+                    <td data-label="Actions">${actions}</td>
                 `;
                 tbody.appendChild(tr);
             });
+
+            if (canIdentity && window.DashboardExtensions) {
+                tbody.querySelectorAll('[data-open-docs]').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        activateDashSection('verification-section');
+                        DashboardExtensions.openVerificationReview(btn.dataset.openDocs);
+                    });
+                });
+                tbody.querySelectorAll('[data-quick-approve]').forEach((btn) => {
+                    btn.addEventListener('click', async () => {
+                        await fetch(`/api/dashboard/verification/user/${btn.dataset.quickApprove}/review`, {
+                            method: 'POST', credentials: 'include',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'approved', notes: '' }),
+                        });
+                        await loadCustomers();
+                        if (DashboardExtensions.loadVerificationQueue) await DashboardExtensions.loadVerificationQueue();
+                    });
+                });
+                tbody.querySelectorAll('[data-quick-reject]').forEach((btn) => {
+                    btn.addEventListener('click', async () => {
+                        const notes = prompt('Rejection reason (optional):') || '';
+                        await fetch(`/api/dashboard/verification/user/${btn.dataset.quickReject}/review`, {
+                            method: 'POST', credentials: 'include',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'rejected', notes }),
+                        });
+                        await loadCustomers();
+                        if (DashboardExtensions.loadVerificationQueue) await DashboardExtensions.loadVerificationQueue();
+                    });
+                });
+            }
         }
 
         function renderUsers() {
@@ -4648,7 +4976,7 @@
             });
         });
 
-        const DASH_GUIDE_VERSION = 1;
+        const DASH_GUIDE_VERSION = 2;
         const DASH_PREF_PREFIX = 'infinity-dash-pref';
 
         function dashPrefStorageKey() {
@@ -4683,22 +5011,30 @@
             if (auto) auto.checked = pref.autoShow;
         }
 
+        function canStaffSupport() {
+            return ['employee', 'manager', 'primary'].includes(currentRole);
+        }
+
+        function canManageIdentity() {
+            return ['employee', 'manager', 'primary'].includes(currentRole);
+        }
+
         function getDashGuideRoleMeta() {
             const meta = {
                 primary: {
                     label: 'Primary Admin',
-                    summary: 'Highest access: full catalog, team page, analytics, staff management, and order fulfillment. Your account cannot be deleted from the dashboard.',
-                    perms: ['All tabs', 'Add / delete products', 'Our Team', 'Analytics', 'Create staff', 'Orders & inventory'],
+                    summary: 'Highest access: full catalog, team page, analytics, staff management, order fulfillment, identity verification, and customer support. Your account cannot be deleted from the dashboard.',
+                    perms: ['All tabs', 'Add / delete products', 'Our Team', 'Analytics', 'Support & Identity', 'Create staff', 'Orders & inventory'],
                 },
                 manager: {
                     label: 'Manager',
-                    summary: 'Manage the store catalog, public team page, business analytics, and most staff accounts. Cannot remove the primary admin.',
-                    perms: ['Add / delete products', 'Our Team', 'Analytics', 'Create staff', 'Orders & inventory'],
+                    summary: 'Manage the store catalog, public team page, business analytics, most staff accounts, identity verification requests, and support tickets. Cannot remove the primary admin.',
+                    perms: ['Add / delete products', 'Our Team', 'Analytics', 'Support & Identity', 'Create staff', 'Orders & inventory'],
                 },
                 employee: {
                     label: 'Employee',
-                    summary: 'Day-to-day operations: update stock and prices, change order status, and view customers. Cannot add products or manage team.',
-                    perms: ['Inventory edits', 'Order status', 'Customers (view)', 'Users (limited)'],
+                    summary: 'Day-to-day operations: update stock and prices, change order status, view customers, review identity documents, and reply to support tickets. Cannot add products or manage team.',
+                    perms: ['Inventory edits', 'Order status', 'Customers (view)', 'Support & Identity', 'Users (limited)'],
                 },
                 technical: {
                     label: 'Technical',
@@ -4723,14 +5059,14 @@
                     perms: roleMeta.perms,
                     steps: [
                         'The <strong>INFINITY Staff Portal</strong> header shows your name and role. <strong>Guide</strong> opens this help panel; <strong>Website</strong> opens the public store; <strong>Sign Out</strong> ends your session.',
-                        'Tabs below the header switch sections: <strong>Inventory</strong>, <strong>Orders</strong>, <strong>Customers</strong>, and <strong>Users</strong> are available to all staff roles.',
-                        ['manager', 'primary'].includes(currentRole)
-                            ? 'Managers and primary admins also see <strong>Add Product</strong>, <strong>Our Team</strong>, and <strong>Analytics</strong>.'
-                            : 'Tabs such as Add Product, Our Team, and Analytics appear only for manager and primary admin roles.',
+                        'Tabs below the header switch sections: <strong>Inventory</strong>, <strong>Add Product</strong>, <strong>Our Team</strong>, <strong>Orders</strong>, <strong>Customers</strong>, <strong>Analytics</strong>, <strong>Users</strong>, <strong>Support</strong>, and <strong>Identity</strong>.',
+                        'All staff roles see Inventory, Orders, Customers, and Users. Add Product, Our Team, and Analytics appear for manager and primary admin. Support and Identity appear for employee, manager, and primary roles.',
+                        'Staff can review identity verification requests and manage customer support tickets directly from the dashboard — replies and status updates sync to the customer&apos;s Support Center and profile.',
+                        'The dashboard covers <strong>Inventory Management</strong>, <strong>Orders</strong>, <strong>Customers</strong>, <strong>Users</strong>, <strong>Identity Verification</strong>, <strong>Support Center</strong>, <strong>Analytics</strong>, <strong>Team Management</strong>, and <strong>Product Management</strong> (Add Product).',
                         'Green <strong>toast</strong> messages confirm saves; red toasts show errors. Destructive actions (delete product, delete user) use a custom confirmation dialog.',
                         'Run the server with <code>npm start</code> and use <code>http://localhost:3000/dashboard.html</code> — opening HTML files directly will break API calls.',
                     ],
-                    tip: 'Prefer learning by doing? Pick a section tour below (Inventory, Orders, etc.). Each tour only covers that tab.',
+                    tip: 'Prefer learning by doing? Pick a section tour below (Inventory, Support, Identity, Orders, etc.). Each tour only covers that tab.',
                 },
                 {
                     id: 'inventory',
@@ -4810,14 +5146,63 @@
                     icon: 'fa-user-friends',
                     title: 'Customers',
                     roles: null,
-                    lead: 'Registered storefront accounts — not staff users. Use this list for support and account lookups.',
+                    lead: 'Registered storefront accounts — not staff users. Use this list for support, account lookups, email verification status, and identity verification actions.',
                     steps: [
-                        '<strong>Search</strong> by name, email, phone, gender, age, or address.',
-                        'Columns include profile info, phone, gender/age, state, company name/location, and account creation date.',
-                        'Customers place orders with the same email shown here — match with <strong>Orders</strong> when resolving tickets.',
-                        'This list is read-only; customers sign up and update profiles through the public site and <strong>complete-profile</strong> flow.',
+                        '<strong>Search</strong> by name, email, phone, gender, age, address, account type, or identity status.',
+                        '<strong>View customer profile</strong> from each row: name, avatar, account type (Personal or Company), email, and phone.',
+                        'Columns include <strong>Email Status</strong> and <strong>Identity Status</strong> for quick account health checks.',
+                        '<strong>Email verification:</strong> every account must verify its email address before gaining full access. Verified emails show a green <strong>Verified</strong> badge; unverified accounts show <strong>Not Verified</strong>.',
+                        '<strong>Identity Status</strong> shows the overall verification state: Not Submitted, Pending, Approved, or Rejected.',
+                        canManageIdentity()
+                            ? '<strong>Documents</strong> opens the customer&apos;s uploaded verification files on the <strong>Identity</strong> tab — preview images, download files, and approve or reject per document.'
+                            : 'Identity document actions are available to employee, manager, and primary roles.',
+                        canManageIdentity()
+                            ? '<strong>Approve</strong> and <strong>Reject</strong> quick actions update the customer&apos;s overall verification status. Use <strong>Documents</strong> for per-file review when needed.'
+                            : 'Verification actions appear for staff with Identity access.',
+                        'Customers place orders with the same email shown here — match with <strong>Orders</strong> and <strong>Support</strong> when resolving tickets.',
+                        'This list is read-only for profile fields; customers update their own details through the public site and profile page.',
                     ],
-                    tip: 'Staff accounts are managed under the <strong>Users</strong> tab, not Customers.',
+                    tip: 'Staff accounts are managed under the <strong>Users</strong> tab, not Customers. For document-level review, open <strong>Identity</strong> from the Documents button.',
+                },
+                {
+                    id: 'support',
+                    icon: 'fa-life-ring',
+                    title: 'Support',
+                    roles: ['employee', 'manager', 'primary'],
+                    lead: 'The Support Center lets staff manage customer helpdesk tickets — read conversations, reply, change status, and review uploaded attachments.',
+                    steps: [
+                        '<strong>Purpose:</strong> customers open tickets from the public Support Center. Staff handle them here without leaving the dashboard.',
+                        '<strong>Search</strong> tickets by subject or ticket number. Use the <strong>status</strong> filter (Open, In Progress, Waiting for Customer, Resolved, Closed) and <strong>category</strong> filter to narrow the list.',
+                        'The <strong>ticket list</strong> on the left shows all matching tickets. Click one to open the conversation.',
+                        'The conversation panel shows the customer name, ticket number, category, current status, and full message history.',
+                        'Customer messages may include <strong>screenshots and attachments</strong> (images and documents) inline in the thread — click thumbnails to open or download.',
+                        'Type a reply in the <strong>Staff reply</strong> box and click <strong>Send reply</strong>. You can attach up to three files. Replies appear immediately in the customer&apos;s Support Center.',
+                        'Change ticket status with the dropdown in the ticket header (e.g. Open → In Progress → Resolved). Status updates sync to the customer view.',
+                        'The full message thread is the ticket history — scroll up to read earlier replies, status changes, and attachments in chronological order.',
+                        'Use Support together with <strong>Customers</strong> and <strong>Orders</strong> when a ticket involves account or purchase issues.',
+                    ],
+                    tip: 'Attachments uploaded by customers are stored permanently and visible on every staff reply review — they are never text-only.',
+                },
+                {
+                    id: 'identity',
+                    icon: 'fa-id-card',
+                    title: 'Identity',
+                    roles: ['employee', 'manager', 'primary'],
+                    lead: 'Review customer identity verification requests — view uploaded documents, approve or reject individually, and track account type and submission status.',
+                    steps: [
+                        '<strong>Purpose:</strong> customers upload ID and license documents (or company registration files) from their profile. Staff review them here before granting verified status.',
+                        'Use the <strong>status filter</strong> to show Pending review, Submitted, Rejected, Approved, or All requests.',
+                        'The queue table lists customer name, email, account type (Personal or Company), verification status, submitted date, and quick actions.',
+                        'Each row shows how many files the customer uploaded (e.g. <strong>2 file(s)</strong>) so you can see upload progress before opening the review panel.',
+                        'Click <strong>View Documents</strong> to open the review panel with every uploaded file, upload date, and per-document status badge.',
+                        'Each document has its own lifecycle: <strong>Not Uploaded</strong>, <strong>Uploaded</strong> (draft), <strong>Pending Review</strong>, <strong>Approved</strong>, or <strong>Rejected</strong>. Documents are reviewed independently.',
+                        'Use <strong>Open Full Size</strong> or <strong>Download</strong> on each file. Image previews appear inline; PDFs open in a new tab.',
+                        '<strong>Approve</strong> or <strong>Reject</strong> individual documents with the per-file buttons. Rejection can include an optional reason the customer will see.',
+                        'Overall <strong>Approve</strong>, <strong>Reject</strong>, or <strong>Request re-upload</strong> buttons at the bottom apply to the full verification request. Add internal notes for your team.',
+                        'When a customer replaces a previously <strong>Approved</strong> document, only that document returns to <strong>Pending Review</strong> — other approved files stay approved until reviewed again.',
+                        'From <strong>Customers</strong>, the <strong>Documents</strong> button jumps directly to this page with that customer&apos;s files loaded.',
+                    ],
+                    tip: 'Partial uploads are normal — customers may submit some documents today and the rest later. Only submitted documents enter the review queue.',
                 },
                 {
                     id: 'analytics',
@@ -4844,6 +5229,7 @@
                     lead: 'Staff accounts that can sign in to this dashboard — roles: technical, employee, manager, primary.',
                     steps: [
                         '<strong>Search</strong> by name, email, or role.',
+                        '<strong>Email verification</strong> applies to storefront customers, not staff accounts. Every customer must verify their email before full access — see the green <strong>Verified</strong> badge on the <strong>Customers</strong> tab.',
                         currentRole === 'technical'
                             ? '<strong>Technical role:</strong> view-only — you cannot create or delete staff accounts.'
                             : ['manager', 'primary'].includes(currentRole)
@@ -4853,7 +5239,7 @@
                         'Server <code>.env</code> lists (<code>MANAGER_EMAILS</code>, <code>EMPLOYEE_EMAILS</code>) can auto-assign roles on login when emails match.',
                         'Primary admin is also seeded via <code>PRIMARY_ADMIN_EMAIL</code> in environment configuration.',
                     ],
-                    tip: 'Customers who shop on the website are listed under <strong>Customers</strong>, not here.',
+                    tip: 'Customers who shop on the website are listed under <strong>Customers</strong>, not here. Check Customers for email verification and identity status.',
                 },
             ];
             return sections.filter((s) => {
@@ -4976,6 +5362,8 @@
                 { id: 'team', label: 'Our Team', icon: 'fa-users', section: 'team-section', visible: canManageTeam },
                 { id: 'orders', label: 'Orders', icon: 'fa-receipt', section: 'orders-section', visible: () => true },
                 { id: 'customers', label: 'Customers', icon: 'fa-user-friends', section: 'customers-section', visible: () => true },
+                { id: 'support', label: 'Support', icon: 'fa-life-ring', section: 'support-section', visible: canStaffSupport },
+                { id: 'identity', label: 'Identity', icon: 'fa-id-card', section: 'verification-section', visible: canManageIdentity },
                 { id: 'analytics', label: 'Analytics', icon: 'fa-chart-line', section: 'analytics-section', visible: canViewAnalytics },
                 { id: 'users', label: 'Users', icon: 'fa-user-cog', section: 'users-section', visible: () => true },
             ].filter((t) => t.visible());
@@ -5073,11 +5461,55 @@
         function buildCustomersTourSteps() {
             const label = 'Customers';
             const section = 'customers-section';
+            const custRow = tourTableHasData('customers-table') ? '#customers-table tbody tr:first-child' : null;
+            const steps = [
+                tourStep(label, section, 'Customers overview', 'Registered storefront customers with profile, contact, email verification, and identity status.', '#customers-section .section-head', '#customers-table'),
+                tourStep(label, section, 'Search customers', 'Filter by name, email, phone, gender, age, address, account type, or identity status.', '#customers-search', '#customers-section .section-tools'),
+                tourStep(label, section, 'Customer profile', 'Each row shows the customer name, avatar, account type (Personal or Company), email, and phone.', custRow ? `${custRow} td[data-label="Customer"]` : '#customers-table', '#customers-table'),
+                tourStep(label, section, 'Email verification', 'The <strong>Email Status</strong> column shows a green <strong>Verified</strong> badge when the customer confirmed their email. Unverified accounts show <strong>Not Verified</strong>.', custRow ? `${custRow} td[data-label="Email Status"]` : '#customers-table thead th:nth-child(5)', '#customers-table'),
+                tourStep(label, section, 'Identity status', 'The <strong>Identity Status</strong> chip shows overall verification: Not Submitted, Pending, Approved, or Rejected.', custRow ? `${custRow} td[data-label="Identity Status"]` : '#customers-table thead th:nth-child(6)', '#customers-table'),
+            ];
+            if (canManageIdentity()) {
+                steps.push(
+                    tourStep(label, section, 'View documents', '<strong>Documents</strong> opens the Identity tab with this customer&apos;s uploaded files for per-document review.', custRow ? `${custRow} [data-open-docs]` : '#customers-table thead th:last-child', '#customers-table'),
+                    tourStep(label, section, 'Quick approve / reject', 'Use <strong>Approve</strong> or <strong>Reject</strong> for the overall verification status, or open Documents for individual file review.', custRow ? `${custRow} td[data-label="Actions"]` : '#customers-table', '#customers-table')
+                );
+            }
+            steps.push(tourStep(label, section, 'Tour complete', 'Customers tour done. Use Orders for purchase history, Support for tickets, and Identity for document review.', '#dash-help-btn', '.dash-actions'));
+            return steps;
+        }
+
+        function buildSupportTourSteps() {
+            const label = 'Support';
+            const section = 'support-section';
             return [
-                tourStep(label, section, 'Customers overview', 'Registered storefront customers with profile and contact details.', '#customers-section .section-head', '#customers-table'),
-                tourStep(label, section, 'Search customers', 'Filter by name, email, phone, gender, age, or address.', '#customers-search', '#customers-section .section-tools'),
-                tourStep(label, section, 'Profile columns', 'See signup date, phone, gender/age, state, and company fields. Match with Orders when handling support tickets.', tourTableHasData('customers-table') ? '#customers-table tbody tr:first-child' : '#customers-table', '#customers-table'),
-                tourStep(label, section, 'Tour complete', 'Customers tour done. Use Orders for purchase history and receipts.', '#dash-help-btn', '.dash-actions'),
+                tourStep(label, section, 'Support overview', 'Manage customer helpdesk tickets — read conversations, reply, and update status from one place.', '#support-section .section-head', '#support-section'),
+                tourStep(label, section, 'Search tickets', 'Search by subject or ticket number to find a specific conversation quickly.', '#dash-support-search', '#support-section .section-tools'),
+                tourStep(label, section, 'Status filter', 'Filter the ticket list by status: Open, In Progress, Waiting for Customer, Resolved, or Closed.', '#dash-support-status', '#support-section .section-tools'),
+                tourStep(label, section, 'Category filter', 'Narrow tickets by category — Technical, Billing, Product, Complaint, Suggestion, Account, or Other.', '#dash-support-category', '#support-section .section-tools'),
+                tourStep(label, section, 'Ticket list', 'All matching tickets appear here. Click one to load the full conversation on the right.', '#dash-support-list', '#support-section .dash-card'),
+                tourStep(label, section, 'Ticket details', 'When a ticket is selected, see the subject, ticket number, customer name, category, status, and message history — including customer attachments.', '#dash-support-detail', '#dash-support-empty'),
+                tourStep(label, section, 'Status selector', 'Change the active ticket&apos;s status with the dropdown in the ticket header. Updates sync to the customer Support Center.', '#dash-support-status-select', '#dash-support-status'),
+                tourStep(label, section, 'Reply box', 'Type a staff reply and click <strong>Send reply</strong>. Attach up to three files. Replies appear in the customer&apos;s Support Center immediately.', '#dash-support-reply-form', '#support-section .dash-card'),
+                tourStep(label, section, 'Tour complete', 'Support tour done. Cross-check Customers and Orders when resolving account or purchase issues.', '#dash-help-btn', '.dash-actions'),
+            ];
+        }
+
+        function buildIdentityTourSteps() {
+            const label = 'Identity';
+            const section = 'verification-section';
+            const idRow = tourTableHasData('verification-table') ? '#verification-table tbody tr:first-child' : null;
+            return [
+                tourStep(label, section, 'Identity overview', 'Review customer identity verification requests — view documents, approve or reject, and track submission status.', '#verification-section .section-head', '#verification-section'),
+                tourStep(label, section, 'Status filter', 'Show Pending review, Submitted, Rejected, Approved, or All requests in the queue.', '#dash-verification-filter', '#verification-section .section-head'),
+                tourStep(label, section, 'Verification queue', 'The table lists customer name, email, account type, verification status, submitted date, and actions.', '#verification-table', '#verification-section .dash-card'),
+                tourStep(label, section, 'Customer information', 'Each row shows who submitted the request and their account type (Personal or Company).', idRow ? `${idRow} td[data-label="Customer"]` : '#verification-table thead', '#verification-table'),
+                tourStep(label, section, 'Status badge', 'The Status column shows the overall verification state — Pending, Approved, Rejected, or Not Submitted.', idRow ? `${idRow} td[data-label="Status"]` : '#verification-table thead th:nth-child(4)', '#verification-table'),
+                tourStep(label, section, 'Open review panel', 'Click <strong>View Documents</strong> to open the review panel with uploaded files and per-document status badges.', idRow ? `${idRow} [data-review]` : '#verification-table tbody', '#verification-table'),
+                tourStep(label, section, 'Document viewer', 'Preview images inline, download files, and review each document&apos;s status: Uploaded, Pending Review, Approved, or Rejected.', '#dash-verification-docs', '#dash-verification-detail'),
+                tourStep(label, section, 'Approve', 'Click <strong>Approve</strong> to accept the verification request (or use per-document Approve buttons inside the document viewer).', '#dash-verification-approve', '#dash-verification-detail'),
+                tourStep(label, section, 'Reject', 'Click <strong>Reject</strong> to decline the request. Add internal notes and optional rejection reasons for the customer.', '#dash-verification-reject', '#dash-verification-detail'),
+                tourStep(label, section, 'Tour complete', 'Identity tour done. From Customers, use Documents to jump here with a specific customer loaded.', '#dash-help-btn', '.dash-actions'),
             ];
         }
 
@@ -5108,6 +5540,7 @@
                 steps.push(tourStep(label, section, 'Create staff user', 'Enter name, email, password, and role, then <strong>Create</strong>. They sign in at auth.html with those credentials.', '#user-create-form', '#create-user-btn'));
             }
             steps.push(
+                tourStep(label, section, 'Email verification note', 'Storefront customers must verify email before full access — see the green <strong>Verified</strong> badge on the <strong>Customers</strong> tab, not here.', '#user-mgmt-note', '#users-section h3'),
                 tourStep(label, section, 'Delete rules', currentRole === 'technical' ? 'Technical role: view-only — cannot create or delete users.' : 'Delete permissions depend on your role. Primary admin cannot be deleted. Managers cannot delete primary.', tourTableHasData('users-table') ? '#users-table tbody tr:first-child' : '#users-table', '#user-mgmt-note'),
                 tourStep(label, section, 'Tour complete', 'Users tour done. Role lists in server .env (MANAGER_EMAILS, etc.) can also affect roles on login.', '#dash-help-btn', '.dash-actions')
             );
@@ -5121,6 +5554,8 @@
                 team: buildTeamTourSteps,
                 orders: buildOrdersTourSteps,
                 customers: buildCustomersTourSteps,
+                support: buildSupportTourSteps,
+                identity: buildIdentityTourSteps,
                 analytics: buildAnalyticsTourSteps,
                 users: buildUsersTourSteps,
             };
@@ -5392,6 +5827,7 @@
             if (canManageTeam()) loads.push(loadTeamMembers());
             await Promise.all(loads);
             renderAnalytics();
+            if (window.DashboardExtensions) await DashboardExtensions.init(currentRole);
         })();
     </script>
 </body>
