@@ -4,8 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In / Sign Up - Infinity</title>
-    <link rel="stylesheet" href="mazen.css">
+    <link rel="icon" href="assets/images/infinity-logo1.png" type="image/png">
+    <link rel="apple-touch-icon" href="assets/images/infinity-logo1.png">
+    <link rel="stylesheet" href="mazen.css?v=20260506-1">
+    <link rel="stylesheet" href="infinity-loader.css?v=20260607">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="form-validation.css?v=20260630">
     <style>
         .auth-container {
             min-height: 100vh;
@@ -21,9 +25,18 @@
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
             width: 100%;
-            max-width: 400px;
-            padding: 2rem;
+            max-width: min(900px, 96vw);
+            padding: clamp(1.25rem, 3vw, 2rem);
             transition: var(--transition);
+            box-sizing: border-box;
+        }
+
+        .auth-card.auth-card--signin {
+            max-width: min(440px, 96vw);
+        }
+
+        .auth-card.auth-card--signup {
+            max-width: min(900px, 96vw);
         }
 
         .auth-card:hover {
@@ -77,22 +90,114 @@
             display: block;
         }
 
-        .signup-grid {
-            display: none;
-            grid-template-columns: 1fr 1fr;
-            gap: 0 1rem;
-        }
-
-        .signup-grid.active {
+        .auth-form.signup-grid.active {
             display: grid;
         }
 
+        .signup-grid {
+            display: none;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem 1.25rem;
+            align-items: start;
+        }
+
         .signup-grid .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 0;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body.signup-company .signup-personal-only,
+        body.signup-personal .signup-company-only {
+            display: none;
+        }
+
+        .signup-grid .form-group label {
+            margin-bottom: 0.4rem;
+        }
+
+        .signup-grid .form-group input,
+        .signup-grid .form-group select {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .account-type-group {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+            padding: 0.25rem 0;
+        }
+
+        .account-type-option {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .account-type-option input[type="radio"] {
+            width: 1rem;
+            height: 1rem;
+            margin: 0;
+            flex-shrink: 0;
+            accent-color: var(--primary-color, #0099cc);
         }
 
         .signup-grid .full-width {
             grid-column: 1 / -1;
+        }
+
+        .signup-grid .auth-btn.full-width {
+            grid-column: 1 / -1;
+            width: 100%;
+        }
+
+        .signup-credentials-section {
+            grid-column: 1 / -1;
+            display: grid;
+            gap: 0;
+        }
+
+        .signup-credentials-section .form-group {
+            margin-bottom: 0;
+            min-width: 0;
+        }
+
+        .signup-password-stack {
+            padding-bottom: 0;
+        }
+
+        .field-optional-tag {
+            font-size: .72rem;
+            font-weight: 600;
+            color: #64748b;
+            margin-left: .35rem;
+        }
+
+        .country-readonly {
+            background: #f1f5f9 !important;
+            color: #475569;
+            cursor: not-allowed;
+        }
+
+        #signin-form .form-group {
+            position: relative;
+            padding-bottom: 1.25rem;
+            margin-bottom: 0;
+        }
+
+        #signin-form .forgot-password {
+            margin-top: -0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        #signin-form .auth-btn {
+            margin-top: 0.25rem;
         }
 
         .form-group {
@@ -281,8 +386,8 @@
         }
 
         @media (min-width: 900px) {
-            .auth-card {
-                max-width: 920px;
+            .auth-card.auth-card--signup {
+                padding: clamp(1.5rem, 3vw, 2.25rem);
             }
         }
 
@@ -304,10 +409,13 @@
             }
         }
 
-        /* Tablet Optimization */
+        /* Tablet: keep sign-up wide; sign-in stays compact */
         @media (min-width: 769px) and (max-width: 1024px) {
-            .auth-card {
-                max-width: 450px;
+            .auth-card.auth-card--signin {
+                max-width: min(440px, 96vw);
+            }
+            .auth-card.auth-card--signup {
+                max-width: min(900px, 96vw);
             }
         }
 
@@ -327,7 +435,7 @@
         }
     </style>
 </head>
-<body>
+<body class="signup-personal">
     <div class="auth-container">
         <div class="auth-card">
             <div class="auth-header">
@@ -355,25 +463,39 @@
                     </div>
                 </div>
                 <div class="forgot-password">
-                    <a href="#">Forgot Password?</a>
+                    <a href="forgot-password.html">Forgot Password?</a>
                 </div>
                 <button type="submit" class="auth-btn">Sign In</button>
             </form>
 
             <form class="auth-form signup-grid" id="signup-form">
-                <div class="form-group">
+                <div class="form-group full-width">
+                    <label>Account Type</label>
+                    <div class="account-type-group">
+                        <label class="account-type-option">
+                            <input type="radio" name="account-type" value="personal" checked>
+                            Personal Account
+                        </label>
+                        <label class="account-type-option">
+                            <input type="radio" name="account-type" value="company">
+                            Company Account
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group signup-personal-only">
                     <label for="signup-name">Full Name</label>
                     <input type="text" id="signup-name" required>
                 </div>
-                <div class="form-group">
-                    <label for="signup-phone">Phone Number (Egypt)</label>
-                    <input type="tel" id="signup-phone" placeholder="01XXXXXXXXX" required>
+                <div class="form-group signup-personal-only">
+                    <label for="signup-phone">Phone Number</label>
+                    <input type="tel" id="signup-phone" placeholder="01XXXXXXXXX" maxlength="11" inputmode="numeric" required>
                 </div>
-                <div class="form-group">
+                <div class="form-group signup-personal-only">
                     <label for="signup-age">Age</label>
-                    <input type="number" id="signup-age" min="16" max="100" required>
+                    <input type="number" id="signup-age" min="18" max="120" inputmode="numeric" required>
                 </div>
-                <div class="form-group">
+                <div class="form-group signup-personal-only">
                     <label for="signup-gender">Gender</label>
                     <select id="signup-gender" required>
                         <option value="">Select Gender</option>
@@ -382,8 +504,8 @@
                         <option value="prefer_not_to_say">Prefer not to say</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label for="signup-state">State in Egypt</label>
+                <div class="form-group signup-personal-only">
+                    <label for="signup-state">State</label>
                     <select id="signup-state" required>
                         <option value="">Select State</option>
                         <option value="Cairo">Cairo</option>
@@ -415,36 +537,85 @@
                         <option value="Monufia">Monufia</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label for="signup-company-name">Company Name (optional)</label>
-                    <input type="text" id="signup-company-name" placeholder="Your company name">
+                <div class="form-group signup-personal-only">
+                    <label for="signup-city">City</label>
+                    <input type="text" id="signup-city" required>
                 </div>
-                <div class="form-group full-width">
-                    <label for="signup-company-location">Company Location (optional)</label>
-                    <input type="text" id="signup-company-location" placeholder="City / Address">
+                <div class="form-group signup-personal-only full-width">
+                    <label for="signup-address">Address</label>
+                    <input type="text" id="signup-address" placeholder="Building, street, area" maxlength="200" required>
                 </div>
-                <div class="form-group full-width">
-                    <label for="signup-email">Email</label>
-                    <input type="email" id="signup-email" required>
+                <div class="form-group signup-personal-only">
+                    <label for="signup-country">Country</label>
+                    <input type="text" id="signup-country" class="country-readonly" value="Egypt" readonly>
                 </div>
-                <div class="form-group">
-                    <label for="signup-password">Password</label>
-                    <div class="password-field">
-                        <input type="password" id="signup-password" required>
-                        <button type="button" class="toggle-password" data-target="signup-password" aria-label="Show password">
-                            <i class="fas fa-eye"></i>
-                        </button>
+                <div class="form-group signup-personal-only">
+                    <label for="signup-dob">Date of Birth <span class="field-optional-tag">Optional</span></label>
+                    <input type="date" id="signup-dob">
+                </div>
+
+                <div class="form-group signup-company-only">
+                    <label for="signup-company-name-req">Company Name</label>
+                    <input type="text" id="signup-company-name-req" required>
+                </div>
+                <div class="form-group signup-company-only">
+                    <label for="signup-contact-person">Contact Person</label>
+                    <input type="text" id="signup-contact-person" required>
+                </div>
+                <div class="form-group signup-company-only">
+                    <label for="signup-company-phone">Company Phone</label>
+                    <input type="tel" id="signup-company-phone" placeholder="01XXXXXXXXX" maxlength="11" inputmode="numeric" required>
+                </div>
+                <div class="form-group signup-company-only full-width">
+                    <label for="signup-company-address">Company Address</label>
+                    <input type="text" id="signup-company-address" placeholder="Building, street, area" maxlength="200" required>
+                </div>
+                <div class="form-group signup-company-only">
+                    <label for="signup-company-city">City</label>
+                    <input type="text" id="signup-company-city" required>
+                </div>
+                <div class="form-group signup-company-only">
+                    <label for="signup-company-state">State</label>
+                    <select id="signup-company-state" required></select>
+                </div>
+                <div class="form-group signup-company-only">
+                    <label for="signup-company-country">Country</label>
+                    <input type="text" id="signup-company-country" class="country-readonly" value="Egypt" readonly>
+                </div>
+                <div class="form-group signup-company-only">
+                    <label for="signup-website">Company Website <span class="field-optional-tag">Optional</span></label>
+                    <input type="url" id="signup-website" placeholder="https://">
+                </div>
+                <div class="form-group signup-company-only">
+                    <label for="signup-tax">Tax Number <span class="field-optional-tag">Optional</span></label>
+                    <input type="text" id="signup-tax">
+                </div>
+
+                <div class="signup-credentials-section">
+                    <div class="form-group">
+                        <label for="signup-email">Email</label>
+                        <input type="email" id="signup-email" required>
+                    </div>
+                    <div class="form-group signup-password-stack">
+                        <label for="signup-password">Password</label>
+                        <div class="password-field">
+                            <input type="password" id="signup-password" required>
+                            <button type="button" class="toggle-password" data-target="signup-password" aria-label="Show password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-confirm-password">Confirm Password</label>
+                        <div class="password-field">
+                            <input type="password" id="signup-confirm-password" required>
+                            <button type="button" class="toggle-password" data-target="signup-confirm-password" aria-label="Show password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="signup-confirm-password">Confirm Password</label>
-                    <div class="password-field">
-                        <input type="password" id="signup-confirm-password" required>
-                        <button type="button" class="toggle-password" data-target="signup-confirm-password" aria-label="Show password">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
+
                 <button type="submit" class="auth-btn full-width">Create Account</button>
             </form>
 
@@ -462,6 +633,9 @@
         </div>
     </div>
 
+    <script src="infinity-loader.js?v=20260607"></script>
+    <script src="connectivity.js?v=20260607"></script>
+    <script src="form-validation.js?v=20260630"></script>
     <script>
         // Check if user is already logged in
         async function checkAuth() {
@@ -469,6 +643,10 @@
                 const res = await fetch("/api/user", { credentials: "include" });
                 if (res.ok) {
                     const data = await res.json();
+                    if (Array.isArray(data?.missingProfileFields) && data.missingProfileFields.length) {
+                        window.location.href = "/complete-profile.html";
+                        return;
+                    }
                     const role = data?.user?.role || 'customer';
                     window.location.href = (['employee', 'manager', 'primary', 'technical'].includes(role))
                         ? "/dashboard.html"
@@ -497,15 +675,13 @@
         }
 
         function switchTab(tab) {
-            // Update tabs
             document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
             document.querySelector(`.auth-tab[onclick="switchTab('${tab}')"]`).classList.add('active');
-
-            // Update forms
             document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
             document.getElementById(`${tab}-form`).classList.add('active');
-
-            // Update header text
+            const card = document.querySelector('.auth-card');
+            card?.classList.toggle('auth-card--signin', tab === 'signin');
+            card?.classList.toggle('auth-card--signup', tab === 'signup');
             const header = document.querySelector('.auth-header h1');
             const subheader = document.querySelector('.auth-header p');
             if (tab === 'signin') {
@@ -517,9 +693,68 @@
             }
         }
 
+        function computeAgeFromDob(dob) {
+            if (!dob) return null;
+            const birth = new Date(dob);
+            if (Number.isNaN(birth.getTime())) return null;
+            const today = new Date();
+            let age = today.getFullYear() - birth.getFullYear();
+            const m = today.getMonth() - birth.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age -= 1;
+            return age;
+        }
+
+        function cloneCompanyStateOptions() {
+            const src = document.getElementById('signup-state');
+            const dst = document.getElementById('signup-company-state');
+            if (src && dst && dst.options.length === 0) dst.innerHTML = src.innerHTML;
+        }
+
+        function getSignupAccountType() {
+            const checked = document.querySelector('input[name="account-type"]:checked');
+            return checked?.value === 'company' ? 'company' : 'personal';
+        }
+
+        function syncSignupAccountType() {
+            const type = getSignupAccountType();
+            document.body.classList.toggle('signup-company', type === 'company');
+            document.body.classList.toggle('signup-personal', type === 'personal');
+            const personalFields = ['signup-name', 'signup-phone', 'signup-age', 'signup-gender', 'signup-state', 'signup-city', 'signup-address'];
+            const companyFields = ['signup-company-name-req', 'signup-contact-person', 'signup-company-phone', 'signup-company-address', 'signup-company-city', 'signup-company-state'];
+            personalFields.forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.required = type === 'personal';
+            });
+            companyFields.forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.required = type === 'company';
+            });
+            if (window.FormValidation) {
+                document.querySelectorAll('#signup-form .signup-personal-only, #signup-form .signup-company-only').forEach((group) => {
+                    const isHidden = (type === 'personal' && group.classList.contains('signup-company-only'))
+                        || (type === 'company' && group.classList.contains('signup-personal-only'));
+                    if (!isHidden) return;
+                    group.querySelectorAll('input, select, textarea').forEach((input) => {
+                        FormValidation.clearFieldError(input);
+                    });
+                });
+            }
+        }
+
+        cloneCompanyStateOptions();
+        document.querySelectorAll('input[name="account-type"]').forEach((radio) => {
+            radio.addEventListener('change', syncSignupAccountType);
+        });
+        syncSignupAccountType();
+
+        const authCard = document.querySelector('.auth-card');
+        authCard?.classList.add('auth-card--signin');
+
         // Form submission handlers
         document.getElementById('signin-form').addEventListener('submit', async function(e) {
             e.preventDefault();
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (window.InfinityLoader && submitBtn) InfinityLoader.setButtonLoading(submitBtn, true);
             const email = document.getElementById('signin-email').value;
             const password = document.getElementById('signin-password').value;
 
@@ -534,6 +769,15 @@
                 const data = await res.json();
 
                 if (!res.ok) {
+                    if (data.code === 'EMAIL_NOT_VERIFIED') {
+                        const pendingEmail = data.email || email;
+                        sessionStorage.setItem('pending_verify_email', pendingEmail);
+                        showFormMessage('signin-form', 'Please verify your email first.', 'error');
+                        setTimeout(() => {
+                            window.location.href = `/verify-email.html?email=${encodeURIComponent(pendingEmail)}`;
+                        }, 1200);
+                        return;
+                    }
                     showFormMessage('signin-form', data.error, 'error');
                     return;
                 }
@@ -545,27 +789,53 @@
                     : "/index.html";
             } catch (error) {
                 showFormMessage('signin-form', "An error occurred during login", 'error');
+            } finally {
+                if (window.InfinityLoader && submitBtn) InfinityLoader.setButtonLoading(submitBtn, false);
             }
         });
 
-        document.getElementById('signup-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const name = document.getElementById('signup-name').value;
-            const phone = document.getElementById('signup-phone').value;
-            const age = document.getElementById('signup-age').value;
-            const gender = document.getElementById('signup-gender').value;
-            const state = document.getElementById('signup-state').value;
-            const companyName = document.getElementById('signup-company-name').value;
-            const companyLocation = document.getElementById('signup-company-location').value;
-            const email = document.getElementById('signup-email').value;
-            const password = document.getElementById('signup-password').value;
-            const confirmPassword = document.getElementById('signup-confirm-password').value;
+        const signupForm = document.getElementById('signup-form');
+        if (window.FormValidation && signupForm) {
+            FormValidation.attachSignupValidation(signupForm);
+        }
 
-            if (password !== confirmPassword) {
-                showFormMessage('signup-form', "Passwords do not match", 'error');
+        signupForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (window.FormValidation && !FormValidation.validateSignupForm(this)) {
                 return;
             }
 
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const accountType = getSignupAccountType();
+            const name = document.getElementById('signup-name').value.trim();
+            const contactPerson = document.getElementById('signup-contact-person').value.trim();
+            const companyName = document.getElementById('signup-company-name-req').value.trim();
+            const phoneRaw = accountType === 'company'
+                ? document.getElementById('signup-company-phone').value
+                : document.getElementById('signup-phone').value;
+            const phone = phoneRaw.replace(/\D/g, '');
+            const gender = document.getElementById('signup-gender').value;
+            const state = accountType === 'company'
+                ? document.getElementById('signup-company-state').value
+                : document.getElementById('signup-state').value;
+            const address = accountType === 'company'
+                ? document.getElementById('signup-company-address').value.trim()
+                : document.getElementById('signup-address').value.trim();
+            const city = accountType === 'company'
+                ? document.getElementById('signup-company-city').value.trim()
+                : document.getElementById('signup-city').value.trim();
+            const dateOfBirth = document.getElementById('signup-dob').value;
+            const ageInput = document.getElementById('signup-age')?.value;
+            const age = accountType === 'personal'
+                ? (ageInput ? Number(ageInput) : computeAgeFromDob(dateOfBirth))
+                : null;
+            const taxNumber = document.getElementById('signup-tax').value.trim();
+            const companyWebsite = document.getElementById('signup-website').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+            const password = document.getElementById('signup-password').value;
+            const confirmPassword = document.getElementById('signup-confirm-password').value;
+
+            if (window.InfinityLoader && submitBtn) InfinityLoader.setButtonLoading(submitBtn, true);
             try {
                 const res = await fetch("/api/register", {
                     method: "POST",
@@ -574,13 +844,21 @@
                     body: JSON.stringify({
                         email,
                         password,
-                        name,
+                        accountType,
+                        name: accountType === 'personal' ? name : contactPerson,
+                        contactPerson,
                         phone,
                         age,
                         gender,
                         state,
+                        address,
+                        city,
+                        country: 'Egypt',
+                        dateOfBirth: dateOfBirth || null,
                         companyName,
-                        companyLocation
+                        companyAddress: address,
+                        taxNumber,
+                        companyWebsite,
                     }),
                 });
 
@@ -591,25 +869,32 @@
                     return;
                 }
 
-                // Successful registration - switch to login tab
+                if (data.requiresVerification) {
+                    sessionStorage.setItem('pending_verify_email', data.email || email);
+                    sessionStorage.setItem('pending_verify_sent_at', String(Date.now()));
+                    sessionStorage.setItem('pending_verify_expires', String(Date.now() + 15 * 60 * 1000));
+                    window.location.href = `/verify-email.html?email=${encodeURIComponent(data.email || email)}`;
+                    return;
+                }
+
+                // Staff registration — switch to login tab
                 switchTab('signin');
                 document.getElementById('signin-email').value = email;
                 showFormMessage('signin-form', "Registration successful! Please sign in.", 'success');
             } catch (error) {
                 showFormMessage('signup-form', "An error occurred during registration", 'error');
+            } finally {
+                if (window.InfinityLoader && submitBtn) InfinityLoader.setButtonLoading(submitBtn, false);
             }
         });
 
         // Handle responsive behavior
         function handleResponsive() {
-            const isMobile = window.innerWidth <= 768;
-            const isLandscape = window.innerHeight < window.innerWidth;
-            
-            // Adjust padding and margins for mobile landscape
-            if (isMobile && isLandscape) {
-                document.querySelector('.auth-container').style.padding = '0.5rem';
-                document.querySelector('.auth-card').style.padding = '1rem';
-            }
+            const container = document.querySelector('.auth-container');
+            const card = document.querySelector('.auth-card');
+            const isMobileLandscape = window.innerWidth <= 768 && window.innerHeight < window.innerWidth;
+            if (container) container.style.padding = isMobileLandscape ? '0.5rem' : '';
+            if (card) card.style.padding = isMobileLandscape ? '1rem' : '';
         }
 
         // Initial call
@@ -631,26 +916,49 @@
         }
 
         // Show OAuth errors from callback
-        const errorCode = new URLSearchParams(window.location.search).get('error');
+        const urlParams = new URLSearchParams(window.location.search);
+        const errorCode = urlParams.get('error');
         if (errorCode === 'google_auth_failed' || errorCode === 'facebook_auth_failed') {
             showFormMessage('signin-form', 'Social login failed. Please try again.', 'error');
+        }
+
+        if (urlParams.get('verified') === '1') {
+            switchTab('signin');
+            showFormMessage('signin-form', 'Email verified! You can now sign in.', 'success');
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
+        if (urlParams.get('reset') === 'success') {
+            switchTab('signin');
+            showFormMessage(
+                'signin-form',
+                'Password changed successfully. Please sign in with your new password.',
+                'success'
+            );
+            window.history.replaceState({}, document.title, window.location.pathname);
         }
 
         // Add resize listener
         window.addEventListener('resize', handleResponsive);
 
+        function syncPasswordToggle(btn, input) {
+            const hidden = input.type === 'password';
+            btn.innerHTML = hidden
+                ? '<i class="fas fa-eye-slash"></i>'
+                : '<i class="fas fa-eye"></i>';
+            btn.setAttribute('aria-label', hidden ? 'Show password' : 'Hide password');
+        }
+
         // Password visibility toggles
         document.querySelectorAll('.toggle-password').forEach((btn) => {
+            const targetId = btn.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            if (!input) return;
+            syncPasswordToggle(btn, input);
             btn.addEventListener('click', () => {
-                const targetId = btn.getAttribute('data-target');
-                const input = document.getElementById(targetId);
-                if (!input) return;
-                const isPassword = input.type === 'password';
-                input.type = isPassword ? 'text' : 'password';
-                btn.innerHTML = isPassword
-                    ? '<i class="fas fa-eye-slash"></i>'
-                    : '<i class="fas fa-eye"></i>';
-                btn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+                const hidden = input.type === 'password';
+                input.type = hidden ? 'text' : 'password';
+                syncPasswordToggle(btn, input);
             });
         });
     </script>

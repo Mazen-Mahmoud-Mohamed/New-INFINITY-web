@@ -36,6 +36,41 @@ const revealObserver = new IntersectionObserver((entries) => {
     });
 }, observerOptions);
 
+/** Bind scroll-reveal to team cards (including members injected after fetch on team.html). */
+function bindScrollReveal(root) {
+    const scope = root || document;
+    scope.querySelectorAll('.team-member').forEach((member, index) => {
+        if (member.dataset.revealBound) return;
+        member.dataset.revealBound = '1';
+        if (!member.classList.contains('slide-in-left') && !member.classList.contains('slide-in-right')) {
+            member.classList.add(index % 2 === 0 ? 'slide-in-left' : 'slide-in-right');
+            member.dataset.delay = index * 120;
+        }
+        revealObserver.observe(member);
+        requestAnimationFrame(() => {
+            const rect = member.getBoundingClientRect();
+            if (rect.top < window.innerHeight && rect.bottom > 0) {
+                member.classList.add('visible');
+            }
+        });
+    });
+    scope.querySelectorAll('.team-category-block').forEach((block, index) => {
+        if (block.dataset.revealBound) return;
+        block.dataset.revealBound = '1';
+        block.classList.add('fade-in');
+        block.dataset.delay = index * 80;
+        revealObserver.observe(block);
+        requestAnimationFrame(() => {
+            const rect = block.getBoundingClientRect();
+            if (rect.top < window.innerHeight && rect.bottom > 0) {
+                block.classList.add('visible');
+            }
+        });
+    });
+}
+
+window.bindScrollReveal = bindScrollReveal;
+
 // Add animation classes with faster staggered delays
 document.addEventListener('DOMContentLoaded', () => {
     // Faster initial paint for images (lazy load offscreen)
@@ -51,8 +86,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Sections with faster fade-in
+    // Sections with faster fade-in (skip dashboard modals/dialogs)
     document.querySelectorAll('section').forEach((section, index) => {
+        if (section.closest('.product-edit-modal, .dash-dialog, .product-edit-dialog')) return;
         section.classList.add('fade-in');
         section.dataset.delay = index * 80; // Reduced from 150
         revealObserver.observe(section);
@@ -79,12 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         revealObserver.observe(card);
     });
 
-    // Team members with faster alternating slide-in
-    document.querySelectorAll('.team-member').forEach((member, index) => {
-        member.classList.add(index % 2 === 0 ? 'slide-in-left' : 'slide-in-right');
-        member.dataset.delay = index * 120; // Reduced from 250
-        revealObserver.observe(member);
-    });
+    bindScrollReveal(document);
 
     // Value cards with faster scale-in
     document.querySelectorAll('.value-card').forEach((card, index) => {
@@ -178,10 +209,13 @@ document.head.appendChild(style);
 document.addEventListener('DOMContentLoaded', function() {
     // Get existing menu toggle button and menu
     const menuToggle = document.querySelector('.menu-toggle');
-    const menu = document.querySelector('nav ul');
+    const menu = document.querySelector('nav:not(.home-quick-nav) ul');
+    if (!menuToggle || !menu) return;
 
-    // Handle menu toggle
-    menuToggle.addEventListener('click', function() {
+    // Handle menu toggle (stopPropagation so document/outside handlers never eat the tap; icon uses pointer-events:none in CSS)
+    menuToggle.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
         menu.classList.toggle('active');
         menuToggle.classList.toggle('active');
         
@@ -216,9 +250,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Close menu on window resize if switching to desktop view
+    // Close menu on window resize if switching to desktop view (matches CSS hamburger breakpoint)
     window.addEventListener('resize', function() {
-        if (window.innerWidth > 768 && menu.classList.contains('active')) {
+        if (window.innerWidth > 992 && menu.classList.contains('active')) {
             menu.classList.remove('active');
             menuToggle.classList.remove('active');
             menuToggle.setAttribute('aria-expanded', 'false');
@@ -229,63 +263,289 @@ document.addEventListener('DOMContentLoaded', function() {
     // Reveal animations already handled by shared observer above
 });
 
-// Auth UI (show first name + logout icon)
+// Auth UI (nav link on inner pages; dropdown on homepage)
+function setAuthNavItemVisible(el, visible) {
+    if (!el) return;
+    if (visible) {
+        el.removeAttribute('hidden');
+    } else {
+        el.setAttribute('hidden', '');
+    }
+    el.style.removeProperty('display');
+}
+
 async function initAuthUI() {
     const authLink = document.querySelector('a.account-link');
-    if (!authLink) return;
+    const homeMenu = document.getElementById('home-account-menu');
+    const homeToggleLabel = document.querySelector('.home-account-toggle-label');
+    const homePanelTitle = document.querySelector('.home-account-panel-title');
+    const homeSignInItem = document.querySelector('.home-account-signin-item');
+    const homeSignOutItem = document.querySelector('.home-account-signout-item');
+    const homeSignOutBtn = document.getElementById('home-account-signout');
+    const isHomeDropdown = !!homeMenu;
 
-    try {
-        const res = await fetch('/api/user', { credentials: 'include' });
-        if (!res.ok) {
-            document.querySelectorAll('.staff-dashboard-link').forEach((el) => {
-                el.style.display = 'none';
-            });
+    if (!authLink && !isHomeDropdown) return;
+
+    function setHomeGuestMode(isGuest) {
+        if (!homeMenu) return;
+        homeMenu.classList.toggle('is-guest', isGuest);
+        homeMenu.dataset.authState = isGuest ? 'guest' : 'signed-in';
+    }
+
+    function applyLoggedOut() {
+        document.querySelectorAll('.user-orders-link').forEach((el) => {
+            setAuthNavItemVisible(el, false);
+        });
+        document.querySelectorAll('.user-profile-link').forEach((el) => {
+            setAuthNavItemVisible(el, false);
+        });
+        document.querySelectorAll('.user-support-link').forEach((el) => {
+            setAuthNavItemVisible(el, false);
+        });
+        document.querySelectorAll('.staff-dashboard-link').forEach((el) => {
+            setAuthNavItemVisible(el, false);
+        });
+        if (authLink && !isHomeDropdown) {
             authLink.href = 'auth.html';
             authLink.innerHTML = '<i class="fas fa-user"></i> Sign In';
-            return;
         }
-
-        const data = await res.json();
-        const fullName = (data?.user?.name || '').trim();
-        const firstName = (fullName.split(/\s+/)[0] || 'Account').slice(0, 20);
-        const role = data?.user?.role || 'customer';
-        // Show dashboard shortcut for staff roles only.
-        const canSeeDashboard = ['employee', 'manager', 'primary', 'technical'].includes(role);
-
-        if (canSeeDashboard) {
-            // Reveal static dashboard links in nav (more reliable than injecting only).
-            document.querySelectorAll('.staff-dashboard-link').forEach((el) => {
-                el.style.display = '';
-            });
-            document.querySelectorAll('.dashboard-nav-link').forEach((link) => {
-                link.innerHTML = '<i class="fas fa-chart-line"></i> Dashboard';
-            });
-        } else {
-            document.querySelectorAll('.staff-dashboard-link').forEach((el) => {
-                el.style.display = 'none';
-            });
+        if (isHomeDropdown) {
+            setHomeGuestMode(true);
+            if (homeToggleLabel) homeToggleLabel.textContent = 'Sign In';
+            if (homePanelTitle) homePanelTitle.textContent = '';
+            setAuthNavItemVisible(homeSignInItem, false);
+            setAuthNavItemVisible(homeSignOutItem, false);
         }
+    }
 
-        authLink.href = '#';
-        authLink.innerHTML = `<i class="fas fa-user"></i> <span class="auth-name">${firstName}</span> <i class="fas fa-sign-out-alt auth-logout-icon" aria-hidden="true"></i>`;
-        authLink.addEventListener('click', async (e) => {
+    function wireSignOut(handlerTarget) {
+        const runLogout = async (e) => {
             e.preventDefault();
             try {
                 await fetch('/api/logout', { method: 'POST', credentials: 'include' });
             } finally {
                 window.location.href = '/index.html';
             }
-        }, { once: true });
-    } catch (e) {
-        document.querySelectorAll('.staff-dashboard-link').forEach((el) => {
-            el.style.display = 'none';
+        };
+        if (handlerTarget && !handlerTarget.dataset.logoutWired) {
+            handlerTarget.dataset.logoutWired = '1';
+            handlerTarget.addEventListener('click', runLogout);
+        }
+        if (homeSignOutBtn && !homeSignOutBtn.dataset.logoutWired) {
+            homeSignOutBtn.dataset.logoutWired = '1';
+            homeSignOutBtn.addEventListener('click', runLogout);
+        }
+    }
+
+    function applyLoggedIn(data) {
+        const fullName = (data?.user?.name || '').trim();
+        const firstName = (fullName.split(/\s+/)[0] || 'Account').slice(0, 20);
+        const role = data?.user?.role || 'customer';
+        const canSeeDashboard = ['employee', 'manager', 'primary', 'technical'].includes(role);
+        const canSeeMyOrders = !canSeeDashboard;
+
+        document.querySelectorAll('.user-orders-link').forEach((el) => {
+            setAuthNavItemVisible(el, canSeeMyOrders);
         });
-        authLink.href = 'auth.html';
-        authLink.innerHTML = '<i class="fas fa-user"></i> Sign In';
+        document.querySelectorAll('.user-profile-link').forEach((el) => {
+            setAuthNavItemVisible(el, canSeeMyOrders);
+        });
+        document.querySelectorAll('.user-support-link').forEach((el) => {
+            setAuthNavItemVisible(el, canSeeMyOrders);
+        });
+        document.querySelectorAll('.staff-dashboard-link').forEach((el) => {
+            setAuthNavItemVisible(el, canSeeDashboard);
+        });
+        document.querySelectorAll('.dashboard-nav-link').forEach((link) => {
+            if (canSeeDashboard && link.closest('.home-account-list')) {
+                link.innerHTML = '<i class="fas fa-chart-line" aria-hidden="true"></i> Dashboard';
+            } else if (canSeeDashboard) {
+                link.innerHTML = '<i class="fas fa-chart-line"></i> Dashboard';
+            }
+        });
+
+        if (isHomeDropdown) {
+            setHomeGuestMode(false);
+            if (homeToggleLabel) homeToggleLabel.textContent = firstName;
+            if (homePanelTitle) homePanelTitle.textContent = `Signed in as ${firstName}`;
+            setAuthNavItemVisible(homeSignInItem, false);
+            setAuthNavItemVisible(homeSignOutItem, true);
+            wireSignOut(null);
+        }
+
+        if (authLink && !isHomeDropdown) {
+            authLink.href = '#';
+            authLink.innerHTML = `<i class="fas fa-user"></i> <span class="auth-name">${firstName}</span> <i class="fas fa-sign-out-alt auth-logout-icon" aria-hidden="true"></i>`;
+            wireSignOut(authLink);
+        }
+    }
+
+    try {
+        const res = await fetch('/api/user', { credentials: 'include' });
+        if (!res.ok) {
+            applyLoggedOut();
+            return;
+        }
+        const data = await res.json();
+        applyLoggedIn(data);
+        if (window.InfinityNotifications) InfinityNotifications.refreshBadges();
+    } catch (_e) {
+        applyLoggedOut();
     }
 }
 
 document.addEventListener('DOMContentLoaded', initAuthUI);
+
+function initSiteAccountDropdown() {
+    const root = document.getElementById('home-account-menu');
+    const toggle = document.getElementById('home-account-toggle');
+    const panel = document.getElementById('home-account-panel');
+    const quickNav = document.querySelector('.home-quick-nav');
+    if (!root || !toggle || !panel) return;
+
+    function closePanel() {
+        toggle.setAttribute('aria-expanded', 'false');
+        panel.setAttribute('hidden', '');
+    }
+
+    function openPanel() {
+        toggle.setAttribute('aria-expanded', 'true');
+        panel.removeAttribute('hidden');
+    }
+
+    toggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (root.classList.contains('is-guest')) {
+            window.location.href = 'auth.html';
+            return;
+        }
+        if (panel.hasAttribute('hidden')) openPanel();
+        else closePanel();
+    });
+
+    panel.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+
+    document.addEventListener('click', () => {
+        closePanel();
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closePanel();
+    });
+
+    panel.querySelectorAll('a.home-account-item').forEach((link) => {
+        link.addEventListener('click', () => {
+            closePanel();
+        });
+    });
+
+    if (quickNav && 'IntersectionObserver' in window) {
+        const hero = document.querySelector('.hero, .products-hero, .team-hero');
+        if (quickNav.classList.contains('site-top-nav')) {
+            const onScroll = () => {
+                quickNav.classList.toggle('is-stuck', window.scrollY > 6);
+            };
+            onScroll();
+            window.addEventListener('scroll', onScroll, { passive: true });
+
+            const activeLink = quickNav.querySelector('.home-quick-links .home-quick-link.is-active');
+            if (activeLink) {
+                requestAnimationFrame(() => {
+                    activeLink.scrollIntoView({ inline: 'nearest', block: 'nearest' });
+                });
+            }
+        } else if (hero) {
+            const obs = new IntersectionObserver((entries) => {
+                quickNav.classList.toggle('is-stuck', !entries[0].isIntersecting);
+            }, { threshold: 0, rootMargin: '-1px 0px 0px 0px' });
+            obs.observe(hero);
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', initSiteAccountDropdown);
+
+function initHomeQuickMobileNav() {
+    document.querySelectorAll('nav.home-quick-nav').forEach((nav) => {
+        const inner = nav.querySelector('.home-quick-nav-inner');
+        if (!inner) return;
+
+        if (inner.querySelector('.home-quick-nav-cart')) {
+            nav.classList.add('has-mobile-cart');
+        }
+
+        let toggle = inner.querySelector('.site-nav-menu-toggle');
+        if (!toggle) {
+            toggle = document.createElement('button');
+            toggle.type = 'button';
+            toggle.className = 'site-nav-menu-toggle menu-toggle';
+            toggle.setAttribute('aria-label', 'Open navigation menu');
+            toggle.setAttribute('aria-expanded', 'false');
+            toggle.innerHTML = '<i class="fas fa-bars" aria-hidden="true"></i>';
+            inner.appendChild(toggle);
+        }
+
+        function closeMobileNav() {
+            inner.classList.remove('is-mobile-open');
+            nav.classList.remove('is-mobile-menu-open');
+            toggle.setAttribute('aria-expanded', 'false');
+            toggle.innerHTML = '<i class="fas fa-bars" aria-hidden="true"></i>';
+        }
+
+        function openMobileNav() {
+            inner.classList.add('is-mobile-open');
+            nav.classList.add('is-mobile-menu-open');
+            toggle.setAttribute('aria-expanded', 'true');
+            toggle.innerHTML = '<i class="fas fa-times" aria-hidden="true"></i>';
+        }
+
+        if (!toggle.dataset.bound) {
+            toggle.dataset.bound = '1';
+            toggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (inner.classList.contains('is-mobile-open')) closeMobileNav();
+                else openMobileNav();
+            });
+        }
+
+        inner.querySelectorAll('.home-quick-links a.home-quick-link').forEach((link) => {
+            if (link.dataset.mobileNavBound) return;
+            link.dataset.mobileNavBound = '1';
+            link.addEventListener('click', closeMobileNav);
+        });
+
+        if (!nav.dataset.mobileOutsideBound) {
+            nav.dataset.mobileOutsideBound = '1';
+            document.addEventListener('click', (e) => {
+                if (!inner.classList.contains('is-mobile-open')) return;
+                if (nav.contains(e.target)) return;
+                closeMobileNav();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeMobileNav();
+            });
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', initHomeQuickMobileNav);
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 992) {
+        document.querySelectorAll('nav.home-quick-nav .home-quick-nav-inner.is-mobile-open').forEach((inner) => {
+            inner.classList.remove('is-mobile-open');
+            const nav = inner.closest('nav.home-quick-nav');
+            if (nav) nav.classList.remove('is-mobile-menu-open');
+            const toggle = inner.querySelector('.site-nav-menu-toggle');
+            if (toggle) {
+                toggle.setAttribute('aria-expanded', 'false');
+                toggle.innerHTML = '<i class="fas fa-bars" aria-hidden="true"></i>';
+            }
+        });
+    }
+});
 
 // Database API Functions
 const API_URL = 'http://localhost:3000/api';
@@ -469,4 +729,76 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-}); 
+});
+
+/** Shared cart drawer rendering — single source of truth for all pages */
+(function initInfinityCart(global) {
+    if (global.InfinityCart) return;
+
+    const DEFAULT_FALLBACK = 'assets/images/infinity-logo.png';
+
+    function renderCartItems(container, cart, options) {
+        if (!container) return;
+        const opts = options || {};
+        const productStockMap = opts.productStockMap || {};
+        const fallbackImage = opts.fallbackImage || DEFAULT_FALLBACK;
+
+        container.innerHTML = '';
+        (cart || []).forEach((item) => {
+            const stockNum = Number(productStockMap[item.id]);
+            const maxAttr = Number.isFinite(stockNum) ? `max="${stockNum}"` : '';
+            container.innerHTML += `
+                <div class="cart-item">
+                    <img class="cart-item-image" src="${item.image || fallbackImage}" alt="${item.name}">
+                    <div class="item-info">
+                        <h4>${item.name}</h4>
+                        ${item.nameAr ? `<p class="arabic-title">${item.nameAr}</p>` : ''}
+                        <p>EGP ${item.price.toFixed(2)} × ${item.quantity}</p>
+                        ${item.installation > 0 ? `<p class="installation-fee">Installation: EGP ${item.installation.toFixed(2)}</p>` : ''}
+                    </div>
+                    <div class="item-actions">
+                        <div class="cart-qty-stepper" role="group" aria-label="Quantity">
+                            <button type="button" class="quantity-btn minus" data-id="${item.id}" aria-label="Decrease quantity">−</button>
+                            <input type="number" class="cart-qty-input" data-id="${item.id}" min="1" ${maxAttr} value="${item.quantity}" inputmode="numeric" autocomplete="off" aria-label="Quantity">
+                            <button type="button" class="quantity-btn plus" data-id="${item.id}" aria-label="Increase quantity">+</button>
+                        </div>
+                        <button type="button" class="remove-btn" data-id="${item.id}" aria-label="Remove from cart">×</button>
+                    </div>
+                </div>`;
+        });
+    }
+
+    function updateCartTotals(cart, elements) {
+        const items = cart || [];
+        let subtotal = 0;
+        let installation = 0;
+        items.forEach((item) => {
+            subtotal += item.price * item.quantity;
+            installation += item.installation * item.quantity;
+        });
+        const count = items.reduce((sum, item) => sum + item.quantity, 0);
+
+        if (elements.subtotalEl) {
+            elements.subtotalEl.textContent = `EGP ${subtotal.toFixed(2)}`;
+        }
+        if (elements.installationEl) {
+            elements.installationEl.textContent = `EGP ${installation.toFixed(2)}`;
+        }
+        if (elements.totalEl) {
+            elements.totalEl.textContent = `EGP ${(subtotal + installation).toFixed(2)}`;
+        }
+        if (elements.countEl) {
+            elements.countEl.textContent = count;
+        } else if (elements.countSelector) {
+            document.querySelectorAll(elements.countSelector).forEach((el) => {
+                el.textContent = count;
+            });
+        }
+    }
+
+    global.InfinityCart = {
+        DEFAULT_FALLBACK,
+        renderCartItems,
+        updateCartTotals,
+    };
+})(window);
