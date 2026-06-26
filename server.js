@@ -17,6 +17,8 @@ const PDFDocument = require("pdfkit");
 const { ArabicShaper } = require("arabic-persian-reshaper");
 const cloudinary = require("./cloudinary");
 const { isCloudinaryConfigured } = cloudinary;
+const realtime = require("./services/realtimeService");
+const http = require("http");
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
@@ -80,7 +82,7 @@ app.use(express.static(__dirname, {
     }
 }));
 
-app.use(session({
+const sessionMiddleware = session({
     secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
@@ -90,7 +92,8 @@ app.use(session({
         collectionName: "sessions",
         ttl: 60 * 60 * 24 * 7 // 7 days
     })
-}));
+});
+app.use(sessionMiddleware);
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -99,7 +102,7 @@ app.use(passport.session());
 app.use(async (req, _res, next) => {
     try {
         if (!req.session?.user?.id) return next();
-        const user = await User.findById(req.session.user.id).select("email name role").lean();
+        const user = await User.findById(req.session.user.id).select("email name role accountType").lean();
         if (!user) {
             req.session.user = null;
             return next();
@@ -113,6 +116,7 @@ app.use(async (req, _res, next) => {
             email: user.email,
             name: user.name,
             role: computedRole,
+            accountType: resolveAccountType(user.accountType),
         };
         next();
     } catch (_err) {
@@ -1025,13 +1029,17 @@ async function syncRoleFromEmailLists(user) {
     return user;
 }
 
+function resolveAccountType(value) {
+    return String(value || "").trim().toLowerCase() === "company" ? "company" : "personal";
+}
+
 function getMissingProfileFields(user) {
     if (!user) return [];
     const missing = [];
     if (!user.passwordHash) missing.push("password");
     if (!user.phone) missing.push("phone");
     if (!user.state) missing.push("state");
-    const accountType = user.accountType || "personal";
+    const accountType = resolveAccountType(user.accountType);
     if (accountType === "company") {
         if (!user.companyName) missing.push("companyName");
         if (!user.companyLocation) missing.push("companyLocation");
@@ -1202,7 +1210,9 @@ async function start() {
         const { initializeMailService } = require("./services/mail/mailService");
         await initializeMailService();
 
-        app.listen(PORT, () => {
+        const server = http.createServer(app);
+        realtime.init(server, sessionMiddleware);
+        server.listen(PORT, () => {
             console.log(`Server running at http://localhost:${PORT}`);
         });
     } catch (err) {
@@ -1282,6 +1292,8 @@ app.post("/api/process-payment", requireAuth, async (req, res) => {
                 status: "completed"
             });
 
+            realtime.emitNewOrder(order);
+
             res.json({
                 success: true,
                 transactionId: paymentResult.transactionId,
@@ -1349,6 +1361,8 @@ app.post("/api/orders", requireAuth, async (req, res) => {
                 });
             }
         }
+
+        realtime.emitNewOrder(order);
 
         res.json({ success: true, orderId: order._id });
     } catch (error) {
@@ -1627,6 +1641,7 @@ app.patch("/api/dashboard/products/:productId/stock", requireRole(["employee", "
             { new: true }
         );
         if (!product) return res.status(404).json({ error: "Product not found" });
+        realtime.emitProductUpdated(productId, "updated");
         res.json({ product });
     } catch (error) {
         console.error("Update product failed:", error);
@@ -1690,6 +1705,8 @@ app.post("/api/dashboard/products", requireRole(["manager", "primary"]), async (
             active: body.active !== false
         });
 
+        realtime.emitProductUpdated(productId, "created");
+
         res.status(201).json({ product });
     } catch (error) {
         console.error("Create product failed:", error);
@@ -1710,6 +1727,7 @@ app.delete("/api/dashboard/products/:productId", requireRole(["manager", "primar
         if (permanent) {
             await deleteProductImageAsset(productId, existing.image);
             await Product.deleteOne({ productId });
+            realtime.emitProductUpdated(productId, "deleted");
             return res.json({ message: "Product permanently deleted", productId, permanent: true });
         }
 
@@ -1718,6 +1736,7 @@ app.delete("/api/dashboard/products/:productId", requireRole(["manager", "primar
             { $set: { active: false, stock: 0 } },
             { new: true }
         );
+        realtime.emitProductUpdated(productId, "updated");
         res.json({
             message: "Product removed from store",
             productId,
@@ -1779,6 +1798,7 @@ app.patch("/api/dashboard/orders/:id/status", requireRole(["employee", "manager"
             { new: true }
         );
         if (!order) return res.status(404).json({ error: "Order not found" });
+        realtime.emitOrderUpdated(order);
         res.json({ order });
     } catch (error) {
         res.status(500).json({ error: "Internal server error" });
@@ -1865,6 +1885,7 @@ app.post("/api/dashboard/users", requireRole(["manager", "primary"]), async (req
             role,
             provider: "local",
         });
+        realtime.emitUserCreated(user._id);
         res.json({ user: { _id: user._id, name: user.name, email: user.email, role: user.role } });
     } catch (error) {
         res.status(500).json({ error: "Internal server error" });
@@ -1883,6 +1904,7 @@ app.delete("/api/dashboard/users/:id", requireRole(["employee", "manager", "prim
             return res.status(403).json({ error: "You cannot delete this role" });
         }
         await User.deleteOne({ _id: target._id });
+        realtime.emitUserUpdated(target._id);
         res.json({ message: "User deleted" });
     } catch (error) {
         res.status(500).json({ error: "Internal server error" });
@@ -2123,7 +2145,7 @@ app.post("/api/register", async (req, res) => {
             taxNumber, companyWebsite, companyAddress, companyLogo,
         } = req.body;
 
-        const type = accountType === "company" ? "company" : "personal";
+        const type = resolveAccountType(accountType);
         const displayName = type === "company"
             ? String(contactPerson || name || "").trim()
             : String(name || "").trim();
@@ -2210,6 +2232,7 @@ app.post("/api/register", async (req, res) => {
                 }
                 throw mailErr;
             }
+            realtime.emitCustomerUpdated(user._id, "created");
             return res.json({
                 message: "Registration successful! Please check your email to verify your account.",
                 requiresVerification: true,
@@ -2218,6 +2241,9 @@ app.post("/api/register", async (req, res) => {
         }
 
         req.session.user = { id: String(user._id), email: user.email, name: user.name, role: user.role || "customer" };
+        if (assignedRole === "customer") {
+            realtime.emitCustomerUpdated(user._id, "created");
+        }
         res.json({
             message: "Registration successful!",
             user: { email: user.email, name: user.name, role: user.role || "customer" },
@@ -2280,17 +2306,37 @@ app.get("/api/user", async (req, res) => {
         unreadNotifications = await getUnreadCount(req.session.user.id);
     } catch (_e) { /* non-fatal */ }
 
+    const resolvedAccountType = resolveAccountType(dbUser?.accountType ?? req.session.user?.accountType);
+
     res.json({
         user: {
             ...req.session.user,
             emailVerified: dbUser?.emailVerified !== false,
-            accountType: dbUser?.accountType || "personal",
+            accountType: resolvedAccountType,
             identityStatus: dbUser?.identityVerification?.status || "none",
             profilePicture: dbUser?.profilePicture || null,
         },
         missingProfileFields: getMissingProfileFields(dbUser),
         unreadNotifications,
     });
+});
+
+app.get("/api/profile/onboarding", requireAuth, async (req, res) => {
+    try {
+        const user = await User.findById(req.session.user.id)
+            .select("accountType phone passwordHash state companyName companyLocation role provider")
+            .lean();
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        res.json({
+            accountType: resolveAccountType(user.accountType),
+            accountTypeLocked: user.provider === "local",
+            missingProfileFields: getMissingProfileFields(user),
+            role: user.role || req.session.user.role || "customer",
+        });
+    } catch (_err) {
+        res.status(500).json({ error: "Internal server error" });
+    }
 });
 
 app.post("/api/profile/complete", requireAuth, async (req, res) => {
@@ -2300,7 +2346,8 @@ app.post("/api/profile/complete", requireAuth, async (req, res) => {
             phone,
             state,
             companyName,
-            companyLocation
+            companyLocation,
+            accountType: bodyAccountType,
         } = req.body || {};
 
         const user = await User.findById(req.session.user.id);
@@ -2316,7 +2363,15 @@ app.post("/api/profile/complete", requireAuth, async (req, res) => {
             return res.status(400).json({ error: "State is required" });
         }
 
-        const accountType = user.accountType || "personal";
+        const accountTypeLocked = user.provider === "local";
+        const accountType = accountTypeLocked
+            ? resolveAccountType(user.accountType)
+            : resolveAccountType(bodyAccountType);
+
+        if (!accountTypeLocked) {
+            user.accountType = accountType;
+        }
+
         if (accountType === "company") {
             if (!companyName || !String(companyName).trim()) {
                 return res.status(400).json({ error: "Company name is required" });
@@ -2335,6 +2390,10 @@ app.post("/api/profile/complete", requireAuth, async (req, res) => {
         }
 
         await user.save();
+        realtime.emitCustomerUpdated(user._id, "updated");
+        if (req.session.user) {
+            req.session.user.accountType = accountType;
+        }
         res.json({ message: "Profile completed successfully" });
     } catch (error) {
         res.status(500).json({ error: "Internal server error" });

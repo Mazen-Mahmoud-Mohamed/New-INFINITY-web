@@ -39,9 +39,9 @@
     display: block;
 }
 
-.password-requirements--signup {
+.password-requirements--signup,
+.password-requirements--profile {
     display: block;
-    min-height: 6.75rem;
 }
 
 .password-requirements-title {
@@ -55,6 +55,12 @@
     padding-left: 1.1rem;
     display: grid;
     gap: 0.15rem;
+}
+
+.password-requirements--signup ul,
+.password-requirements--profile ul {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1rem;
 }
 
 .password-requirements li {
@@ -88,20 +94,28 @@
 
 /* Stable grid rows — errors never push siblings */
 .signup-grid .form-group,
+.signup-credentials-section .form-group,
 .cp-grid > .cp-group,
-.cp-password-row > .cp-group,
+.cp-password-section > .cp-group,
 #signin-form .form-group {
     align-self: start;
     min-width: 0;
 }
 
 .signup-grid .form-group,
+.signup-credentials-section .form-group,
 #signin-form .form-group {
     position: relative;
     padding-bottom: 1.35rem;
 }
 
+.signup-password-stack,
+.cp-group.cp-password-group {
+    padding-bottom: 0;
+}
+
 .signup-grid .form-group .field-error,
+.signup-credentials-section .form-group .field-error,
 #signin-form .form-group .field-error {
     position: absolute;
     left: 0;
@@ -110,22 +124,16 @@
     margin-top: 0;
 }
 
-/* Password row: requirements sit in flow; confirm field keeps error slot */
-.signup-grid .form-group:has(.password-requirements--signup) {
-    padding-bottom: 0;
-}
-
-.signup-grid .form-group:has(.password-requirements--signup) .password-requirements {
+.signup-password-stack .password-requirements--signup,
+.cp-group.cp-password-group .password-requirements--profile {
     margin-bottom: 0.35rem;
 }
 
-.signup-grid .form-group:has(#signup-password) {
-    padding-bottom: 0;
-}
-
-.signup-grid .form-group:has(#signup-confirm-password),
-.signup-grid .form-group:has(#signup-email) {
-    padding-bottom: 1.35rem;
+@media (max-width: 768px) {
+    .password-requirements--signup ul,
+    .password-requirements--profile ul {
+        grid-template-columns: 1fr;
+    }
 }
 
 .cp-group,

@@ -101,10 +101,156 @@
 
     let supportTickets = [];
     let activeSupportId = null;
+    let cachedActiveTicket = null;
+    let joinedTicketId = null;
     let verificationUsers = [];
     let activeVerificationId = null;
+    let supportRealtimeWired = false;
 
-    async function loadSupportTickets() {
+    function messageDomId(m) {
+        if (!m) return "";
+        return m._id ? String(m._id) : `${m.createdAt || ""}|${String(m.body || "").slice(0, 48)}`;
+    }
+
+    function renderSupportMessageHtml(m) {
+        const staff = STAFF_ROLES.concat(["technical"]).includes(m.authorRole);
+        const cls = staff ? "staff" : "user";
+        const attachments = renderMessageAttachments(m.attachments);
+        const time = formatDate(m.createdAt);
+        return `<div class="dash-support-msg ${cls}" data-msg-id="${esc(messageDomId(m))}">
+            <div class="dash-support-msg-head"><strong>${esc(m.authorName || (staff ? "Staff" : "Customer"))}</strong><span>${time}</span></div>
+            <div class="dash-support-msg-body">${esc(m.body).replace(/\n/g, "<br>")}${attachments}</div>
+        </div>`;
+    }
+
+    function appendSupportMessages(messages) {
+        const chat = document.getElementById("dash-support-chat");
+        if (!chat || !messages?.length) return false;
+        const existing = new Set([...chat.querySelectorAll("[data-msg-id]")].map((el) => el.getAttribute("data-msg-id")));
+        const wasAtBottom = chat.scrollHeight - chat.scrollTop - chat.clientHeight < 48;
+        let appended = false;
+        messages.forEach((m) => {
+            const id = messageDomId(m);
+            if (!id || existing.has(id)) return;
+            chat.insertAdjacentHTML("beforeend", renderSupportMessageHtml(m));
+            existing.add(id);
+            appended = true;
+        });
+        if (appended && wasAtBottom) chat.scrollTop = chat.scrollHeight;
+        return appended;
+    }
+
+    function mergeMessageIntoCache(msg) {
+        if (!cachedActiveTicket || !msg) return;
+        if (!Array.isArray(cachedActiveTicket.messages)) cachedActiveTicket.messages = [];
+        const key = messageDomId(msg);
+        if (!cachedActiveTicket.messages.some((m) => messageDomId(m) === key)) {
+            cachedActiveTicket.messages.push(msg);
+        }
+    }
+
+    function patchActiveTicketStatus(status) {
+        if (!status) return;
+        const statusSelect = document.getElementById("dash-support-status-select");
+        if (statusSelect && document.activeElement !== statusSelect) {
+            statusSelect.value = status;
+        }
+    }
+
+    function ticketMatchesListFilters(t) {
+        const status = document.getElementById("dash-support-status")?.value || "";
+        const category = document.getElementById("dash-support-category")?.value || "";
+        const search = document.getElementById("dash-support-search")?.value?.trim().toLowerCase() || "";
+        if (status && t.status !== status) return false;
+        if (category && t.category !== category) return false;
+        if (search) {
+            const hay = `${t.subject || ""} ${t.ticketNumber || ""} ${t.customer?.name || ""} ${t.customer?.email || ""}`.toLowerCase();
+            if (!hay.includes(search)) return false;
+        }
+        return true;
+    }
+
+    function upsertSupportTicketInList(payload) {
+        const ticketId = String(payload.ticketId);
+        const entry = {
+            _id: ticketId,
+            ticketNumber: payload.ticketNumber,
+            subject: payload.subject,
+            category: payload.category,
+            status: payload.status,
+            updatedAt: payload.updatedAt,
+            createdAt: payload.createdAt,
+            customer: payload.customer || null,
+        };
+        const idx = supportTickets.findIndex((t) => String(t._id) === ticketId);
+        if (idx >= 0) {
+            if (!ticketMatchesListFilters(entry)) {
+                supportTickets.splice(idx, 1);
+                renderSupportList();
+                return;
+            }
+            supportTickets[idx] = { ...supportTickets[idx], ...entry };
+            const [row] = supportTickets.splice(idx, 1);
+            supportTickets.unshift(row);
+        } else if (ticketMatchesListFilters(entry)) {
+            supportTickets.unshift(entry);
+        } else {
+            return;
+        }
+        renderSupportList();
+    }
+
+    function handleRealtimeTicketCreated(payload) {
+        if (!ticketMatchesListFilters(payload)) return;
+        upsertSupportTicketInList(payload);
+    }
+
+    function handleRealtimeTicketMessage(payload) {
+        upsertSupportTicketInList(payload);
+        if (String(activeSupportId) !== String(payload.ticketId)) return;
+        if (payload.status && cachedActiveTicket) cachedActiveTicket.status = payload.status;
+        patchActiveTicketStatus(payload.status);
+        if (payload.message) {
+            mergeMessageIntoCache(payload.message);
+            appendSupportMessages([payload.message]);
+        } else {
+            refreshActiveSupportTicket({ silent: true });
+        }
+    }
+
+    function handleRealtimeTicketUpdated(payload) {
+        upsertSupportTicketInList(payload);
+        if (String(activeSupportId) !== String(payload.ticketId)) return;
+        if (cachedActiveTicket) cachedActiveTicket.status = payload.status;
+        patchActiveTicketStatus(payload.status);
+        const replyForm = document.getElementById("dash-support-reply-form");
+        if (replyForm) {
+            const closed = payload.status === "closed" || payload.status === "resolved";
+            replyForm.style.display = closed ? "none" : "";
+        }
+    }
+
+    function wireSupportRealtime() {
+        if (supportRealtimeWired || !global.RealtimeClient) return;
+        supportRealtimeWired = true;
+        RealtimeClient.connect();
+        RealtimeClient.on("ticketCreated", handleRealtimeTicketCreated);
+        RealtimeClient.on("ticketMessage", handleRealtimeTicketMessage);
+        RealtimeClient.on("ticketUpdated", handleRealtimeTicketUpdated);
+    }
+
+    function renderSupportChat(ticket) {
+        const chat = document.getElementById("dash-support-chat");
+        if (!chat) return;
+        const wasAtBottom = chat.scrollHeight - chat.scrollTop - chat.clientHeight < 48;
+        const prevScroll = chat.scrollTop;
+        chat.innerHTML = (ticket.messages || []).map((m) => renderSupportMessageHtml(m)).join("");
+        if (wasAtBottom) chat.scrollTop = chat.scrollHeight;
+        else chat.scrollTop = prevScroll;
+    }
+
+    async function loadSupportTickets(options = {}) {
+        const { silent = false } = options;
         const status = document.getElementById("dash-support-status")?.value || "";
         const category = document.getElementById("dash-support-category")?.value || "";
         const search = document.getElementById("dash-support-search")?.value?.trim() || "";
@@ -113,7 +259,9 @@
         if (category) params.set("category", category);
         if (search) params.set("search", search);
         const list = document.getElementById("dash-support-list");
-        if (list && window.InfinityLoader) list.innerHTML = `<div class="muted" style="padding:1rem;">Loading…</div>`;
+        if (!silent && list && window.InfinityLoader) {
+            list.innerHTML = `<div class="muted" style="padding:1rem;">Loading…</div>`;
+        }
         const res = await fetch(`/api/dashboard/support/tickets?${params}`, { credentials: "include" });
         const data = await res.json();
         supportTickets = data.tickets || [];
@@ -128,7 +276,7 @@
             return;
         }
         list.innerHTML = supportTickets.map((t) => `
-            <button type="button" class="ap-ticket-item dash-support-item" data-id="${t._id}" style="width:100%;text-align:left;">
+            <button type="button" class="ap-ticket-item dash-support-item${t._id === activeSupportId ? " is-active" : ""}" data-id="${t._id}" style="width:100%;text-align:left;">
                 <strong>${esc(t.subject)}</strong><br>
                 <small class="muted">${esc(t.ticketNumber)} · ${esc((t.status || "").replace(/_/g, " "))} · ${esc(t.customer?.name || t.customer?.email || "Customer")}</small>
             </button>
@@ -138,11 +286,51 @@
         });
     }
 
+    async function refreshActiveSupportTicket(options = {}) {
+        if (!activeSupportId) return;
+        const detail = document.getElementById("dash-support-detail");
+        if (detail?.hidden) return;
+        const replyEl = document.getElementById("dash-support-reply-body");
+        if (replyEl && document.activeElement === replyEl && replyEl.value.trim()) return;
+
+        const res = await fetch(`/api/dashboard/support/tickets/${activeSupportId}`, { credentials: "include" });
+        if (!res.ok) return;
+        const { ticket, customer } = await res.json();
+        const prevCount = cachedActiveTicket?.messages?.length || 0;
+        const msgCount = (ticket.messages || []).length;
+        const statusChanged = cachedActiveTicket?.status !== ticket.status;
+        const subjectChanged = cachedActiveTicket?.subject !== ticket.subject;
+
+        if (subjectChanged) {
+            document.getElementById("dash-support-subject").textContent = ticket.subject;
+        }
+        if (statusChanged) {
+            const statusSelect = document.getElementById("dash-support-status-select");
+            if (statusSelect && document.activeElement !== statusSelect) {
+                statusSelect.value = ticket.status;
+            }
+        }
+        if (customer) {
+            document.getElementById("dash-support-customer").innerHTML =
+                `<strong>${esc(customer.name)}</strong> · ${esc(customer.email)} · ${esc(customer.phone || "-")} · ${esc(customer.accountType || "personal")}`;
+        }
+        if (msgCount !== prevCount || !cachedActiveTicket) {
+            renderSupportChat(ticket);
+        }
+        cachedActiveTicket = ticket;
+    }
+
     async function openSupportTicket(id) {
+        if (global.RealtimeClient) {
+            if (joinedTicketId && joinedTicketId !== id) RealtimeClient.leaveTicket(joinedTicketId);
+            RealtimeClient.joinTicket(id);
+            joinedTicketId = id;
+        }
         activeSupportId = id;
         const res = await fetch(`/api/dashboard/support/tickets/${id}`, { credentials: "include" });
         if (!res.ok) return;
         const { ticket, customer } = await res.json();
+        cachedActiveTicket = ticket;
         document.getElementById("dash-support-detail").hidden = false;
         document.getElementById("dash-support-empty").hidden = true;
         document.getElementById("dash-support-subject").textContent = ticket.subject;
@@ -157,18 +345,7 @@
         document.getElementById("dash-support-customer").innerHTML = customer
             ? `<strong>${esc(customer.name)}</strong> · ${esc(customer.email)} · ${esc(customer.phone || "-")} · ${esc(customer.accountType || "personal")}`
             : "";
-        const chat = document.getElementById("dash-support-chat");
-        chat.innerHTML = (ticket.messages || []).map((m) => {
-            const staff = STAFF_ROLES.concat(["technical"]).includes(m.authorRole);
-            const cls = staff ? "staff" : "user";
-            const attachments = renderMessageAttachments(m.attachments);
-            const time = formatDate(m.createdAt);
-            return `<div class="dash-support-msg ${cls}">
-                <div class="dash-support-msg-head"><strong>${esc(m.authorName || (staff ? "Staff" : "Customer"))}</strong><span>${time}</span></div>
-                <div class="dash-support-msg-body">${esc(m.body).replace(/\n/g, "<br>")}${attachments}</div>
-            </div>`;
-        }).join("");
-        chat.scrollTop = chat.scrollHeight;
+        renderSupportChat(ticket);
         document.getElementById("dash-support-status-select")?.addEventListener("change", async (e) => {
             await fetch(`/api/dashboard/support/tickets/${id}/status`, {
                 method: "PATCH",
@@ -181,12 +358,13 @@
         });
     }
 
-    async function loadVerificationQueue() {
+    async function loadVerificationQueue(options = {}) {
+        const { silent = false } = options;
         const tbody = document.querySelector("#verification-table tbody");
-        if (tbody && window.InfinityLoader) {
+        if (!silent && tbody && window.InfinityLoader) {
             tbody.innerHTML = window.InfinityLoader.skeletonTableBody(4, 6);
         }
-        const filter = document.getElementById("dash-verification-filter")?.value || "actionable";
+        const filter = document.getElementById("dash-verification-filter")?.value || "all";
         const res = await fetch(`/api/dashboard/verification/pending?status=${encodeURIComponent(filter)}`, { credentials: "include" });
         const data = await res.json();
         verificationUsers = data.users || [];
@@ -266,14 +444,12 @@
         });
     }
 
-    async function openVerificationReview(userId) {
-        activeVerificationId = userId;
-        const res = await fetch(`/api/dashboard/verification/user/${userId}`, { credentials: "include" });
-        if (!res.ok) return;
-        const { user } = await res.json();
+    function renderVerificationDetailPanel(userId, user, opts = {}) {
         const panel = document.getElementById("dash-verification-detail");
         panel.hidden = false;
-        panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        if (opts.scrollIntoView !== false) {
+            panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
         document.getElementById("dash-verification-user").textContent = `${user.name} (${user.email}) — ${user.accountType}`;
         const docs = user.identityVerification?.documents || [];
         document.getElementById("dash-verification-docs").innerHTML = docs.length ? docs.map((d) => `
@@ -306,7 +482,29 @@
                 reviewDocument(userId, btn.dataset.type, "rejected", reason);
             });
         });
-        document.getElementById("dash-verification-notes").value = user.identityVerification?.staffNotes || "";
+        const notesEl = document.getElementById("dash-verification-notes");
+        if (!opts.preserveNotes) {
+            notesEl.value = user.identityVerification?.staffNotes || "";
+        }
+    }
+
+    async function openVerificationReview(userId, opts = {}) {
+        activeVerificationId = userId;
+        const res = await fetch(`/api/dashboard/verification/user/${userId}`, { credentials: "include" });
+        if (!res.ok) return;
+        const { user } = await res.json();
+        renderVerificationDetailPanel(userId, user, opts);
+    }
+
+    async function refreshActiveVerificationDetail(options = {}) {
+        if (!activeVerificationId) return;
+        const panel = document.getElementById("dash-verification-detail");
+        if (panel?.hidden) return;
+        const notesEl = document.getElementById("dash-verification-notes");
+        if (notesEl && document.activeElement === notesEl) return;
+        const rejectReasonEl = document.querySelector(".doc-reject-reason:focus");
+        if (rejectReasonEl) return;
+        await openVerificationReview(activeVerificationId, { scrollIntoView: false, preserveNotes: true });
     }
 
     async function reviewDocument(userId, docType, status, reason) {
@@ -342,10 +540,25 @@
                 body: JSON.stringify({ body, attachments }),
             });
             if (res.ok) {
+                const data = await res.json();
                 document.getElementById("dash-support-reply-body").value = "";
                 if (fileInput) fileInput.value = "";
-                await loadSupportTickets();
-                openSupportTicket(activeSupportId);
+                if (data.ticket) {
+                    cachedActiveTicket = data.ticket;
+                    const lastMsg = (data.ticket.messages || []).slice(-1)[0];
+                    if (lastMsg) appendSupportMessages([lastMsg]);
+                    upsertSupportTicketInList({
+                        ticketId: data.ticket._id,
+                        ticketNumber: data.ticket.ticketNumber,
+                        subject: data.ticket.subject,
+                        category: data.ticket.category,
+                        status: data.ticket.status,
+                        updatedAt: data.ticket.updatedAt,
+                    });
+                } else {
+                    await loadSupportTickets({ silent: true });
+                    await openSupportTicket(activeSupportId);
+                }
             }
         });
 
@@ -375,6 +588,7 @@
         if (supportTab) supportTab.style.display = "";
         if (verificationTab) verificationTab.style.display = "";
         wireEvents();
+        wireSupportRealtime();
         await Promise.all([loadSupportTickets(), loadVerificationQueue()]);
     }
 
@@ -383,5 +597,8 @@
         canStaffSupport,
         openVerificationReview,
         loadVerificationQueue,
+        loadSupportTickets,
+        refreshActiveSupportTicket,
+        refreshActiveVerificationDetail,
     };
 })(window);

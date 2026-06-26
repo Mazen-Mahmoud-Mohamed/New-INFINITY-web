@@ -2347,6 +2347,7 @@
             transition: border-color .15s ease, background .15s ease;
         }
         .ap-ticket-item:hover { border-color: #7dd3fc; background: #f0f9ff; }
+        .ap-ticket-item.is-active { border-color: #0891b2; background: #ecfeff; }
         @media (max-width: 900px) {
             #support-section .dash-card > div[style*="grid-template-columns"] {
                 grid-template-columns: 1fr !important;
@@ -2803,11 +2804,11 @@
                 <div class="section-head">
                     <h3>Identity Verification</h3>
                     <select id="dash-verification-filter" class="dash-search" style="max-width:200px;">
+                        <option value="all" selected>All</option>
                         <option value="actionable">Pending review</option>
                         <option value="pending">Submitted</option>
                         <option value="rejected">Rejected</option>
                         <option value="approved">Approved</option>
-                        <option value="all">All</option>
                     </select>
                 </div>
                 <table class="dash-table" id="verification-table">
@@ -3115,7 +3116,10 @@
 
     <script src="infinity-loader.js?v=20260607"></script>
     <script src="connectivity.js?v=20260607"></script>
-    <script src="dashboard-extensions.js?v=20260624"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="realtime-client.js?v=20260701"></script>
+    <script src="dashboard-extensions.js?v=20260701"></script>
+    <script src="dashboard-live.js?v=20260701"></script>
     <script>
         let currentRole = "customer";
         let currentUserId = "";
@@ -3177,16 +3181,35 @@
             return true;
         }
 
-        async function loadProducts() {
+        async function loadProducts(opts = {}) {
+            const silent = opts.silent === true;
             const tbody = document.querySelector('#products-table tbody');
-            if (tbody && window.InfinityLoader && !allProducts.length) {
+            if (!silent && tbody && window.InfinityLoader && !allProducts.length) {
                 tbody.innerHTML = InfinityLoader.skeletonTableBody(6, 7);
             }
+            const drafts = silent ? captureInventoryDrafts() : null;
             const res = await fetch('/api/dashboard/products', { credentials: 'include' });
             const data = await res.json();
             allProducts = Array.isArray(data.products) ? data.products : [];
             renderProducts();
-            renderAnalytics();
+            if (drafts) restoreInventoryDrafts(drafts);
+            if (!opts.skipAnalytics) renderAnalytics(opts);
+        }
+
+        function captureInventoryDrafts() {
+            const drafts = {};
+            document.querySelectorAll('#products-table tbody input[type="number"]').forEach((input) => {
+                if (input.id) drafts[input.id] = input.value;
+            });
+            return drafts;
+        }
+
+        function restoreInventoryDrafts(drafts) {
+            if (!drafts) return;
+            Object.entries(drafts).forEach(([id, value]) => {
+                const el = document.getElementById(id);
+                if (el) el.value = value;
+            });
         }
 
         function renderProducts() {
@@ -3446,7 +3469,8 @@
             }
         }
 
-        function renderAnalytics() {
+        function renderAnalytics(opts = {}) {
+            const silent = opts.silent === true;
             if (!canViewAnalytics()) return;
             const chartAvailable = typeof Chart !== 'undefined';
             const isPhone = window.matchMedia('(max-width: 680px)').matches;
@@ -3482,6 +3506,7 @@
             if (kpiOrders) kpiOrders.textContent = String(orderCount);
             if (kpiAvg) kpiAvg.textContent = fmtEGP(avgOrder);
             if (kpiCustomers) kpiCustomers.textContent = String(customerCount);
+            if (silent) return;
             if (!chartAvailable) return;
 
             const itemQty = {};
@@ -4247,17 +4272,48 @@
             }
         }
 
-        async function loadOrders() {
+        async function loadOrders(opts = {}) {
+            const silent = opts.silent === true;
             const tbody = document.querySelector('#orders-table tbody');
-            if (tbody && window.InfinityLoader && !allOrders.length) {
+            if (!silent && tbody && window.InfinityLoader && !allOrders.length) {
                 tbody.innerHTML = InfinityLoader.skeletonTableBody(5, 7);
             }
+            const orderUiState = silent ? captureOrderUiState() : null;
             const status = document.getElementById('status-filter').value;
             const res = await fetch(`/api/dashboard/orders${status ? `?status=${encodeURIComponent(status)}` : ''}`, { credentials: 'include' });
             const data = await res.json();
             allOrders = Array.isArray(data.orders) ? data.orders : [];
             renderOrders();
-            renderAnalytics();
+            if (orderUiState) restoreOrderUiState(orderUiState);
+            if (!opts.skipAnalytics) renderAnalytics(opts);
+        }
+
+        function captureOrderUiState() {
+            const openDetails = [];
+            document.querySelectorAll('#orders-table tbody tr').forEach((tr) => {
+                if (tr.querySelector('.order-extra-details[open]')) {
+                    openDetails.push(tr.dataset.orderId || tr.dataset.transactionId);
+                }
+            });
+            const statusDrafts = {};
+            document.querySelectorAll('#orders-table select[id^="order-status-"]').forEach((sel) => {
+                statusDrafts[sel.id] = sel.value;
+            });
+            return { openDetails, statusDrafts };
+        }
+
+        function restoreOrderUiState(state) {
+            if (!state) return;
+            document.querySelectorAll('#orders-table tbody tr').forEach((tr) => {
+                const key = tr.dataset.orderId || tr.dataset.transactionId;
+                if (state.openDetails.includes(key)) {
+                    tr.querySelector('.order-extra-details')?.setAttribute('open', '');
+                }
+            });
+            Object.entries(state.statusDrafts || {}).forEach(([id, value]) => {
+                const el = document.getElementById(id);
+                if (el && document.activeElement !== el) el.value = value;
+            });
         }
 
         function buildOrderItemsCellHtml(order, items) {
@@ -4344,6 +4400,8 @@
                 const statusClass = `status-${String(o.status || '').toLowerCase()}`;
 
                 const tr = document.createElement('tr');
+                tr.dataset.orderId = o._id;
+                tr.dataset.transactionId = o.transactionId || '';
                 tr.innerHTML = `
                     <td data-label="Order">${o.transactionId}<br><small class="muted">${new Date(o.createdAt).toLocaleString()}</small></td>
                     <td data-label="Customer">${o.customerName || '-'}<br><small class="muted">${o.customerEmail || '-'}</small></td>
@@ -4395,9 +4453,10 @@
             await loadOrders();
         }
 
-        async function loadUsers() {
+        async function loadUsers(opts = {}) {
+            const silent = opts.silent === true;
             const tbody = document.querySelector('#users-table tbody');
-            if (tbody && window.InfinityLoader && !allUsers.length) {
+            if (!silent && tbody && window.InfinityLoader && !allUsers.length) {
                 tbody.innerHTML = InfinityLoader.skeletonTableBody(4, 6);
             }
             const res = await fetch('/api/dashboard/users', { credentials: 'include' });
@@ -4406,10 +4465,11 @@
             renderUsers();
         }
 
-        async function loadTeamMembers() {
+        async function loadTeamMembers(opts = {}) {
             if (!canManageTeam()) return;
+            const silent = opts.silent === true;
             const tbody = document.querySelector('#team-table tbody');
-            if (tbody && window.InfinityLoader && !allTeamMembers.length) {
+            if (!silent && tbody && window.InfinityLoader && !allTeamMembers.length) {
                 tbody.innerHTML = InfinityLoader.skeletonTableBody(4, 6);
             }
             const res = await fetch('/api/dashboard/team', { credentials: 'include' });
@@ -4705,17 +4765,101 @@
             }
         }
 
-        async function loadCustomers() {
+        async function loadCustomers(opts = {}) {
+            const silent = opts.silent === true;
             const tbody = document.querySelector('#customers-table tbody');
-            if (tbody && window.InfinityLoader && !allCustomers.length) {
+            if (!silent && tbody && window.InfinityLoader && !allCustomers.length) {
                 tbody.innerHTML = InfinityLoader.skeletonTableBody(5, 8);
             }
             const res = await fetch('/api/dashboard/customers', { credentials: 'include' });
             const data = await res.json();
             allCustomers = Array.isArray(data.customers) ? data.customers : [];
             renderCustomers();
-            renderAnalytics();
+            if (!opts.skipAnalytics) renderAnalytics(opts);
         }
+
+        function isDashUiLocked() {
+            return document.getElementById('dash-dialog')?.classList.contains('open')
+                || document.getElementById('edit-product-modal')?.classList.contains('open')
+                || document.getElementById('edit-team-modal')?.classList.contains('open')
+                || document.getElementById('dash-guide-modal')?.classList.contains('open')
+                || document.getElementById('dash-tour-overlay')?.classList.contains('active');
+        }
+
+        const DashLiveSync = {
+            inFlight: null,
+            async refreshSection(section) {
+                if (document.hidden || isDashUiLocked()) return;
+                const silent = { silent: true, skipAnalytics: true };
+                switch (section) {
+                    case 'orders':
+                        await loadOrders(silent);
+                        break;
+                    case 'customers':
+                        await loadCustomers(silent);
+                        break;
+                    case 'products':
+                        if (!document.getElementById('edit-product-modal')?.classList.contains('open')) {
+                            await loadProducts(silent);
+                        }
+                        break;
+                    case 'users':
+                        await loadUsers(silent);
+                        break;
+                    case 'team':
+                        if (canManageTeam() && !document.getElementById('edit-team-modal')?.classList.contains('open')) {
+                            await loadTeamMembers(silent);
+                        }
+                        break;
+                    case 'support':
+                        if (window.DashboardExtensions?.loadSupportTickets) {
+                            await DashboardExtensions.loadSupportTickets({ silent: true });
+                        }
+                        break;
+                    case 'identity':
+                        if (window.DashboardExtensions?.loadVerificationQueue) {
+                            await DashboardExtensions.loadVerificationQueue({ silent: true });
+                            if (DashboardExtensions.refreshActiveVerificationDetail) {
+                                await DashboardExtensions.refreshActiveVerificationDetail({ silent: true });
+                            }
+                        }
+                        break;
+                    default:
+                        return this.refreshAll();
+                }
+                renderAnalytics({ silent: true });
+            },
+            async refreshAll() {
+                if (document.hidden || isDashUiLocked()) return;
+                if (this.inFlight) return this.inFlight;
+
+                const silent = { silent: true, skipAnalytics: true };
+                const tasks = [];
+
+                if (!document.getElementById('edit-product-modal')?.classList.contains('open')) {
+                    tasks.push(loadProducts(silent));
+                }
+                tasks.push(loadOrders(silent));
+                tasks.push(loadCustomers(silent));
+                tasks.push(loadUsers(silent));
+                if (canManageTeam() && !document.getElementById('edit-team-modal')?.classList.contains('open')) {
+                    tasks.push(loadTeamMembers(silent));
+                }
+                if (window.DashboardExtensions?.canStaffSupport?.(currentRole)) {
+                    tasks.push(DashboardExtensions.loadSupportTickets({ silent: true }));
+                    tasks.push(DashboardExtensions.refreshActiveSupportTicket({ silent: true }));
+                    tasks.push(DashboardExtensions.loadVerificationQueue({ silent: true }));
+                    tasks.push(DashboardExtensions.refreshActiveVerificationDetail({ silent: true }));
+                }
+
+                this.inFlight = Promise.allSettled(tasks).then(() => {
+                    renderAnalytics({ silent: true });
+                }).finally(() => {
+                    this.inFlight = null;
+                });
+                return this.inFlight;
+            },
+        };
 
         function identityStatusLabel(status) {
             const map = {
@@ -5191,7 +5335,7 @@
                     lead: 'Review customer identity verification requests — view uploaded documents, approve or reject individually, and track account type and submission status.',
                     steps: [
                         '<strong>Purpose:</strong> customers upload ID and license documents (or company registration files) from their profile. Staff review them here before granting verified status.',
-                        'Use the <strong>status filter</strong> to show Pending review, Submitted, Rejected, Approved, or All requests.',
+                        'Use the <strong>status filter</strong> to show All, Pending review, Submitted, Rejected, or Approved requests (defaults to All).',
                         'The queue table lists customer name, email, account type (Personal or Company), verification status, submitted date, and quick actions.',
                         'Each row shows how many files the customer uploaded (e.g. <strong>2 file(s)</strong>) so you can see upload progress before opening the review panel.',
                         'Click <strong>View Documents</strong> to open the review panel with every uploaded file, upload date, and per-document status badge.',
@@ -5501,7 +5645,7 @@
             const idRow = tourTableHasData('verification-table') ? '#verification-table tbody tr:first-child' : null;
             return [
                 tourStep(label, section, 'Identity overview', 'Review customer identity verification requests — view documents, approve or reject, and track submission status.', '#verification-section .section-head', '#verification-section'),
-                tourStep(label, section, 'Status filter', 'Show Pending review, Submitted, Rejected, Approved, or All requests in the queue.', '#dash-verification-filter', '#verification-section .section-head'),
+                tourStep(label, section, 'Status filter', 'Show All, Pending review, Submitted, Rejected, or Approved requests in the queue (defaults to All).', '#dash-verification-filter', '#verification-section .section-head'),
                 tourStep(label, section, 'Verification queue', 'The table lists customer name, email, account type, verification status, submitted date, and actions.', '#verification-table', '#verification-section .dash-card'),
                 tourStep(label, section, 'Customer information', 'Each row shows who submitted the request and their account type (Personal or Company).', idRow ? `${idRow} td[data-label="Customer"]` : '#verification-table thead', '#verification-table'),
                 tourStep(label, section, 'Status badge', 'The Status column shows the overall verification state — Pending, Approved, Rejected, or Not Submitted.', idRow ? `${idRow} td[data-label="Status"]` : '#verification-table thead th:nth-child(4)', '#verification-table'),
@@ -5828,6 +5972,7 @@
             await Promise.all(loads);
             renderAnalytics();
             if (window.DashboardExtensions) await DashboardExtensions.init(currentRole);
+            if (window.DashboardLive) DashboardLive.start();
         })();
     </script>
 </body>

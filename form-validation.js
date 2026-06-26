@@ -53,7 +53,8 @@
     }
 
     function getCompleteProfileAccountType(form) {
-        return form?.dataset?.accountType === 'company' ? 'company' : 'personal';
+        const checked = form?.querySelector('input[name="cp-account-type"]:checked');
+        return checked?.value === 'company' ? 'company' : 'personal';
     }
 
     function validateEgyptPhone(value) {
@@ -513,11 +514,11 @@
         let requirementsEl = form.querySelector('.password-requirements');
         if (!requirementsEl && password) {
             requirementsEl = document.createElement('div');
-            requirementsEl.className = 'password-requirements';
+            requirementsEl.className = 'password-requirements password-requirements--profile is-visible';
             requirementsEl.innerHTML = [
                 '<p class="password-requirements-title">Password must include:</p>',
                 '<ul>',
-                '<li class="pending" data-rule="length">8+ characters</li>',
+                '<li class="pending" data-rule="length">At least 8 characters</li>',
                 '<li class="pending" data-rule="upper">One uppercase letter</li>',
                 '<li class="pending" data-rule="lower">One lowercase letter</li>',
                 '<li class="pending" data-rule="number">One number</li>',
@@ -526,6 +527,10 @@
             ].join('');
             const passwordGroup = password.closest('.cp-group');
             if (passwordGroup) passwordGroup.appendChild(requirementsEl);
+        }
+
+        if (requirementsEl) {
+            requirementsEl.classList.add('password-requirements--profile', 'is-visible');
         }
 
         bindField(phone, () => validateEgyptPhone(phone.value));
@@ -541,6 +546,20 @@
             liveConfirmTarget: confirm
         });
         bindField(confirm, () => validateConfirmPassword(password.value, confirm.value));
+
+        form.querySelectorAll('input[name="cp-account-type"]').forEach((radio) => {
+            radio.addEventListener('change', () => {
+                const isCompany = getCompleteProfileAccountType(form) === 'company';
+                if (companyName) {
+                    companyName.required = isCompany;
+                    if (!isCompany) clearFieldError(companyName);
+                }
+                if (companyLocation) {
+                    companyLocation.required = isCompany;
+                    if (!isCompany) clearFieldError(companyLocation);
+                }
+            });
+        });
 
         updatePasswordRequirements(password, requirementsEl);
     }

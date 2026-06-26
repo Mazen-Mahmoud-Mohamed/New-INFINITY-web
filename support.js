@@ -22,6 +22,8 @@
     let activeId = null;
     let activeTicket = null;
     let pollTimer = null;
+    let joinedTicketId = null;
+    let realtimeWired = false;
 
     const listEl = document.getElementById("ticket-list");
     const emptyEl = document.getElementById("ticket-empty");
@@ -132,39 +134,131 @@
         return items ? `<div class="support-msg-attachments">${items}</div>` : "";
     }
 
+    function messageDomId(m) {
+        if (!m) return "";
+        return m._id ? String(m._id) : `${m.createdAt || ""}|${String(m.body || "").slice(0, 48)}`;
+    }
+
+    function renderMessageHtml(m) {
+        const staff = isStaffRole(m.authorRole);
+        const cls = staff ? "staff" : "user";
+        const initial = (m.authorName || "U").charAt(0).toUpperCase();
+        const time = formatDate(m.createdAt);
+        const attachments = renderAttachments(m.attachments);
+        return `<div class="support-msg ${cls}" data-msg-id="${esc(messageDomId(m))}">
+            <div class="support-msg-avatar" aria-hidden="true">${esc(initial)}</div>
+            <div>
+                <div class="support-msg-meta"><strong>${esc(m.authorName || (staff ? "Staff" : "You"))}</strong><span>${time}</span></div>
+                <div class="support-msg-body">${esc(m.body).replace(/\n/g, "<br>")}${attachments}</div>
+            </div>
+        </div>`;
+    }
+
+    function appendMessages(messages) {
+        const chat = document.getElementById("ticket-chat");
+        if (!chat || !messages?.length) return false;
+        const existing = new Set([...chat.querySelectorAll("[data-msg-id]")].map((el) => el.getAttribute("data-msg-id")));
+        const wasAtBottom = chat.scrollHeight - chat.scrollTop - chat.clientHeight < 48;
+        let appended = false;
+        messages.forEach((m) => {
+            const id = messageDomId(m);
+            if (!id || existing.has(id)) return;
+            chat.insertAdjacentHTML("beforeend", renderMessageHtml(m));
+            existing.add(id);
+            appended = true;
+        });
+        if (appended && wasAtBottom) {
+            requestAnimationFrame(() => { chat.scrollTop = chat.scrollHeight; });
+        }
+        return appended;
+    }
+
+    function mergeActiveTicketMessage(msg) {
+        if (!activeTicket || !msg) return;
+        if (!Array.isArray(activeTicket.messages)) activeTicket.messages = [];
+        const key = messageDomId(msg);
+        if (!activeTicket.messages.some((m) => messageDomId(m) === key)) {
+            activeTicket.messages.push(msg);
+        }
+    }
+
+    function upsertTicketInList(payload) {
+        const ticketId = String(payload.ticketId);
+        const entry = {
+            _id: ticketId,
+            ticketNumber: payload.ticketNumber,
+            subject: payload.subject,
+            status: payload.status,
+            updatedAt: payload.updatedAt,
+        };
+        const idx = tickets.findIndex((t) => String(t._id) === ticketId);
+        if (idx >= 0) {
+            tickets[idx] = { ...tickets[idx], ...entry };
+            const [row] = tickets.splice(idx, 1);
+            tickets.unshift(row);
+        } else {
+            tickets.unshift(entry);
+        }
+        renderList();
+    }
+
+    function handleRealtimeTicketMessage(payload) {
+        upsertTicketInList(payload);
+        if (String(activeId) !== String(payload.ticketId)) return;
+        if (payload.status) {
+            activeTicket.status = payload.status;
+            renderTicketHeader(activeTicket);
+            const closed = payload.status === "closed" || payload.status === "resolved";
+            document.getElementById("reply-form").style.display = closed ? "none" : "";
+        }
+        if (payload.message) {
+            mergeActiveTicketMessage(payload.message);
+            appendMessages([payload.message]);
+        }
+    }
+
+    function handleRealtimeTicketUpdated(payload) {
+        upsertTicketInList(payload);
+        if (String(activeId) !== String(payload.ticketId)) return;
+        activeTicket.status = payload.status;
+        renderTicketHeader(activeTicket);
+        const closed = payload.status === "closed" || payload.status === "resolved";
+        document.getElementById("reply-form").style.display = closed ? "none" : "";
+    }
+
+    function wireRealtime() {
+        if (realtimeWired || !window.RealtimeClient) return;
+        realtimeWired = true;
+        RealtimeClient.connect();
+        RealtimeClient.on("ticketMessage", handleRealtimeTicketMessage);
+        RealtimeClient.on("ticketUpdated", handleRealtimeTicketUpdated);
+        RealtimeClient.on("__connect", () => stopPolling());
+        RealtimeClient.on("__disconnect", () => startPolling());
+    }
+
     function renderChat(ticket) {
         const chat = document.getElementById("ticket-chat");
-        chat.innerHTML = (ticket.messages || []).map((m) => {
-            const staff = isStaffRole(m.authorRole);
-            const cls = staff ? "staff" : "user";
-            const initial = (m.authorName || "U").charAt(0).toUpperCase();
-            const time = formatDate(m.createdAt);
-            const attachments = renderAttachments(m.attachments);
-            return `<div class="support-msg ${cls}">
-                <div class="support-msg-avatar" aria-hidden="true">${esc(initial)}</div>
-                <div>
-                    <div class="support-msg-meta"><strong>${esc(m.authorName || (staff ? "Staff" : "You"))}</strong><span>${time}</span></div>
-                    <div class="support-msg-body">${esc(m.body).replace(/\n/g, "<br>")}${attachments}</div>
-                </div>
-            </div>`;
-        }).join("");
+        chat.innerHTML = (ticket.messages || []).map((m) => renderMessageHtml(m)).join("");
         requestAnimationFrame(() => { chat.scrollTop = chat.scrollHeight; });
     }
 
     function startPolling() {
         stopPolling();
+        if (window.RealtimeClient?.isConnected?.()) return;
         pollTimer = setInterval(async () => {
             if (!activeId) return;
             const res = await fetch(`/api/support/tickets/${activeId}`, { credentials: "include" });
             if (!res.ok) return;
             const { ticket } = await res.json();
-            if (ticket.status !== activeTicket?.status || (ticket.messages?.length || 0) !== (activeTicket?.messages?.length || 0)) {
+            const prevCount = activeTicket?.messages?.length || 0;
+            const nextCount = ticket.messages?.length || 0;
+            if (ticket.status !== activeTicket?.status || nextCount !== prevCount) {
                 activeTicket = ticket;
                 renderTicketHeader(ticket);
-                renderChat(ticket);
-                await loadTickets();
+                if (nextCount > prevCount) appendMessages(ticket.messages.slice(prevCount));
+                else renderChat(ticket);
             }
-        }, 8000);
+        }, 12000);
     }
 
     function stopPolling() {
@@ -203,6 +297,11 @@
 
     async function openTicket(id) {
         stopPolling();
+        if (window.RealtimeClient) {
+            if (joinedTicketId && joinedTicketId !== id) RealtimeClient.leaveTicket(joinedTicketId);
+            RealtimeClient.joinTicket(id);
+            joinedTicketId = id;
+        }
         activeId = id;
         setPanelMode("view");
         const res = await fetch(`/api/support/tickets/${id}`, { credentials: "include" });
@@ -214,7 +313,7 @@
         renderList();
         const closed = ticket.status === "closed" || ticket.status === "resolved";
         document.getElementById("reply-form").style.display = closed ? "none" : "";
-        startPolling();
+        if (!window.RealtimeClient?.isConnected?.()) startPolling();
     }
 
     document.getElementById("new-ticket-btn").addEventListener("click", () => {
@@ -297,8 +396,21 @@
         document.getElementById("reply-body").value = "";
         if (fileInput) fileInput.value = "";
         showMsg(msg, "Reply sent.", "success");
-        await loadTickets();
-        await openTicket(activeId);
+        if (data.ticket) {
+            activeTicket = data.ticket;
+            const lastMsg = (data.ticket.messages || []).slice(-1)[0];
+            if (lastMsg) appendMessages([lastMsg]);
+            upsertTicketInList({
+                ticketId: data.ticket._id,
+                ticketNumber: data.ticket.ticketNumber,
+                subject: data.ticket.subject,
+                status: data.ticket.status,
+                updatedAt: data.ticket.updatedAt,
+            });
+        } else {
+            await loadTickets();
+            await openTicket(activeId);
+        }
         if (window.InfinityNotifications) InfinityNotifications.refreshBadges();
     });
 
@@ -313,6 +425,7 @@
 
     (async () => {
         if (!(await ensureAuth())) return;
+        wireRealtime();
         await loadMeta();
         await loadTickets();
         const q = new URLSearchParams(location.search).get("ticket");
