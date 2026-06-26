@@ -1,6 +1,7 @@
 const { SupportTicket, TICKET_CATEGORIES, TICKET_STATUSES } = require("../models/SupportTicket");
 const { uploadUserFile } = require("./uploadService");
 const { createNotification } = require("./notificationService");
+const realtime = require("./realtimeService");
 
 const CATEGORY_LABELS = {
     technical: "Technical Issue",
@@ -33,6 +34,7 @@ async function createTicket(user, { subject, category, description, attachments 
             attachments,
         }],
     });
+    realtime.emitTicketCreated(ticket, user);
     return ticket;
 }
 
@@ -63,6 +65,8 @@ async function addUserReply(user, ticketId, body, attachments = []) {
     });
     if (ticket.status === "waiting_customer") ticket.status = "open";
     await ticket.save();
+    const lastMessage = ticket.messages[ticket.messages.length - 1];
+    realtime.emitTicketMessage(ticket, lastMessage);
     return { ok: true, ticket };
 }
 
@@ -73,6 +77,7 @@ async function closeTicketByUser(user, ticketId) {
     ticket.closedAt = new Date();
     ticket.closedBy = user._id;
     await ticket.save();
+    realtime.emitTicketUpdated(ticket, { action: "closed" });
     return { ok: true, ticket };
 }
 
@@ -117,6 +122,8 @@ async function addStaffReply(staffUser, ticketId, body, attachments = []) {
         meta: { ticketId: String(ticket._id) },
     });
 
+    const lastMessage = ticket.messages[ticket.messages.length - 1];
+    realtime.emitTicketMessage(ticket, lastMessage);
     return { ok: true, ticket };
 }
 
@@ -145,6 +152,7 @@ async function updateTicketStatus(staffUser, ticketId, status) {
         });
     }
     await ticket.save();
+    realtime.emitTicketUpdated(ticket, { action: "status", status });
     return { ok: true, ticket };
 }
 
