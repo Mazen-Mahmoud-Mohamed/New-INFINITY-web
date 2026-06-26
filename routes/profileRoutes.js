@@ -1,6 +1,7 @@
 const express = require("express");
 const { uploadUserFile } = require("../services/uploadService");
 const { createNotification } = require("../services/notificationService");
+const realtime = require("../services/realtimeService");
 const {
     getRequiredDocTypes,
     getAllDocTypes,
@@ -159,6 +160,10 @@ function createProfileRouter({ User, requireAuth }) {
 
             await user.save();
 
+            if (entry.status === "pending") {
+                realtime.emitIdentitySubmitted(user);
+            }
+
             res.json({
                 message: entry.status === "pending"
                     ? "Document updated and queued for review."
@@ -217,6 +222,8 @@ function createProfileRouter({ User, requireAuth }) {
                 user.accountType || "personal"
             );
             await user.save();
+
+            realtime.emitIdentitySubmitted(user);
 
             res.json({
                 message: "All documents submitted for verification.",

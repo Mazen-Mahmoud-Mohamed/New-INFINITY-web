@@ -2,6 +2,7 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs");
 const { createNotification } = require("../services/notificationService");
+const realtime = require("../services/realtimeService");
 const {
     getRequiredDocTypes,
     computeOverallStatus,
@@ -82,6 +83,8 @@ function createDashboardVerificationRouter({ User, requireRole }) {
 
             await user.save();
 
+            realtime.emitIdentityUpdated(user);
+
             if (overall === "approved") {
                 await createNotification({
                     userId: user._id,
@@ -151,6 +154,8 @@ function createDashboardVerificationRouter({ User, requireRole }) {
             user.identityVerification.reviewedBy = req.session.user.id;
             user.identityVerification.reviewedAt = new Date();
             await user.save();
+
+            realtime.emitIdentityUpdated(user);
 
             const finalStatus = user.identityVerification.status;
             const typeMap = {
